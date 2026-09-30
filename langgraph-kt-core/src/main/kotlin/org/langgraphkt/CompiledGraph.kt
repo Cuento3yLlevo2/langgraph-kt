@@ -8,13 +8,33 @@ class CompiledGraph<State>(
     /**
      * Executes the compiled graph from START to END.
      */
-    suspend fun invoke(initialState: State): State {
+    suspend fun invoke(initialState: State, config: GraphConfig<State>? = null, resume: Boolean = false): State {
         var currentState = initialState
-        var currentNode = START
+        var nextNodeToExecute = START
+        var justResumed = resume
 
-        while (currentNode != END) {
-            val condEdges = conditionalEdges[currentNode]
-            val standardEdges = edges[currentNode]
+        if (config?.checkpointer != null) {
+            val checkpoint = config.checkpointer.load(config.threadId)
+            if (checkpoint != null) {
+                currentState = if (resume) initialState else checkpoint.state
+                nextNodeToExecute = checkpoint.nextNode
+            }
+        }
+
+        while (nextNodeToExecute != END) {
+            if (config != null && config.interruptBefore.contains(nextNodeToExecute) && !justResumed) {
+                config.checkpointer?.save(config.threadId, Checkpoint(currentState, nextNodeToExecute))
+                return currentState
+            }
+
+            if (nextNodeToExecute != START) {
+                val node = nodes[nextNodeToExecute] ?: throw IllegalStateException("Node '$nextNodeToExecute' not found")
+                currentState = node.action(currentState)
+            }
+            justResumed = false
+
+            val condEdges = conditionalEdges[nextNodeToExecute]
+            val standardEdges = edges[nextNodeToExecute]
 
             val nextNode = if (!condEdges.isNullOrEmpty()) {
                 require(condEdges.size == 1) { "Multiple conditional edges from a single node are not supported" }
@@ -26,15 +46,15 @@ class CompiledGraph<State>(
                 END
             }
 
-            if (nextNode == END) {
-                break
+            if (config != null && config.interruptAfter.contains(nextNodeToExecute)) {
+                config.checkpointer?.save(config.threadId, Checkpoint(currentState, nextNode))
+                return currentState
             }
 
-            val node = nodes[nextNode] ?: throw IllegalStateException("Node '$nextNode' not found")
-            currentState = node.action(currentState)
-            currentNode = nextNode
+            nextNodeToExecute = nextNode
         }
 
+        config?.checkpointer?.save(config.threadId, Checkpoint(currentState, END))
         return currentState
     }
 }
