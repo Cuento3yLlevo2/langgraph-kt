@@ -1,0 +1,45 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, linuxArm64, linuxX64, macosArm64, mingwX64, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <langgraph-kt:langgraph-kt-checkpoint-file>
+final class <#A: kotlin/Any?> org.langgraphkt.checkpoint.file/FileCheckpointer : org.langgraphkt/Checkpointer<#A> { // org.langgraphkt.checkpoint.file/FileCheckpointer|null[0]
+    constructor <init>(kotlinx.io.files/Path, org.langgraphkt/StateSerializer<#A>, kotlinx.io.files/FileSystem = ...) // org.langgraphkt.checkpoint.file/FileCheckpointer.<init>|<init>(kotlinx.io.files.Path;org.langgraphkt.StateSerializer<1:0>;kotlinx.io.files.FileSystem){}[0]
+
+    final suspend fun load(kotlin/String): org.langgraphkt/Checkpoint<#A>? // org.langgraphkt.checkpoint.file/FileCheckpointer.load|load(kotlin.String){}[0]
+    final suspend fun save(kotlin/String, org.langgraphkt/Checkpoint<#A>) // org.langgraphkt.checkpoint.file/FileCheckpointer.save|save(kotlin.String;org.langgraphkt.Checkpoint<1:0>){}[0]
+}
+
+final class org.langgraphkt.checkpoint.file/SerializedCheckpoint { // org.langgraphkt.checkpoint.file/SerializedCheckpoint|null[0]
+    constructor <init>(kotlin/String, kotlin.collections/List<kotlin/String>) // org.langgraphkt.checkpoint.file/SerializedCheckpoint.<init>|<init>(kotlin.String;kotlin.collections.List<kotlin.String>){}[0]
+
+    final val nextNodes // org.langgraphkt.checkpoint.file/SerializedCheckpoint.nextNodes|{}nextNodes[0]
+        final fun <get-nextNodes>(): kotlin.collections/List<kotlin/String> // org.langgraphkt.checkpoint.file/SerializedCheckpoint.nextNodes.<get-nextNodes>|<get-nextNodes>(){}[0]
+    final val stateJson // org.langgraphkt.checkpoint.file/SerializedCheckpoint.stateJson|{}stateJson[0]
+        final fun <get-stateJson>(): kotlin/String // org.langgraphkt.checkpoint.file/SerializedCheckpoint.stateJson.<get-stateJson>|<get-stateJson>(){}[0]
+
+    final fun component1(): kotlin/String // org.langgraphkt.checkpoint.file/SerializedCheckpoint.component1|component1(){}[0]
+    final fun component2(): kotlin.collections/List<kotlin/String> // org.langgraphkt.checkpoint.file/SerializedCheckpoint.component2|component2(){}[0]
+    final fun copy(kotlin/String = ..., kotlin.collections/List<kotlin/String> = ...): org.langgraphkt.checkpoint.file/SerializedCheckpoint // org.langgraphkt.checkpoint.file/SerializedCheckpoint.copy|copy(kotlin.String;kotlin.collections.List<kotlin.String>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // org.langgraphkt.checkpoint.file/SerializedCheckpoint.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // org.langgraphkt.checkpoint.file/SerializedCheckpoint.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // org.langgraphkt.checkpoint.file/SerializedCheckpoint.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<org.langgraphkt.checkpoint.file/SerializedCheckpoint> { // org.langgraphkt.checkpoint.file/SerializedCheckpoint.$serializer|null[0]
+        final val descriptor // org.langgraphkt.checkpoint.file/SerializedCheckpoint.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // org.langgraphkt.checkpoint.file/SerializedCheckpoint.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // org.langgraphkt.checkpoint.file/SerializedCheckpoint.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): org.langgraphkt.checkpoint.file/SerializedCheckpoint // org.langgraphkt.checkpoint.file/SerializedCheckpoint.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, org.langgraphkt.checkpoint.file/SerializedCheckpoint) // org.langgraphkt.checkpoint.file/SerializedCheckpoint.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;org.langgraphkt.checkpoint.file.SerializedCheckpoint){}[0]
+    }
+
+    final object Companion { // org.langgraphkt.checkpoint.file/SerializedCheckpoint.Companion|null[0]
+        final val $childSerializers // org.langgraphkt.checkpoint.file/SerializedCheckpoint.Companion.$childSerializers|{}$childSerializers[0]
+
+        final fun serializer(): kotlinx.serialization/KSerializer<org.langgraphkt.checkpoint.file/SerializedCheckpoint> // org.langgraphkt.checkpoint.file/SerializedCheckpoint.Companion.serializer|serializer(){}[0]
+    }
+}

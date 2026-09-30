@@ -1,5 +1,6 @@
 public final class org/langgraphkt/checkpoint/file/FileCheckpointer : org/langgraphkt/Checkpointer {
-	public fun <init> (Ljava/io/File;Lorg/langgraphkt/StateSerializer;)V
+	public fun <init> (Lkotlinx/io/files/Path;Lorg/langgraphkt/StateSerializer;Lkotlinx/io/files/FileSystem;)V
+	public synthetic fun <init> (Lkotlinx/io/files/Path;Lorg/langgraphkt/StateSerializer;Lkotlinx/io/files/FileSystem;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun load (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun save (Ljava/lang/String;Lorg/langgraphkt/Checkpoint;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }

@@ -1,14 +1,17 @@
 package org.langgraphkt.checkpoint.file
 
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.io.buffered
+import kotlinx.io.files.FileSystem
+import kotlinx.io.files.Path
+import kotlinx.io.files.SystemFileSystem
+import kotlinx.io.readString
+import kotlinx.io.writeString
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.langgraphkt.Checkpoint
 import org.langgraphkt.Checkpointer
 import org.langgraphkt.StateSerializer
-import java.io.File
 
 @Serializable
 data class SerializedCheckpoint(
@@ -17,43 +20,43 @@ data class SerializedCheckpoint(
 )
 
 /**
- * A persistent checkpointer that saves graph state to local files.
- * Perfect for JVM/Backend offline persistence.
+ * A persistent checkpointer that saves graph state as one JSON file per thread inside [directory].
+ *
+ * Works on every target that has a file system: JVM/Android, Apple, Linux and Windows native, and
+ * JS/Wasm running on Node.js. It is not available in browsers.
  */
 class FileCheckpointer<State>(
-    private val directory: File,
+    private val directory: Path,
     private val serializer: StateSerializer<State>,
+    private val fileSystem: FileSystem = SystemFileSystem,
 ) : Checkpointer<State> {
     init {
-        if (!directory.exists()) {
-            directory.mkdirs()
-        }
+        fileSystem.createDirectories(directory)
     }
 
-    private fun getFile(threadId: String): File {
+    private fun getFile(threadId: String): Path {
         val safeName = threadId.replace(Regex("[^a-zA-Z0-9_-]"), "_")
-        return File(directory, "$safeName.json")
+        return Path(directory, "$safeName.json")
     }
 
     override suspend fun save(threadId: String, checkpoint: Checkpoint<State>) {
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
             val stateJson = serializer.serialize(checkpoint.state)
             val serialized = SerializedCheckpoint(stateJson, checkpoint.nextNodes)
             val json = Json.encodeToString(serialized)
-            getFile(threadId).writeText(json)
+            fileSystem.sink(getFile(threadId)).buffered().use { it.writeString(json) }
         }
     }
 
-    override suspend fun load(threadId: String): Checkpoint<State>? {
-        return withContext(Dispatchers.IO) {
+    override suspend fun load(threadId: String): Checkpoint<State>? =
+        withContext(ioDispatcher) {
             val file = getFile(threadId)
-            if (!file.exists()) return@withContext null
+            if (!fileSystem.exists(file)) return@withContext null
 
-            val json = file.readText()
+            val json = fileSystem.source(file).buffered().use { it.readString() }
             val serialized = Json.decodeFromString<SerializedCheckpoint>(json)
             val state = serializer.deserialize(serialized.stateJson)
 
             Checkpoint(state, serialized.nextNodes)
         }
-    }
 }
