@@ -18,7 +18,7 @@ class StateGraph<State> {
         conditionalEdges.add(ConditionalEdge(from, condition))
     }
 
-    fun compile(): CompiledGraph<State> {
+    fun compile(reducer: Reducer<State>? = null): CompiledGraph<State> {
         if (edges.none { it.from == START } && conditionalEdges.none { it.from == START }) {
             throw IllegalStateException("Graph must have at least one edge originating from START")
         }
@@ -35,7 +35,8 @@ class StateGraph<State> {
         return CompiledGraph(
             nodes = nodes.toMap(),
             edges = edges.groupBy { it.from },
-            conditionalEdges = conditionalEdges.groupBy { it.from }
+            conditionalEdges = conditionalEdges.groupBy { it.from },
+            reducer = reducer
         )
     }
 }

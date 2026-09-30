@@ -2,8 +2,11 @@ package org.langgraphkt
 
 data class Checkpoint<State>(
     val state: State,
-    val nextNode: String
-)
+    val nextNodes: List<String>
+) {
+    val nextNode: String get() = nextNodes.firstOrNull() ?: END
+    constructor(state: State, nextNode: String) : this(state, listOf(nextNode))
+}
 
 interface Checkpointer<State> {
     suspend fun save(threadId: String, checkpoint: Checkpoint<State>)
