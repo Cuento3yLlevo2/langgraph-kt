@@ -1,0 +1,35 @@
+public final class org/langgraphkt/checkpoint/file/FileCheckpointer : org/langgraphkt/Checkpointer {
+	public fun <init> (Ljava/io/File;Lorg/langgraphkt/StateSerializer;)V
+	public fun load (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun save (Ljava/lang/String;Lorg/langgraphkt/Checkpoint;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class org/langgraphkt/checkpoint/file/SerializedCheckpoint {
+	public static final field Companion Lorg/langgraphkt/checkpoint/file/SerializedCheckpoint$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;)Lorg/langgraphkt/checkpoint/file/SerializedCheckpoint;
+	public static synthetic fun copy$default (Lorg/langgraphkt/checkpoint/file/SerializedCheckpoint;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lorg/langgraphkt/checkpoint/file/SerializedCheckpoint;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getNextNodes ()Ljava/util/List;
+	public final fun getStateJson ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class org/langgraphkt/checkpoint/file/SerializedCheckpoint$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lorg/langgraphkt/checkpoint/file/SerializedCheckpoint$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lorg/langgraphkt/checkpoint/file/SerializedCheckpoint;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/langgraphkt/checkpoint/file/SerializedCheckpoint;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class org/langgraphkt/checkpoint/file/SerializedCheckpoint$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
