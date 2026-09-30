@@ -11,82 +11,85 @@ class CompiledGraph<State>(
     val nodes: Map<String, Node<State>>,
     val edges: Map<String, List<Edge>>,
     val conditionalEdges: Map<String, List<ConditionalEdge<State>>>,
-    val reducer: Reducer<State>? = null
+    val reducer: Reducer<State>? = null,
 ) {
     /**
      * Executes the compiled graph from START to END, returning only the final state.
      */
-    suspend fun invoke(initialState: State, config: GraphConfig<State>? = null, resume: Boolean = false): State {
-        return stream(initialState, config, resume).last()
-    }
+    suspend fun invoke(initialState: State, config: GraphConfig<State>? = null, resume: Boolean = false): State =
+        stream(initialState, config, resume).last()
 
     /**
      * Executes the compiled graph from START to END, emitting the state after each step.
      */
-    fun stream(initialState: State, config: GraphConfig<State>? = null, resume: Boolean = false): Flow<State> = flow {
-        var currentState = initialState
-        var currentNodesToExecute = listOf(START)
-        var justResumed = resume
+    fun stream(initialState: State, config: GraphConfig<State>? = null, resume: Boolean = false): Flow<State> =
+        flow {
+            var currentState = initialState
+            var currentNodesToExecute = listOf(START)
+            var justResumed = resume
 
-        if (config?.checkpointer != null) {
-            val checkpoint = config.checkpointer.load(config.threadId)
-            if (checkpoint != null) {
-                currentState = if (resume) initialState else checkpoint.state
-                currentNodesToExecute = checkpoint.nextNodes
-            }
-        }
-
-        emit(currentState)
-
-        var iterations = 0
-        val maxIters = config?.maxIterations ?: 25
-
-        while (currentNodesToExecute.isNotEmpty() && !currentNodesToExecute.contains(END)) {
-            if (iterations >= maxIters) {
-                throw MaxIterationsExceededException("Graph execution exceeded max iterations ($maxIters). Possible infinite loop.")
-            }
-            iterations++
-
-            if (config != null && currentNodesToExecute.any { config.interruptBefore.contains(it) } && !justResumed) {
-                config.checkpointer?.save(config.threadId, Checkpoint(currentState, currentNodesToExecute))
-                return@flow
+            if (config?.checkpointer != null) {
+                val checkpoint = config.checkpointer.load(config.threadId)
+                if (checkpoint != null) {
+                    currentState = if (resume) initialState else checkpoint.state
+                    currentNodesToExecute = checkpoint.nextNodes
+                }
             }
 
-            val nodesToRun = currentNodesToExecute.filter { it != START }
-            if (nodesToRun.isNotEmpty()) {
-                val updates = coroutineScope {
-                    nodesToRun.map { nodeName ->
-                        async {
-                            val node = nodes[nodeName] ?: throw IllegalStateException("Node '$nodeName' not found")
-                            node.action(currentState)
+            emit(currentState)
+
+            var iterations = 0
+            val maxIters = config?.maxIterations ?: 25
+
+            while (currentNodesToExecute.isNotEmpty() && !currentNodesToExecute.contains(END)) {
+                if (iterations >= maxIters) {
+                    throw MaxIterationsExceededException("Graph execution exceeded max iterations ($maxIters). Possible infinite loop.")
+                }
+                iterations++
+
+                if (config != null && currentNodesToExecute.any { config.interruptBefore.contains(it) } && !justResumed) {
+                    config.checkpointer?.save(config.threadId, Checkpoint(currentState, currentNodesToExecute))
+                    return@flow
+                }
+
+                val nodesToRun = currentNodesToExecute.filter { it != START }
+                if (nodesToRun.isNotEmpty()) {
+                    val updates =
+                        coroutineScope {
+                            nodesToRun
+                                .map { nodeName ->
+                                    async {
+                                        val node = nodes[nodeName] ?: throw IllegalStateException("Node '$nodeName' not found")
+                                        node.action(currentState)
+                                    }
+                                }.awaitAll()
                         }
-                    }.awaitAll()
+
+                    currentState =
+                        if (updates.size > 1) {
+                            requireNotNull(reducer) { "Reducer is required when executing parallel nodes" }
+                            reducer.reduce(currentState, updates)
+                        } else if (updates.size == 1) {
+                            updates.first()
+                        } else {
+                            currentState
+                        }
+
+                    emit(currentState)
+                }
+                justResumed = false
+
+                if (config != null && currentNodesToExecute.any { config.interruptAfter.contains(it) }) {
+                    val nextNodes = resolveNextNodes(currentNodesToExecute, currentState)
+                    config.checkpointer?.save(config.threadId, Checkpoint(currentState, nextNodes))
+                    return@flow
                 }
 
-                currentState = if (updates.size > 1) {
-                    requireNotNull(reducer) { "Reducer is required when executing parallel nodes" }
-                    reducer.reduce(currentState, updates)
-                } else if (updates.size == 1) {
-                    updates.first()
-                } else {
-                    currentState
-                }
-                
-                emit(currentState)
-            }
-            justResumed = false
-
-            if (config != null && currentNodesToExecute.any { config.interruptAfter.contains(it) }) {
-                val nextNodes = resolveNextNodes(currentNodesToExecute, currentState)
-                config.checkpointer?.save(config.threadId, Checkpoint(currentState, nextNodes))
-                return@flow
+                currentNodesToExecute = resolveNextNodes(currentNodesToExecute, currentState)
             }
 
-            currentNodesToExecute = resolveNextNodes(currentNodesToExecute, currentState)
+            config?.checkpointer?.save(config.threadId, Checkpoint(currentState, listOf(END)))
         }
-
-        config?.checkpointer?.save(config.threadId, Checkpoint(currentState, listOf(END)))
-    }
 
     private suspend fun resolveNextNodes(currentNodes: List<String>, currentState: State): List<String> {
         val nextNodes = mutableListOf<String>()

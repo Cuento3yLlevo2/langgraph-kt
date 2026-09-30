@@ -36,7 +36,7 @@ class StateGraph<State> {
             nodes = nodes.toMap(),
             edges = edges.groupBy { it.from },
             conditionalEdges = conditionalEdges.groupBy { it.from },
-            reducer = reducer
+            reducer = reducer,
         )
     }
 }
@@ -44,6 +44,4 @@ class StateGraph<State> {
 /**
  * DSL builder function for creating a StateGraph.
  */
-fun <State> StateGraph(block: StateGraph<State>.() -> Unit): StateGraph<State> {
-    return StateGraph<State>().apply(block)
-}
+fun <State> StateGraph(block: StateGraph<State>.() -> Unit): StateGraph<State> = StateGraph<State>().apply(block)
