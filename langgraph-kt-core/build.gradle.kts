@@ -1,16 +1,13 @@
 plugins {
-    kotlin("jvm")
-    kotlin("plugin.serialization")
+    id("langgraph.kotlin-library")
+    id("langgraph.publishing")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
-    
-    testImplementation(kotlin("test"))
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
-}
+    api(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.serialization.json)
 
-tasks.test {
-    useJUnitPlatform()
+    testImplementation(kotlin("test"))
+    testImplementation(libs.kotlinx.coroutines.test)
 }

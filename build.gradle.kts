@@ -1,10 +1,10 @@
 plugins {
-    kotlin("jvm") version "1.9.22" apply false
-    kotlin("plugin.serialization") version "1.9.22" apply false
+    id("langgraph.root")
 }
 
-allprojects {
-    repositories {
-        mavenCentral()
-    }
+dependencies {
+    dokka(project(":langgraph-kt-core"))
+    dokka(project(":langgraph-kt-langchain4j"))
+    kover(project(":langgraph-kt-core"))
+    kover(project(":langgraph-kt-langchain4j"))
 }
