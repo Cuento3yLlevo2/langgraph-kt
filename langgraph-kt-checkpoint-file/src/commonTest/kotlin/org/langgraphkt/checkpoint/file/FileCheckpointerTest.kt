@@ -5,9 +5,8 @@ import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.files.SystemTemporaryDirectory
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import org.langgraphkt.Checkpoint
-import org.langgraphkt.StateSerializer
+import org.langgraphkt.serialization.KotlinxStateSerializer
 import kotlin.random.Random
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -22,12 +21,7 @@ data class SerializableState(
 class FileCheckpointerTest {
     private val tempDir = Path(SystemTemporaryDirectory, "langgraph-kt-test-${Random.nextLong().toULong()}")
 
-    private val serializer =
-        object : StateSerializer<SerializableState> {
-            override fun serialize(state: SerializableState) = Json.encodeToString(state)
-
-            override fun deserialize(data: String) = Json.decodeFromString<SerializableState>(data)
-        }
+    private val serializer = KotlinxStateSerializer<SerializableState>()
 
     @AfterTest
     fun cleanUp() {

@@ -15,5 +15,6 @@ dependencyResolutionManagement {
 rootProject.name = "langgraph-kt"
 
 include("langgraph-kt-core")
+include("langgraph-kt-serialization")
 include("langgraph-kt-checkpoint-file")
 include("langgraph-kt-langchain4j")

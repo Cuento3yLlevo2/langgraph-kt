@@ -1,0 +1,16 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, linuxArm64, linuxX64, macosArm64, mingwX64, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <langgraph-kt:langgraph-kt-serialization>
+final class <#A: kotlin/Any?> org.langgraphkt.serialization/KotlinxStateSerializer : org.langgraphkt/StateSerializer<#A> { // org.langgraphkt.serialization/KotlinxStateSerializer|null[0]
+    constructor <init>(kotlinx.serialization/KSerializer<#A>, kotlinx.serialization.json/Json = ...) // org.langgraphkt.serialization/KotlinxStateSerializer.<init>|<init>(kotlinx.serialization.KSerializer<1:0>;kotlinx.serialization.json.Json){}[0]
+
+    final fun deserialize(kotlin/String): #A // org.langgraphkt.serialization/KotlinxStateSerializer.deserialize|deserialize(kotlin.String){}[0]
+    final fun serialize(#A): kotlin/String // org.langgraphkt.serialization/KotlinxStateSerializer.serialize|serialize(1:0){}[0]
+}
+
+final inline fun <#A: reified kotlin/Any?> org.langgraphkt.serialization/KotlinxStateSerializer(kotlinx.serialization.json/Json = ...): org.langgraphkt.serialization/KotlinxStateSerializer<#A> // org.langgraphkt.serialization/KotlinxStateSerializer|KotlinxStateSerializer(kotlinx.serialization.json.Json){0§<kotlin.Any?>}[0]
