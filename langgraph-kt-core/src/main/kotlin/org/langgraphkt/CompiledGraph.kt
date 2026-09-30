@@ -38,7 +38,15 @@ class CompiledGraph<State>(
 
         emit(currentState)
 
+        var iterations = 0
+        val maxIters = config?.maxIterations ?: 25
+
         while (currentNodesToExecute.isNotEmpty() && !currentNodesToExecute.contains(END)) {
+            if (iterations >= maxIters) {
+                throw MaxIterationsExceededException("Graph execution exceeded max iterations ($maxIters). Possible infinite loop.")
+            }
+            iterations++
+
             if (config != null && currentNodesToExecute.any { config.interruptBefore.contains(it) } && !justResumed) {
                 config.checkpointer?.save(config.threadId, Checkpoint(currentState, currentNodesToExecute))
                 return@flow

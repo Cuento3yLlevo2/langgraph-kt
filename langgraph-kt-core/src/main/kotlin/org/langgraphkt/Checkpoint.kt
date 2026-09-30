@@ -29,5 +29,6 @@ data class GraphConfig<State>(
     val threadId: String = "default",
     val checkpointer: Checkpointer<State>? = null,
     val interruptBefore: List<String> = emptyList(),
-    val interruptAfter: List<String> = emptyList()
+    val interruptAfter: List<String> = emptyList(),
+    val maxIterations: Int = 25
 )
