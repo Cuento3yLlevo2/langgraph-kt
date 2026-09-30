@@ -4,6 +4,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 data class ParallelState(
     val messages: List<String> = emptyList(),
@@ -52,8 +53,8 @@ class ReducerTest {
             assertEquals(3, result.messages.size)
             // Since branchA and branchB run in parallel, their updates are merged.
             // The reducer adds both "A" and "B" (order might depend on iteration, but both are present).
-            assert(result.messages.contains("A"))
-            assert(result.messages.contains("B"))
+            assertTrue("A" in result.messages)
+            assertTrue("B" in result.messages)
             assertEquals("Aggregated", result.messages.last())
         }
 }
