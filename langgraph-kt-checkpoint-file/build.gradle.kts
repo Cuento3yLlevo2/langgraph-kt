@@ -1,5 +1,5 @@
 plugins {
-    id("langgraph.kotlin-library")
+    id("langgraph.jvm-library")
     id("langgraph.publishing")
     id("org.jetbrains.kotlin.plugin.serialization")
 }

@@ -1,11 +1,16 @@
 plugins {
-    id("langgraph.kotlin-library")
+    id("langgraph.kmp-library")
     id("langgraph.publishing")
 }
 
-dependencies {
-    api(libs.kotlinx.coroutines.core)
-
-    testImplementation(kotlin("test"))
-    testImplementation(libs.kotlinx.coroutines.test)
+kotlin {
+    sourceSets {
+        commonMain.dependencies {
+            api(libs.kotlinx.coroutines.core)
+        }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(libs.kotlinx.coroutines.test)
+        }
+    }
 }
