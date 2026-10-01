@@ -15,12 +15,19 @@ public final class org/langgraphkt/Checkpoint {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class org/langgraphkt/CheckpointCorruptedException : org/langgraphkt/LangGraphException {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getThreadId ()Ljava/lang/String;
+}
+
 public final class org/langgraphkt/CheckpointNotFoundException : org/langgraphkt/LangGraphException {
 	public fun <init> (Ljava/lang/String;)V
 	public final fun getThreadId ()Ljava/lang/String;
 }
 
 public abstract interface class org/langgraphkt/Checkpointer {
+	public abstract fun delete (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun load (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun save (Ljava/lang/String;Lorg/langgraphkt/Checkpoint;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
@@ -158,8 +165,8 @@ public final class org/langgraphkt/InvalidRouteException : org/langgraphkt/LangG
 }
 
 public abstract class org/langgraphkt/LangGraphException : java/lang/RuntimeException {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class org/langgraphkt/MaxIterationsExceededException : org/langgraphkt/LangGraphException {
@@ -169,6 +176,7 @@ public final class org/langgraphkt/MaxIterationsExceededException : org/langgrap
 
 public final class org/langgraphkt/MemoryCheckpointer : org/langgraphkt/Checkpointer {
 	public fun <init> ()V
+	public fun delete (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun load (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun save (Ljava/lang/String;Lorg/langgraphkt/Checkpoint;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }

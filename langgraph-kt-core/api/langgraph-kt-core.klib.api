@@ -11,6 +11,7 @@ abstract fun interface <#A: kotlin/Any?> org.langgraphkt/Reducer { // org.langgr
 }
 
 abstract interface <#A: kotlin/Any?> org.langgraphkt/Checkpointer { // org.langgraphkt/Checkpointer|null[0]
+    abstract suspend fun delete(kotlin/String) // org.langgraphkt/Checkpointer.delete|delete(kotlin.String){}[0]
     abstract suspend fun load(kotlin/String): org.langgraphkt/Checkpoint<#A>? // org.langgraphkt/Checkpointer.load|load(kotlin.String){}[0]
     abstract suspend fun save(kotlin/String, org.langgraphkt/Checkpoint<#A>) // org.langgraphkt/Checkpointer.save|save(kotlin.String;org.langgraphkt.Checkpoint<1:0>){}[0]
 }
@@ -107,6 +108,10 @@ sealed interface <#A: out kotlin/Any?> org.langgraphkt/GraphResult { // org.lang
     }
 }
 
+abstract class org.langgraphkt/LangGraphException : kotlin/RuntimeException { // org.langgraphkt/LangGraphException|null[0]
+    constructor <init>(kotlin/String, kotlin/Throwable? = ...) // org.langgraphkt/LangGraphException.<init>|<init>(kotlin.String;kotlin.Throwable?){}[0]
+}
+
 final class <#A: kotlin/Any?> org.langgraphkt/Checkpoint { // org.langgraphkt/Checkpoint|null[0]
     constructor <init>(#A, kotlin.collections/List<kotlin/String>, kotlin/Int = ...) // org.langgraphkt/Checkpoint.<init>|<init>(1:0;kotlin.collections.List<kotlin.String>;kotlin.Int){}[0]
 
@@ -168,6 +173,7 @@ final class <#A: kotlin/Any?> org.langgraphkt/GraphConfig { // org.langgraphkt/G
 final class <#A: kotlin/Any?> org.langgraphkt/MemoryCheckpointer : org.langgraphkt/Checkpointer<#A> { // org.langgraphkt/MemoryCheckpointer|null[0]
     constructor <init>() // org.langgraphkt/MemoryCheckpointer.<init>|<init>(){}[0]
 
+    final suspend fun delete(kotlin/String) // org.langgraphkt/MemoryCheckpointer.delete|delete(kotlin.String){}[0]
     final suspend fun load(kotlin/String): org.langgraphkt/Checkpoint<#A>? // org.langgraphkt/MemoryCheckpointer.load|load(kotlin.String){}[0]
     final suspend fun save(kotlin/String, org.langgraphkt/Checkpoint<#A>) // org.langgraphkt/MemoryCheckpointer.save|save(kotlin.String;org.langgraphkt.Checkpoint<1:0>){}[0]
 }
@@ -179,6 +185,13 @@ final class <#A: kotlin/Any?> org.langgraphkt/StateGraph { // org.langgraphkt/St
     final fun conditionalEdge(kotlin/String, kotlin.collections/Set<kotlin/String>? = ..., kotlin.coroutines/SuspendFunction1<#A, kotlin/String>) // org.langgraphkt/StateGraph.conditionalEdge|conditionalEdge(kotlin.String;kotlin.collections.Set<kotlin.String>?;kotlin.coroutines.SuspendFunction1<1:0,kotlin.String>){}[0]
     final fun edge(kotlin/String, kotlin/String) // org.langgraphkt/StateGraph.edge|edge(kotlin.String;kotlin.String){}[0]
     final fun node(kotlin/String, kotlin.coroutines/SuspendFunction1<#A, #A>) // org.langgraphkt/StateGraph.node|node(kotlin.String;kotlin.coroutines.SuspendFunction1<1:0,1:0>){}[0]
+}
+
+final class org.langgraphkt/CheckpointCorruptedException : org.langgraphkt/LangGraphException { // org.langgraphkt/CheckpointCorruptedException|null[0]
+    constructor <init>(kotlin/String, kotlin/String, kotlin/Throwable? = ...) // org.langgraphkt/CheckpointCorruptedException.<init>|<init>(kotlin.String;kotlin.String;kotlin.Throwable?){}[0]
+
+    final val threadId // org.langgraphkt/CheckpointCorruptedException.threadId|{}threadId[0]
+        final fun <get-threadId>(): kotlin/String // org.langgraphkt/CheckpointCorruptedException.threadId.<get-threadId>|<get-threadId>(){}[0]
 }
 
 final class org.langgraphkt/CheckpointNotFoundException : org.langgraphkt/LangGraphException { // org.langgraphkt/CheckpointNotFoundException|null[0]
@@ -221,8 +234,6 @@ final class org.langgraphkt/NodeExecutionException : org.langgraphkt/LangGraphEx
     final val nodeName // org.langgraphkt/NodeExecutionException.nodeName|{}nodeName[0]
         final fun <get-nodeName>(): kotlin/String // org.langgraphkt/NodeExecutionException.nodeName.<get-nodeName>|<get-nodeName>(){}[0]
 }
-
-sealed class org.langgraphkt/LangGraphException : kotlin/RuntimeException // org.langgraphkt/LangGraphException|null[0]
 
 final const val org.langgraphkt/END // org.langgraphkt/END|{}END[0]
     final fun <get-END>(): kotlin/String // org.langgraphkt/END.<get-END>|<get-END>(){}[0]

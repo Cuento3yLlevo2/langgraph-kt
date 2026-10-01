@@ -1,5 +1,8 @@
 package org.langgraphkt
 
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+
 /**
  * A saved point in a graph run.
  *
@@ -26,17 +29,26 @@ public interface Checkpointer<State> {
 
     /** Returns the latest checkpoint of [threadId], or `null` if the thread has none. */
     public suspend fun load(threadId: String): Checkpoint<State>?
+
+    /** Removes the checkpoint of [threadId]. Does nothing if the thread has none. */
+    public suspend fun delete(threadId: String)
 }
 
 /**
  * A [Checkpointer] that keeps checkpoints in memory. Intended for tests and short-lived processes.
+ * Safe to share between coroutines and threads.
  */
 public class MemoryCheckpointer<State> : Checkpointer<State> {
+    private val mutex = Mutex()
     private val memory = mutableMapOf<String, Checkpoint<State>>()
 
     override suspend fun save(threadId: String, checkpoint: Checkpoint<State>) {
-        memory[threadId] = checkpoint
+        mutex.withLock { memory[threadId] = checkpoint }
     }
 
-    override suspend fun load(threadId: String): Checkpoint<State>? = memory[threadId]
+    override suspend fun load(threadId: String): Checkpoint<State>? = mutex.withLock { memory[threadId] }
+
+    override suspend fun delete(threadId: String) {
+        mutex.withLock { memory.remove(threadId) }
+    }
 }

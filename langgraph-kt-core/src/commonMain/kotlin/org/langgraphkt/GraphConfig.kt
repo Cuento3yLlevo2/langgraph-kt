@@ -11,8 +11,8 @@ package org.langgraphkt
  * @property interruptAfter node names to pause after.
  * @property maxIterations the maximum number of steps a single [CompiledGraph.invoke] or
  * [CompiledGraph.resume] call may execute before [MaxIterationsExceededException] is thrown.
- * @throws GraphValidationException if [maxIterations] is not positive, or interrupts are configured
- * without a [checkpointer].
+ * @throws GraphValidationException if [threadId] is blank, [maxIterations] is not positive, or
+ * interrupts are configured without a [checkpointer].
  */
 public data class GraphConfig<State>(
     val threadId: String = "default",
@@ -22,6 +22,7 @@ public data class GraphConfig<State>(
     val maxIterations: Int = DEFAULT_MAX_ITERATIONS,
 ) {
     init {
+        if (threadId.isBlank()) throw GraphValidationException("threadId must not be blank.")
         if (maxIterations <= 0) throw GraphValidationException("maxIterations must be positive, was $maxIterations.")
         if (checkpointer == null && (interruptBefore.isNotEmpty() || interruptAfter.isNotEmpty())) {
             throw GraphValidationException("interruptBefore/interruptAfter need a checkpointer to save the paused run.")

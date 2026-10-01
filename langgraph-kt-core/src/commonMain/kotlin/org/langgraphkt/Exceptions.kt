@@ -2,9 +2,10 @@ package org.langgraphkt
 
 /**
  * Base class for every error raised by langgraph-kt itself, so callers can catch the whole family
- * with a single `catch (e: LangGraphException)`.
+ * with a single `catch (e: LangGraphException)`. Integration modules and custom [Checkpointer]s may
+ * add their own subclasses.
  */
-public sealed class LangGraphException(
+public abstract class LangGraphException(
     message: String,
     cause: Throwable? = null,
 ) : RuntimeException(message, cause)
@@ -59,3 +60,13 @@ public class CheckpointNotFoundException(
 public class GraphAlreadyCompletedException(
     public val threadId: String,
 ) : LangGraphException("Thread '$threadId' already ran to completion, so there is nothing to resume.")
+
+/**
+ * The stored checkpoint of [threadId] could not be read, for example because the file is damaged or
+ * was written in a newer format. [Checkpointer] implementations throw this from [Checkpointer.load].
+ */
+public class CheckpointCorruptedException(
+    public val threadId: String,
+    message: String,
+    cause: Throwable? = null,
+) : LangGraphException("Checkpoint of thread '$threadId' cannot be read: $message", cause)

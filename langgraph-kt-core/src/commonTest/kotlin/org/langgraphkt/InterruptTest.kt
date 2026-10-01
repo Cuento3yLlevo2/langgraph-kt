@@ -129,6 +129,8 @@ class InterruptTest {
                     }
 
                     override suspend fun load(threadId: String): Checkpoint<TestState>? = saved.lastOrNull()
+
+                    override suspend fun delete(threadId: String) = saved.clear()
                 }
 
             app.invoke(TestState(0), GraphConfig(checkpointer = recording))
