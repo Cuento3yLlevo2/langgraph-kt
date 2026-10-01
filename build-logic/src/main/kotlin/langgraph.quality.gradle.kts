@@ -6,3 +6,14 @@ plugins {
     id("org.jetbrains.kotlinx.kover")
     id("org.jetbrains.dokka")
 }
+
+kover {
+    reports {
+        verify {
+            rule {
+                // `check` fails if line coverage of a module drops below this.
+                minBound(90)
+            }
+        }
+    }
+}
