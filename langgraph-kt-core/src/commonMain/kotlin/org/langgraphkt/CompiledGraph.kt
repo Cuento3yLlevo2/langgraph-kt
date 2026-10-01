@@ -5,11 +5,26 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.last
 
 /**
- * An executable graph produced by [StateGraph.compile].
+ * An executable graph produced by [StateGraph.compile]. It is immutable and can be shared and run
+ * concurrently; each run is isolated by [GraphConfig.threadId].
+ *
+ * ## Execution model
+ *
+ * A run advances in steps. In each step all currently active nodes run in parallel on the same
+ * input state, and their results are merged by the [Reducer] when there is more than one. The
+ * outgoing edges of those nodes then decide which nodes are active in the next step. A branch that
+ * routes to [END] simply stops; the run completes when no nodes are active.
+ *
+ * A node reached by several branches in the same step runs once. If the branches have different
+ * lengths, the node runs once for each step in which a branch reaches it.
+ *
+ * Nodes run in the coroutine context of the caller. If a node fails, the other nodes of that step
+ * are cancelled and the failure is rethrown as [NodeExecutionException].
  */
 public class CompiledGraph<State> internal constructor(
     internal val nodes: Map<String, Node<State>>,
@@ -18,81 +33,115 @@ public class CompiledGraph<State> internal constructor(
     internal val reducer: Reducer<State>? = null,
 ) {
     /**
-     * Executes the compiled graph from START to END, returning only the final state.
+     * Runs the graph from [START] with [input] until it completes or reaches an interrupt.
+     *
+     * A call always starts a new run: if [config] has a checkpointer, any earlier checkpoint of the
+     * thread is replaced. Use [resume] to continue a paused run.
+     *
+     * @throws GraphValidationException if [config] names interrupt nodes that are not in the graph.
+     * @throws MaxIterationsExceededException if the run needs more than [GraphConfig.maxIterations] steps.
+     * @throws NodeExecutionException if a node throws.
+     * @throws InvalidRouteException if a conditional edge returns an invalid target.
      */
-    public suspend fun invoke(initialState: State, config: GraphConfig<State>? = null, resume: Boolean = false): State =
-        stream(initialState, config, resume).last()
+    public suspend fun invoke(input: State, config: GraphConfig<State> = GraphConfig()): GraphResult<State> =
+        stream(input, config).last().toResult()
 
     /**
-     * Executes the compiled graph from START to END, emitting the state after each step.
+     * Continues the run of [GraphConfig.threadId] from its last checkpoint, typically after an
+     * interrupt and a human decision.
+     *
+     * @param update edits the checkpointed state before execution continues, for example to record
+     * an approval. Defaults to continuing with the state unchanged.
+     * @throws GraphValidationException if [config] has no checkpointer.
+     * @throws CheckpointNotFoundException if the thread has no checkpoint.
+     * @throws GraphAlreadyCompletedException if the thread's last run already completed.
      */
-    public fun stream(initialState: State, config: GraphConfig<State>? = null, resume: Boolean = false): Flow<State> =
+    public suspend fun resume(config: GraphConfig<State>, update: suspend (State) -> State = { it }): GraphResult<State> =
+        streamResume(config, update).last().toResult()
+
+    /**
+     * Like [invoke], but returns a cold [Flow] that emits a [GraphEvent] after every step and ends
+     * with [GraphEvent.Completed] or [GraphEvent.Interrupted]. Nothing runs until the flow is
+     * collected, and each collection is a new run.
+     */
+    public fun stream(input: State, config: GraphConfig<State> = GraphConfig()): Flow<GraphEvent<State>> =
         flow {
-            var currentState = initialState
-            var currentNodesToExecute = listOf(START)
-            var justResumed = resume
-
-            if (config?.checkpointer != null) {
-                val checkpoint = config.checkpointer.load(config.threadId)
-                if (checkpoint != null) {
-                    currentState = if (resume) initialState else checkpoint.state
-                    currentNodesToExecute = checkpoint.nextNodes
-                }
-            }
-
-            emit(currentState)
-
-            var iterations = 0
-            val maxIters = config?.maxIterations ?: 25
-
-            while (currentNodesToExecute.isNotEmpty() && !currentNodesToExecute.contains(END)) {
-                if (iterations >= maxIters) {
-                    throw MaxIterationsExceededException(maxIters)
-                }
-                iterations++
-
-                if (config != null && currentNodesToExecute.any { config.interruptBefore.contains(it) } && !justResumed) {
-                    config.checkpointer?.save(config.threadId, Checkpoint(currentState, currentNodesToExecute))
-                    return@flow
-                }
-
-                val nodesToRun = currentNodesToExecute.filter { it != START }
-                if (nodesToRun.isNotEmpty()) {
-                    val updates =
-                        coroutineScope {
-                            nodesToRun
-                                .map { nodeName ->
-                                    async {
-                                        runNode(nodes.getValue(nodeName), currentState)
-                                    }
-                                }.awaitAll()
-                        }
-
-                    currentState =
-                        if (updates.size > 1) {
-                            checkNotNull(reducer) { "compile() guarantees a reducer for graphs that fan out" }
-                                .reduce(currentState, updates)
-                        } else if (updates.size == 1) {
-                            updates.first()
-                        } else {
-                            currentState
-                        }
-
-                    emit(currentState)
-                }
-                justResumed = false
-
-                if (config != null && currentNodesToExecute.any { config.interruptAfter.contains(it) }) {
-                    val nextNodes = resolveNextNodes(currentNodesToExecute, currentState)
-                    config.checkpointer?.save(config.threadId, Checkpoint(currentState, nextNodes))
-                    return@flow
-                }
-
-                currentNodesToExecute = resolveNextNodes(currentNodesToExecute, currentState)
-            }
-
-            config?.checkpointer?.save(config.threadId, Checkpoint(currentState, listOf(END)))
+            validateInterrupts(config)
+            run(config, RunStart(input, resolveNextNodes(listOf(START), input), step = 0, resumed = false))
         }
+
+    /** Like [resume], but returns a cold [Flow] of [GraphEvent]s. See [stream]. */
+    public fun streamResume(config: GraphConfig<State>, update: suspend (State) -> State = { it }): Flow<GraphEvent<State>> =
+        flow {
+            validateInterrupts(config)
+            val checkpointer =
+                config.checkpointer ?: throw GraphValidationException("resume() needs a GraphConfig with a checkpointer.")
+            val checkpoint = checkpointer.load(config.threadId) ?: throw CheckpointNotFoundException(config.threadId)
+            if (checkpoint.isComplete) throw GraphAlreadyCompletedException(config.threadId)
+            (checkpoint.nextNodes - nodes.keys).firstOrNull()?.let {
+                throw GraphValidationException(
+                    "Checkpoint of thread '${config.threadId}' refers to node '$it', which is not in this graph.",
+                )
+            }
+            run(config, RunStart(update(checkpoint.state), checkpoint.nextNodes, checkpoint.step, resumed = true))
+        }
+
+    private class RunStart<State>(
+        val state: State,
+        val activeNodes: List<String>,
+        val step: Int,
+        val resumed: Boolean,
+    )
+
+    private suspend fun FlowCollector<GraphEvent<State>>.run(config: GraphConfig<State>, start: RunStart<State>) {
+        var state = start.state
+        var activeNodes = start.activeNodes
+        var step = start.step
+        // Resuming continues past the boundary the run paused at, so that boundary must not pause again.
+        var skipInterruptBefore = start.resumed
+        var executedSteps = 0
+
+        suspend fun checkpoint(nextNodes: List<String>) {
+            config.checkpointer?.save(config.threadId, Checkpoint(state, nextNodes, step))
+        }
+
+        while (activeNodes.isNotEmpty()) {
+            if (!skipInterruptBefore && activeNodes.any { it in config.interruptBefore }) {
+                checkpoint(activeNodes)
+                emit(GraphEvent.Interrupted(state, activeNodes))
+                return
+            }
+            skipInterruptBefore = false
+
+            if (executedSteps >= config.maxIterations) throw MaxIterationsExceededException(config.maxIterations)
+            executedSteps++
+            step++
+
+            state = runStep(activeNodes, state)
+            val nextNodes = resolveNextNodes(activeNodes, state)
+            checkpoint(nextNodes)
+            emit(GraphEvent.StepCompleted(step, activeNodes, state))
+
+            if (nextNodes.isNotEmpty() && activeNodes.any { it in config.interruptAfter }) {
+                emit(GraphEvent.Interrupted(state, nextNodes))
+                return
+            }
+            activeNodes = nextNodes
+        }
+
+        if (executedSteps == 0) checkpoint(emptyList())
+        emit(GraphEvent.Completed(state))
+    }
+
+    private suspend fun runStep(activeNodes: List<String>, state: State): State {
+        if (activeNodes.size == 1) return runNode(nodes.getValue(activeNodes.single()), state)
+
+        val updates =
+            coroutineScope {
+                activeNodes.map { name -> async { runNode(nodes.getValue(name), state) } }.awaitAll()
+            }
+        return checkNotNull(reducer) { "compile() guarantees a reducer for graphs that fan out" }.reduce(state, updates)
+    }
 
     private suspend fun runNode(node: Node<State>, state: State): State =
         try {
@@ -105,21 +154,18 @@ public class CompiledGraph<State> internal constructor(
             throw NodeExecutionException(node.name, e)
         }
 
-    private suspend fun resolveNextNodes(currentNodes: List<String>, currentState: State): List<String> {
+    /** Returns the nodes to run after [currentNodes], without [END]. */
+    private suspend fun resolveNextNodes(currentNodes: List<String>, state: State): List<String> {
         val nextNodes = mutableListOf<String>()
         for (node in currentNodes) {
             val conditionalEdge = conditionalEdges[node]
-            val staticTargets = edges[node]
-
             if (conditionalEdge != null) {
-                nextNodes.add(route(conditionalEdge, currentState))
-            } else if (!staticTargets.isNullOrEmpty()) {
-                nextNodes.addAll(staticTargets)
+                nextNodes.add(route(conditionalEdge, state))
             } else {
-                nextNodes.add(END)
+                nextNodes.addAll(edges[node].orEmpty())
             }
         }
-        return nextNodes.distinct()
+        return nextNodes.distinct() - END
     }
 
     private suspend fun route(edge: ConditionalEdge<State>, state: State): String {
@@ -128,4 +174,18 @@ public class CompiledGraph<State> internal constructor(
         if (!allowed) throw InvalidRouteException(edge.from, target)
         return target
     }
+
+    private fun validateInterrupts(config: GraphConfig<State>) {
+        val unknown = (config.interruptBefore + config.interruptAfter) - nodes.keys
+        if (unknown.isNotEmpty()) {
+            throw GraphValidationException("GraphConfig interrupts refer to nodes that are not in the graph: $unknown")
+        }
+    }
+
+    private fun GraphEvent<State>.toResult(): GraphResult<State> =
+        when (this) {
+            is GraphEvent.Completed -> GraphResult.Completed(state)
+            is GraphEvent.Interrupted -> GraphResult.Interrupted(state, nextNodes)
+            is GraphEvent.StepCompleted -> error("A graph stream always ends with Completed or Interrupted")
+        }
 }

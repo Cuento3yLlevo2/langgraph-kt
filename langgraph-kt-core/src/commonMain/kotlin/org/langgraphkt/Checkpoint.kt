@@ -1,22 +1,30 @@
 package org.langgraphkt
 
 /**
- * A saved point in a graph run: the [state] at that point and the nodes that run next.
+ * A saved point in a graph run.
+ *
+ * @property state the graph state after the last executed step.
+ * @property nextNodes the nodes that run when the thread is resumed. Empty when the run completed.
+ * @property step the number of steps the thread has executed so far.
  */
 public data class Checkpoint<State>(
     val state: State,
     val nextNodes: List<String>,
+    val step: Int = 0,
 ) {
-    public val nextNode: String get() = nextNodes.firstOrNull() ?: END
-    public constructor(state: State, nextNode: String) : this(state, listOf(nextNode))
+    /** `true` when the run reached [END] and there is nothing left to resume. */
+    public val isComplete: Boolean get() = nextNodes.isEmpty()
 }
 
 /**
- * Persists [Checkpoint]s per thread so a run can pause and resume later.
+ * Persists the latest [Checkpoint] of each thread so a run can pause and resume later, even in a
+ * different process.
  */
 public interface Checkpointer<State> {
+    /** Stores [checkpoint] as the latest checkpoint of [threadId], replacing any previous one. */
     public suspend fun save(threadId: String, checkpoint: Checkpoint<State>)
 
+    /** Returns the latest checkpoint of [threadId], or `null` if the thread has none. */
     public suspend fun load(threadId: String): Checkpoint<State>?
 }
 
@@ -32,14 +40,3 @@ public class MemoryCheckpointer<State> : Checkpointer<State> {
 
     override suspend fun load(threadId: String): Checkpoint<State>? = memory[threadId]
 }
-
-/**
- * Per-run settings for a [CompiledGraph].
- */
-public data class GraphConfig<State>(
-    val threadId: String = "default",
-    val checkpointer: Checkpointer<State>? = null,
-    val interruptBefore: List<String> = emptyList(),
-    val interruptAfter: List<String> = emptyList(),
-    val maxIterations: Int = 25,
-)

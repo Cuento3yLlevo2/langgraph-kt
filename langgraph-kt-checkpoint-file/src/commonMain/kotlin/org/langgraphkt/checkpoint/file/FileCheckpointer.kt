@@ -17,6 +17,7 @@ import org.langgraphkt.StateSerializer
 internal data class SerializedCheckpoint(
     val stateJson: String,
     val nextNodes: List<String>,
+    val step: Int = 0,
 )
 
 /**
@@ -42,7 +43,7 @@ public class FileCheckpointer<State>(
     override suspend fun save(threadId: String, checkpoint: Checkpoint<State>) {
         withContext(ioDispatcher) {
             val stateJson = serializer.serialize(checkpoint.state)
-            val serialized = SerializedCheckpoint(stateJson, checkpoint.nextNodes)
+            val serialized = SerializedCheckpoint(stateJson, checkpoint.nextNodes, checkpoint.step)
             val json = Json.encodeToString(serialized)
             fileSystem.sink(getFile(threadId)).buffered().use { it.writeString(json) }
         }
@@ -57,6 +58,6 @@ public class FileCheckpointer<State>(
             val serialized = Json.decodeFromString<SerializedCheckpoint>(json)
             val state = serializer.deserialize(serialized.stateJson)
 
-            Checkpoint(state, serialized.nextNodes)
+            Checkpoint(state, serialized.nextNodes, serialized.step)
         }
 }

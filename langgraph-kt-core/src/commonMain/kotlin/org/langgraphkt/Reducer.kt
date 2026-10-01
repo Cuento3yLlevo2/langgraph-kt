@@ -8,5 +8,5 @@ package org.langgraphkt
  * and combining them into a single definitive state for the next step of execution.
  */
 public fun interface Reducer<State> {
-    public fun reduce(currentState: State, updates: List<State>): State
+    public suspend fun reduce(currentState: State, updates: List<State>): State
 }

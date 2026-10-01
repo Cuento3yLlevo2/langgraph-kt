@@ -1,9 +1,14 @@
 package org.langgraphkt
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 data class ParallelState(
@@ -11,50 +16,100 @@ data class ParallelState(
 )
 
 class ReducerTest {
-    @Test
-    fun `fan-out parallel execution runs and reduces state`() =
-        runTest {
-            val workflow =
-                StateGraph<ParallelState> {
-                    node("branchA") { state ->
-                        delay(10) // simulate work
-                        state.copy(messages = listOf("A"))
-                    }
-                    node("branchB") { state ->
-                        delay(20) // simulate work
-                        state.copy(messages = listOf("B"))
-                    }
-                    node("aggregator") { state ->
-                        state.copy(messages = state.messages + "Aggregated")
-                    }
+    private val appendMessages =
+        Reducer<ParallelState> { current, updates ->
+            current.copy(messages = current.messages + updates.flatMap { it.messages - current.messages.toSet() })
+        }
 
-                    // Fan out from START to both branches
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `fan-out runs branches in parallel and fan-in runs the join once`() =
+        runTest {
+            val app =
+                StateGraph<ParallelState> {
+                    node("branchA") {
+                        delay(100)
+                        it.copy(messages = it.messages + "A")
+                    }
+                    node("branchB") {
+                        delay(100)
+                        it.copy(messages = it.messages + "B")
+                    }
+                    node("aggregator") { it.copy(messages = it.messages + "Aggregated") }
+
                     edge(START, "branchA")
                     edge(START, "branchB")
-
-                    // Fan in from both branches to aggregator
                     edge("branchA", "aggregator")
                     edge("branchB", "aggregator")
-
                     edge("aggregator", END)
+                }.compile(reducer = appendMessages)
+
+            val events = app.stream(ParallelState()).toList()
+
+            assertEquals(listOf("A", "B", "Aggregated"), events.last().state.messages)
+            assertEquals(listOf("branchA", "branchB"), (events[0] as GraphEvent.StepCompleted).nodes)
+            assertEquals(listOf("aggregator"), (events[1] as GraphEvent.StepCompleted).nodes)
+            // Both 100 ms branches overlap, so virtual time advances by 100 ms, not 200 ms.
+            assertEquals(100, currentTime)
+        }
+
+    @Test
+    fun `reducer can suspend`() =
+        runTest {
+            val app =
+                StateGraph<ParallelState> {
+                    node("a") { it.copy(messages = listOf("A")) }
+                    node("b") { it.copy(messages = listOf("B")) }
+                    edge(START, "a")
+                    edge(START, "b")
+                }.compile { current, updates ->
+                    delay(10)
+                    current.copy(messages = updates.flatMap { it.messages })
                 }
 
-            val listReducer =
-                Reducer<ParallelState> { original, updates ->
-                    // Our custom logic to merge messages from parallel branches
-                    val allNewMessages = updates.flatMap { it.messages }
-                    original.copy(messages = original.messages + allNewMessages)
-                }
+            assertEquals(listOf("A", "B"), app.invoke(ParallelState()).state.messages)
+        }
 
-            val app = workflow.compile(reducer = listReducer)
+    @Test
+    fun `a failing branch cancels its siblings`() =
+        runTest {
+            var siblingCancelled = false
+            val app =
+                StateGraph<ParallelState> {
+                    node("fails") {
+                        delay(10)
+                        error("boom")
+                    }
+                    node("waits") {
+                        try {
+                            awaitCancellation()
+                        } finally {
+                            siblingCancelled = true
+                        }
+                    }
+                    edge(START, "fails")
+                    edge(START, "waits")
+                }.compile(reducer = appendMessages)
 
-            val result = app.invoke(ParallelState())
+            val exception = assertFailsWith<NodeExecutionException> { app.invoke(ParallelState()) }
 
-            assertEquals(3, result.messages.size)
-            // Since branchA and branchB run in parallel, their updates are merged.
-            // The reducer adds both "A" and "B" (order might depend on iteration, but both are present).
-            assertTrue("A" in result.messages)
-            assertTrue("B" in result.messages)
-            assertEquals("Aggregated", result.messages.last())
+            assertEquals("fails", exception.nodeName)
+            assertTrue(siblingCancelled)
+        }
+
+    @Test
+    fun `parallel interrupt lists every pending node`() =
+        runTest {
+            val app =
+                StateGraph<ParallelState> {
+                    node("a") { it.copy(messages = it.messages + "A") }
+                    node("b") { it.copy(messages = it.messages + "B") }
+                    edge(START, "a")
+                    edge(START, "b")
+                }.compile(reducer = appendMessages)
+            val config = GraphConfig(checkpointer = MemoryCheckpointer<ParallelState>(), interruptBefore = setOf("b"))
+
+            assertEquals(GraphResult.Interrupted(ParallelState(), listOf("a", "b")), app.invoke(ParallelState(), config))
+            assertEquals(listOf("A", "B"), app.resume(config).state.messages)
         }
 }

@@ -33,7 +33,7 @@ class FileCheckpointerTest {
         runTest {
             val checkpointer = FileCheckpointer(tempDir, serializer)
 
-            val checkpoint = Checkpoint(SerializableState(42), listOf("nodeA", "nodeB"))
+            val checkpoint = Checkpoint(SerializableState(42), listOf("nodeA", "nodeB"), step = 3)
             checkpointer.save("thread-x", checkpoint)
 
             assertTrue(SystemFileSystem.exists(Path(tempDir, "thread-x.json")))
@@ -43,6 +43,7 @@ class FileCheckpointerTest {
 
             assertEquals(42, loaded.state.count)
             assertEquals(listOf("nodeA", "nodeB"), loaded.nextNodes)
+            assertEquals(3, loaded.step)
         }
 
     private fun deleteRecursively(path: Path) {

@@ -51,7 +51,7 @@ class LangChain4jExtensionsTest {
                     edge("llm", END)
                 }.compile()
 
-            assertEquals("Echo: Hello!", app.invoke(BotState(input = "Hello!")).output)
+            assertEquals("Echo: Hello!", app.invoke(BotState(input = "Hello!")).state.output)
         }
 
     @Test
@@ -72,7 +72,7 @@ class LangChain4jExtensionsTest {
                 }.compile()
 
             val initial = BotState(history = listOf(SystemMessage.from("Be terse."), UserMessage.from("ping")))
-            val result = app.invoke(initial)
+            val result = app.invoke(initial).state
 
             assertEquals(3, result.history.size)
             assertEquals("Echo: ping", (result.history.last() as AiMessage).text())

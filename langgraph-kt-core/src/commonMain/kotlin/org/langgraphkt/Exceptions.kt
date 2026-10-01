@@ -44,3 +44,18 @@ public class NodeExecutionException(
     public val nodeName: String,
     cause: Throwable,
 ) : LangGraphException("Node '$nodeName' failed: ${cause.message}", cause)
+
+/**
+ * [CompiledGraph.resume] was called for [threadId], but the checkpointer has no checkpoint for it.
+ */
+public class CheckpointNotFoundException(
+    public val threadId: String,
+) : LangGraphException("No checkpoint found for thread '$threadId'. Start the run with invoke() first.")
+
+/**
+ * [CompiledGraph.resume] was called for [threadId], but its last run already completed. Start a new
+ * run with [CompiledGraph.invoke].
+ */
+public class GraphAlreadyCompletedException(
+    public val threadId: String,
+) : LangGraphException("Thread '$threadId' already ran to completion, so there is nothing to resume.")
