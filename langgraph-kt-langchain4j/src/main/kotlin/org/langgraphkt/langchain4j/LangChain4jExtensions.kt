@@ -13,13 +13,13 @@ import org.langgraphkt.NodeAction
  * LangChain4j calls block on network I/O, so the call runs on [Dispatchers.IO] and the caller's
  * thread (for example the Android main thread) is never blocked.
  */
-suspend fun ChatModel.chatSuspending(message: String): String = withContext(Dispatchers.IO) { chat(message) }
+public suspend fun ChatModel.chatSuspending(message: String): String = withContext(Dispatchers.IO) { chat(message) }
 
 /**
  * Sends a conversation to this [ChatModel] and returns the full [ChatResponse] (AI message, tool
  * execution requests, token usage). Like the single-message overload, it runs on [Dispatchers.IO].
  */
-suspend fun ChatModel.chatSuspending(messages: List<ChatMessage>): ChatResponse = withContext(Dispatchers.IO) { chat(messages) }
+public suspend fun ChatModel.chatSuspending(messages: List<ChatMessage>): ChatResponse = withContext(Dispatchers.IO) { chat(messages) }
 
 /**
  * Creates a [NodeAction] that sends a prompt built from the current state to [model] and merges the
@@ -37,8 +37,11 @@ suspend fun ChatModel.chatSuspending(messages: List<ChatMessage>): ChatResponse 
  * @param prompt builds the user message from the current state.
  * @param update returns a new state that includes the model's reply.
  */
-fun <State> chatNode(model: ChatModel, prompt: suspend (State) -> String, update: suspend (State, String) -> State): NodeAction<State> =
-    { state -> update(state, model.chatSuspending(prompt(state))) }
+public fun <State> chatNode(
+    model: ChatModel,
+    prompt: suspend (State) -> String,
+    update: suspend (State, String) -> State,
+): NodeAction<State> = { state -> update(state, model.chatSuspending(prompt(state))) }
 
 /**
  * Creates a [NodeAction] that sends a whole conversation (system, user, AI and tool messages)
@@ -49,7 +52,7 @@ fun <State> chatNode(model: ChatModel, prompt: suspend (State) -> String, update
  * @param messages builds the conversation from the current state.
  * @param update returns a new state that includes the model's response.
  */
-fun <State> chatMessagesNode(
+public fun <State> chatMessagesNode(
     model: ChatModel,
     messages: suspend (State) -> List<ChatMessage>,
     update: suspend (State, ChatResponse) -> State,
