@@ -29,7 +29,7 @@ tasks.test {
     useJUnitPlatform()
 }
 
-listOf("QuickStart", "HumanInTheLoop", "ParallelResearch", "ChatAgent").forEach { sample ->
+listOf("QuickStart", "HumanInTheLoop", "ReviewLoop", "ParallelResearch", "ChatAgent").forEach { sample ->
     tasks.register<JavaExec>("run$sample") {
         group = "samples"
         description = "Runs the $sample sample."

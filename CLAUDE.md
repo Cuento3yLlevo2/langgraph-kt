@@ -49,7 +49,8 @@ is a directed graph: nodes transform an immutable state and edges decide what ru
 2. **Compile** with `.compile(reducer = ...)`, which validates the graph and returns a `CompiledGraph<State>`.
 3. **Execute** with `invoke(input, config)` (returns `GraphResult.Completed` or `.Interrupted`) or
    `stream(input, config)` (a `Flow<GraphEvent<State>>`). Continue a paused run with
-   `resume(config) { state -> ... }` / `streamResume`.
+   `resume(config) { state -> ... }` / `streamResume`. `lastResult(config)` reads where a thread
+   stopped without running it.
 
 The engine (`CompiledGraph.kt`) runs in steps: all active nodes run in parallel on the same input
 state, the `Reducer` merges their results, and outgoing edges select the next active nodes. A
