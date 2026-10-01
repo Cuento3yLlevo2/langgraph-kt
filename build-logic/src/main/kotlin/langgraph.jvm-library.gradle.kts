@@ -1,14 +1,11 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 /*
- * Shared conventions for every published langgraph-kt library module:
- * JVM toolchain, compiler strictness, linting, coverage and API docs.
+ * Conventions for JVM-only library modules (e.g. integrations with Java libraries).
  */
 plugins {
     id("org.jetbrains.kotlin.jvm")
-    id("org.jlleitschuh.gradle.ktlint")
-    id("org.jetbrains.kotlinx.kover")
-    id("org.jetbrains.dokka")
+    id("langgraph.quality")
 }
 
 kotlin {

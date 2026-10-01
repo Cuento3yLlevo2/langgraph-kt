@@ -62,12 +62,6 @@ public final class org/langgraphkt/Edge {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class org/langgraphkt/FileCheckpointer : org/langgraphkt/Checkpointer {
-	public fun <init> (Ljava/io/File;Lorg/langgraphkt/StateSerializer;)V
-	public fun load (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun save (Ljava/lang/String;Lorg/langgraphkt/Checkpoint;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
 public final class org/langgraphkt/GraphConfig {
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;Lorg/langgraphkt/Checkpointer;Ljava/util/List;Ljava/util/List;I)V
@@ -114,35 +108,6 @@ public final class org/langgraphkt/Node {
 
 public abstract interface class org/langgraphkt/Reducer {
 	public abstract fun reduce (Ljava/lang/Object;Ljava/util/List;)Ljava/lang/Object;
-}
-
-public final class org/langgraphkt/SerializedCheckpoint {
-	public static final field Companion Lorg/langgraphkt/SerializedCheckpoint$Companion;
-	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/util/List;
-	public final fun copy (Ljava/lang/String;Ljava/util/List;)Lorg/langgraphkt/SerializedCheckpoint;
-	public static synthetic fun copy$default (Lorg/langgraphkt/SerializedCheckpoint;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lorg/langgraphkt/SerializedCheckpoint;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getNextNodes ()Ljava/util/List;
-	public final fun getStateJson ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final synthetic class org/langgraphkt/SerializedCheckpoint$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field INSTANCE Lorg/langgraphkt/SerializedCheckpoint$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lorg/langgraphkt/SerializedCheckpoint;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/langgraphkt/SerializedCheckpoint;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
-}
-
-public final class org/langgraphkt/SerializedCheckpoint$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/langgraphkt/StateGraph {

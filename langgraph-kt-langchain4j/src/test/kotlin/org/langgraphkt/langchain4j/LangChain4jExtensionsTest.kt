@@ -2,8 +2,11 @@ package org.langgraphkt.langchain4j
 
 import dev.langchain4j.data.message.AiMessage
 import dev.langchain4j.data.message.ChatMessage
-import dev.langchain4j.model.chat.ChatLanguageModel
-import dev.langchain4j.model.output.Response
+import dev.langchain4j.data.message.SystemMessage
+import dev.langchain4j.data.message.UserMessage
+import dev.langchain4j.model.chat.ChatModel
+import dev.langchain4j.model.chat.request.ChatRequest
+import dev.langchain4j.model.chat.response.ChatResponse
 import kotlinx.coroutines.test.runTest
 import org.langgraphkt.END
 import org.langgraphkt.START
@@ -14,51 +17,64 @@ import kotlin.test.assertEquals
 data class BotState(
     val input: String = "",
     val output: String = "",
+    val history: List<ChatMessage> = emptyList(),
 )
 
-/**
- * A dummy model to mock LangChain4j for testing without network calls.
- */
-class DummyModel : ChatLanguageModel {
-    override fun generate(userMessage: String): String = "Echo: $userMessage"
-
-    override fun generate(vararg messages: ChatMessage?): Response<AiMessage> = throw NotImplementedError()
-
-    override fun generate(messages: MutableList<ChatMessage>?): Response<AiMessage> = throw NotImplementedError()
-
-    override fun generate(
-        messages: MutableList<ChatMessage>?,
-        tools: MutableList<dev.langchain4j.agent.tool.ToolSpecification>?,
-    ): Response<AiMessage> = throw NotImplementedError()
-
-    override fun generate(messages: MutableList<ChatMessage>?, tool: dev.langchain4j.agent.tool.ToolSpecification?): Response<AiMessage> =
-        throw NotImplementedError()
+/** Echoes the last user message back, so tests need no network. */
+class EchoModel : ChatModel {
+    override fun doChat(chatRequest: ChatRequest): ChatResponse {
+        val lastUser =
+            chatRequest
+                .messages()
+                .filterIsInstance<UserMessage>()
+                .last()
+                .singleText()
+        return ChatResponse.builder().aiMessage(AiMessage.from("Echo: $lastUser")).build()
+    }
 }
 
 class LangChain4jExtensionsTest {
     @Test
-    fun `generateNode updates state properly with LLM response`() =
+    fun `chatNode updates state with the model reply`() =
         runTest {
-            val model = DummyModel()
-
-            val workflow =
+            val app =
                 StateGraph<BotState> {
                     node(
                         "llm",
-                        generateNode(
-                            model = model,
-                            promptBuilder = { it.input },
-                            stateUpdater = { state, response -> state.copy(output = response) },
+                        chatNode(
+                            model = EchoModel(),
+                            prompt = { it.input },
+                            update = { state, reply -> state.copy(output = reply) },
                         ),
                     )
-
                     edge(START, "llm")
                     edge("llm", END)
-                }
+                }.compile()
 
-            val app = workflow.compile()
-            val result = app.invoke(BotState(input = "Hello!"))
+            assertEquals("Echo: Hello!", app.invoke(BotState(input = "Hello!")).output)
+        }
 
-            assertEquals("Echo: Hello!", result.output)
+    @Test
+    fun `chatMessagesNode sends the conversation and appends the AI message`() =
+        runTest {
+            val app =
+                StateGraph<BotState> {
+                    node(
+                        "llm",
+                        chatMessagesNode(
+                            model = EchoModel(),
+                            messages = { it.history },
+                            update = { state, response -> state.copy(history = state.history + response.aiMessage()) },
+                        ),
+                    )
+                    edge(START, "llm")
+                    edge("llm", END)
+                }.compile()
+
+            val initial = BotState(history = listOf(SystemMessage.from("Be terse."), UserMessage.from("ping")))
+            val result = app.invoke(initial)
+
+            assertEquals(3, result.history.size)
+            assertEquals("Echo: ping", (result.history.last() as AiMessage).text())
         }
 }

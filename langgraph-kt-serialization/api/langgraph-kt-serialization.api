@@ -1,0 +1,7 @@
+public final class org/langgraphkt/serialization/KotlinxStateSerializer : org/langgraphkt/StateSerializer {
+	public fun <init> (Lkotlinx/serialization/KSerializer;Lkotlinx/serialization/json/Json;)V
+	public synthetic fun <init> (Lkotlinx/serialization/KSerializer;Lkotlinx/serialization/json/Json;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun deserialize (Ljava/lang/String;)Ljava/lang/Object;
+	public fun serialize (Ljava/lang/Object;)Ljava/lang/String;
+}
+

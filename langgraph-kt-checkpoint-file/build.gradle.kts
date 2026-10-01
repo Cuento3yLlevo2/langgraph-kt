@@ -1,15 +1,19 @@
 plugins {
     id("langgraph.kmp-library")
     id("langgraph.publishing")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            api(libs.kotlinx.coroutines.core)
+            api(project(":langgraph-kt-core"))
+            api(libs.kotlinx.io.core)
+            implementation(libs.kotlinx.serialization.json)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
+            implementation(project(":langgraph-kt-serialization"))
             implementation(libs.kotlinx.coroutines.test)
         }
     }
