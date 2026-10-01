@@ -1,0 +1,47 @@
+name: Bug report
+description: Something does not work as documented
+labels: [bug]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead. Include the exception and stack trace if there is one.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: The smallest graph definition and call that shows the problem.
+      render: kotlin
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: langgraph-kt version
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      multiple: true
+      options:
+        - JVM
+        - Android
+        - iOS
+        - macOS
+        - Linux
+        - Windows
+        - JS
+        - Wasm
+    validations:
+      required: true
+  - type: input
+    id: kotlin
+    attributes:
+      label: Kotlin version
+      placeholder: 2.4.20
