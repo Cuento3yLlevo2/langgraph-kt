@@ -71,7 +71,7 @@ public class CompiledGraph<State> internal constructor(
             validateInterrupts(config)
             // Drop the previous run now, so that a failure before the first save cannot be resumed into it.
             config.checkpointer?.delete(config.threadId)
-            run(config, RunStart(input, resolveNextNodes(listOf(START), input), step = 0, resumed = false))
+            run(config, RunStart(input, resolveNextNodes(listOf(START), input), step = 0, skipInterruptBefore = false))
         }
 
     /** Like [resume], but returns a cold [Flow] of [GraphEvent]s. See [stream]. */
@@ -87,31 +87,32 @@ public class CompiledGraph<State> internal constructor(
                     "Checkpoint of thread '${config.threadId}' refers to node '$it', which is not in this graph.",
                 )
             }
-            run(config, RunStart(update(checkpoint.state), checkpoint.nextNodes, checkpoint.step, resumed = true))
+            // Only a run that paused before its next nodes continues past that pause. After any other
+            // checkpoint (an interruptAfter pause, or a crash between steps) the pause is still due.
+            run(config, RunStart(update(checkpoint.state), checkpoint.nextNodes, checkpoint.step, checkpoint.interruptedBefore))
         }
 
     private class RunStart<State>(
         val state: State,
         val activeNodes: List<String>,
         val step: Int,
-        val resumed: Boolean,
+        val skipInterruptBefore: Boolean,
     )
 
     private suspend fun FlowCollector<GraphEvent<State>>.run(config: GraphConfig<State>, start: RunStart<State>) {
         var state = start.state
         var activeNodes = start.activeNodes
         var step = start.step
-        // Resuming continues past the boundary the run paused at, so that boundary must not pause again.
-        var skipInterruptBefore = start.resumed
+        var skipInterruptBefore = start.skipInterruptBefore
         var executedSteps = 0
 
-        suspend fun checkpoint(nextNodes: List<String>) {
-            config.checkpointer?.save(config.threadId, Checkpoint(state, nextNodes, step))
+        suspend fun checkpoint(nextNodes: List<String>, interruptedBefore: Boolean = false) {
+            config.checkpointer?.save(config.threadId, Checkpoint(state, nextNodes, step, interruptedBefore))
         }
 
         while (activeNodes.isNotEmpty()) {
             if (!skipInterruptBefore && activeNodes.any { it in config.interruptBefore }) {
-                checkpoint(activeNodes)
+                checkpoint(activeNodes, interruptedBefore = true)
                 emit(GraphEvent.Interrupted(state, activeNodes))
                 return
             }

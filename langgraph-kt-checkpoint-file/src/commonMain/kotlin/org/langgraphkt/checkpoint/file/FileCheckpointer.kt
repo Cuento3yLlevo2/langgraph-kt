@@ -24,6 +24,7 @@ internal data class SerializedCheckpoint(
     val state: String,
     val nextNodes: List<String>,
     val step: Int = 0,
+    val interruptedBefore: Boolean = false,
 ) {
     companion object {
         const val FORMAT_VERSION = 1
@@ -58,7 +59,12 @@ public class FileCheckpointer<State>(
 
     override suspend fun save(threadId: String, checkpoint: Checkpoint<State>) {
         val envelope =
-            SerializedCheckpoint(state = serializer.serialize(checkpoint.state), nextNodes = checkpoint.nextNodes, step = checkpoint.step)
+            SerializedCheckpoint(
+                state = serializer.serialize(checkpoint.state),
+                nextNodes = checkpoint.nextNodes,
+                step = checkpoint.step,
+                interruptedBefore = checkpoint.interruptedBefore,
+            )
         val json = format.encodeToString(envelope)
         val target = fileFor(threadId)
         val temporary = Path(directory, "${target.name}.tmp")
@@ -93,7 +99,7 @@ public class FileCheckpointer<State>(
             } catch (e: SerializationException) {
                 throw CheckpointCorruptedException(threadId, "the stored state does not match the state type", e)
             }
-        return Checkpoint(state, envelope.nextNodes, envelope.step)
+        return Checkpoint(state, envelope.nextNodes, envelope.step, envelope.interruptedBefore)
     }
 
     override suspend fun delete(threadId: String) {

@@ -28,7 +28,7 @@ class InterruptTest {
             val paused = app.invoke(TestState(0), config)
 
             assertEquals(GraphResult.Interrupted(TestState(1), listOf("b")), paused)
-            assertEquals(Checkpoint(TestState(1), listOf("b"), step = 1), checkpointer.load("t"))
+            assertEquals(Checkpoint(TestState(1), listOf("b"), step = 1, interruptedBefore = true), checkpointer.load("t"))
 
             val finished = app.resume(config)
 
@@ -71,6 +71,30 @@ class InterruptTest {
 
             assertEquals(GraphResult.Interrupted(TestState(1), listOf("b")), app.invoke(TestState(0), config))
             assertEquals(GraphResult.Interrupted(TestState(11), listOf("c")), app.resume(config))
+            assertEquals(GraphResult.Completed(TestState(111)), app.resume(config))
+        }
+
+    @Test
+    fun `interruptBefore still pauses after an interruptAfter pause`() =
+        runTest {
+            val config =
+                GraphConfig(checkpointer = MemoryCheckpointer<TestState>(), interruptAfter = setOf("a"), interruptBefore = setOf("b"))
+
+            assertEquals(GraphResult.Interrupted(TestState(1), listOf("b")), app.invoke(TestState(0), config))
+            // The first pause came from interruptAfter, so the pause before "b" is still due.
+            assertEquals(GraphResult.Interrupted(TestState(1), listOf("b")), app.resume(config))
+            assertEquals(GraphResult.Completed(TestState(111)), app.resume(config))
+        }
+
+    @Test
+    fun `resume after a crash between steps still pauses before the next node`() =
+        runTest {
+            val checkpointer = MemoryCheckpointer<TestState>()
+            val config = GraphConfig(checkpointer = checkpointer, interruptBefore = setOf("b"))
+            // The checkpoint saved after step "a"; the process died before the run could pause before "b".
+            checkpointer.save("default", Checkpoint(TestState(1), listOf("b"), step = 1))
+
+            assertEquals(GraphResult.Interrupted(TestState(1), listOf("b")), app.resume(config))
             assertEquals(GraphResult.Completed(TestState(111)), app.resume(config))
         }
 

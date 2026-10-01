@@ -9,11 +9,16 @@ import kotlinx.coroutines.sync.withLock
  * @property state the graph state after the last executed step.
  * @property nextNodes the nodes that run when the thread is resumed. Empty when the run completed.
  * @property step the number of steps the thread has executed so far.
+ * @property interruptedBefore `true` when the run paused before [nextNodes] because of
+ * [GraphConfig.interruptBefore]. [CompiledGraph.resume] then runs those nodes without pausing before
+ * them again. A checkpoint saved for any other reason is `false`, so resuming it still pauses before
+ * a node listed in [GraphConfig.interruptBefore].
  */
 public data class Checkpoint<State>(
     val state: State,
     val nextNodes: List<String>,
     val step: Int = 0,
+    val interruptedBefore: Boolean = false,
 ) {
     /** `true` when the run reached [END] and there is nothing left to resume. */
     public val isComplete: Boolean get() = nextNodes.isEmpty()
