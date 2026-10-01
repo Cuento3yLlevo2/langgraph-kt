@@ -186,6 +186,11 @@ Everything the library throws extends `LangGraphException`:
 | `CheckpointNotFoundException`, `GraphAlreadyCompletedException` | `resume` had nothing to continue. |
 | `CheckpointCorruptedException` | A stored checkpoint could not be read. |
 
+## API reference
+
+The generated API documentation is published at <https://cuento3yllevo2.github.io/langgraph-kt/>.
+To build it locally, run `./gradlew dokkaGenerate` and open `build/dokka/html/index.html`.
+
 ## Samples
 
 Runnable examples live in [`samples/`](samples/src/main/kotlin/org/langgraphkt/samples):

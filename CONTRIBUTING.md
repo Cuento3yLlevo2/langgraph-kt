@@ -110,6 +110,18 @@ for understanding and testing what you submit. Agent-specific instructions live 
 
 ## Releasing (maintainers)
 
+One-time setup:
+
+- Register and verify the `io.github.cuento3yllevo2` namespace at <https://central.sonatype.com>.
+- Create a GPG key and publish its public part to a key server.
+- Add the repository secrets `MAVEN_CENTRAL_USERNAME`, `MAVEN_CENTRAL_PASSWORD` (a Central Portal
+  user token), `SIGNING_IN_MEMORY_KEY` (the ASCII-armored private key) and
+  `SIGNING_IN_MEMORY_KEY_PASSWORD`.
+- In the repository settings, set Pages to deploy from GitHub Actions and enable private
+  vulnerability reporting and Discussions.
+
+For each release:
+
 1. Move the "Unreleased" entries in `CHANGELOG.md` under the new version and date.
 2. Set `VERSION_NAME` in `gradle.properties` to the release version and merge to `main`.
 3. Tag the commit `vX.Y.Z` and push the tag. The release workflow publishes to Maven Central and
