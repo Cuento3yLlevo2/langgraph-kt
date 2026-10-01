@@ -5,7 +5,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
 import kotlinx.io.files.Path
+import org.langgraphkt.GraphConfig
 import org.langgraphkt.GraphResult
+import org.langgraphkt.MemoryCheckpointer
 import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -36,6 +38,47 @@ class SamplesTest {
             // New graph and checkpointer instances, as after a process restart.
             val finished = refundGraph().resume(refundConfig(directory, "order-1001")) { it.copy(approved = true) }
             assertEquals("Refund issued", finished.state.log.last())
+        }
+
+    @Test
+    fun `announcement is redrafted until the reviewer approves`() =
+        runTest {
+            val graph = announcementGraph()
+            val config = GraphConfig(checkpointer = MemoryCheckpointer<AnnouncementState>(), interruptBefore = setOf(REVIEW))
+
+            val first = graph.invoke(AnnouncementState(topic = "the 1.0 release"), config)
+            assertEquals("Announcing the 1.0 release", first.state.draft)
+
+            val second = graph.resume(config) { it.copy(approved = false, feedback = "mention Wasm") }
+            assertIs<GraphResult.Interrupted<AnnouncementState>>(second)
+            assertEquals("Announcing the 1.0 release (mention Wasm)", second.state.draft)
+            assertEquals(second, graph.lastResult(config))
+
+            val finished = graph.resume(config) { it.copy(approved = true) }
+            assertIs<GraphResult.Completed<AnnouncementState>>(finished)
+            assertTrue(finished.state.published)
+            assertEquals(2, finished.state.revisions)
+        }
+
+    @Test
+    fun `support agent continues a conversation from the last result`() =
+        runTest {
+            val agent = supportAgent(CannedModel())
+            val config = GraphConfig(threadId = "customer-7", checkpointer = MemoryCheckpointer<ChatState>())
+
+            for (question in listOf("The app is frozen", "I want a refund")) {
+                val history =
+                    agent
+                        .lastResult(config)
+                        ?.state
+                        ?.messages
+                        .orEmpty()
+                agent.invoke(ChatState(history + UserMessage.from(question)), config)
+            }
+
+            val state = agent.lastResult(config)?.state
+            assertEquals(4, state?.messages?.size)
+            assertEquals(true, state?.needsEscalation)
         }
 
     @OptIn(ExperimentalCoroutinesApi::class)

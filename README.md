@@ -157,6 +157,65 @@ class LocalStorageCheckpointer<State>(private val codec: CheckpointCodec<State>)
 val checkpointer = LocalStorageCheckpointer(CheckpointCodec<RefundState>())
 ```
 
+#### Approve or send back
+
+To let the reviewer ask for changes, pause before a node that does nothing and route on the decision
+after it. `resume` writes the decision into the state, and the conditional edge reads it:
+
+```kotlin
+val graph = StateGraph<AnnouncementState> {
+    val draft = node("draft") { it.copy(draft = write(it.topic, it.feedback), feedback = "") }
+    val review = node("review") { it }
+    val publish = node("publish") { it.copy(published = true) }
+
+    START then draft then review
+    conditionalEdge(review, targets = setOf(publish.name, draft.name)) { state ->
+        if (state.approved) publish.name else draft.name
+    }
+    publish then END
+}.compile()
+
+val config = GraphConfig(checkpointer = checkpointer, interruptBefore = setOf("review"))
+
+var result = graph.invoke(AnnouncementState(topic = "the 1.0 release"), config)
+while (result is GraphResult.Interrupted) {
+    val feedback = askReviewer(result.state.draft)   // empty when approved
+    result = graph.resume(config) { it.copy(approved = feedback.isEmpty(), feedback = feedback) }
+}
+```
+
+The run pauses before `review` every time a new draft is ready, so the loop ends only when the
+reviewer approves.
+
+#### Where a thread stands
+
+`lastResult` reads the thread's checkpoint without running anything. It returns the same
+`GraphResult` that `invoke` or `resume` returned, or `null` if the thread has never run, so a screen
+can be restored after a restart with the code that already handles a result:
+
+```kotlin
+when (val result = graph.lastResult(config)) {
+    is GraphResult.Interrupted -> showApprovalDialog(result.state)
+    is GraphResult.Completed -> showResult(result.state)
+    null -> showEmptyForm()
+}
+```
+
+A run that stopped because a node failed is reported as `Interrupted` as well: its last finished
+step is saved, and `resume` retries from there.
+
+#### Continuing a conversation
+
+`invoke` starts a new run, so a chat passes the conversation so far as its input. `lastResult` gives
+the state the previous turn ended with:
+
+```kotlin
+suspend fun send(question: String): ChatState {
+    val history = agent.lastResult(config)?.state?.messages.orEmpty()
+    return agent.invoke(ChatState(history + UserMessage.from(question)), config).state
+}
+```
+
 ### Parallel branches
 
 Several edges from one node run their targets in parallel. Each branch returns its own copy of the
@@ -234,6 +293,7 @@ Runnable examples live in [`samples/`](samples/src/main/kotlin/org/langgraphkt/s
 ```bash
 ./gradlew :samples:runQuickStart
 ./gradlew :samples:runHumanInTheLoop
+./gradlew :samples:runReviewLoop
 ./gradlew :samples:runParallelResearch
 ./gradlew :samples:runChatAgent
 ```

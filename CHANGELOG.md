@@ -14,6 +14,7 @@ First public release. Everything below is new compared with the unpublished beta
 - Kotlin Multiplatform support: JVM/Android, iOS, macOS, Linux, Windows, JS and Wasm.
 - `GraphResult` (`Completed` / `Interrupted`) as the return type of `invoke` and `resume`.
 - `CompiledGraph.resume()` and `streamResume()` to continue a paused run, optionally editing the state.
+- `CompiledGraph.lastResult()` to read where a thread stopped without running it.
 - `GraphEvent` stream (`NodeStarted`, `NodeCompleted`, `StepCompleted`, `Interrupted`, `Completed`)
   and `Flow<GraphEvent>.states()`.
 - `CompiledGraph.topology` (`GraphTopology`, `GraphEdge`) to inspect or draw a compiled graph.
