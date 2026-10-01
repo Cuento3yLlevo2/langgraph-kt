@@ -35,6 +35,7 @@ public abstract interface class org/langgraphkt/Checkpointer {
 }
 
 public final class org/langgraphkt/CompiledGraph {
+	public final fun getTopology ()Lorg/langgraphkt/GraphTopology;
 	public final fun invoke (Ljava/lang/Object;Lorg/langgraphkt/GraphConfig;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun invoke$default (Lorg/langgraphkt/CompiledGraph;Ljava/lang/Object;Lorg/langgraphkt/GraphConfig;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun resume (Lorg/langgraphkt/GraphConfig;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -79,6 +80,22 @@ public final class org/langgraphkt/GraphConfig {
 }
 
 public final class org/langgraphkt/GraphConfig$Companion {
+}
+
+public final class org/langgraphkt/GraphEdge {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Z)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Z)Lorg/langgraphkt/GraphEdge;
+	public static synthetic fun copy$default (Lorg/langgraphkt/GraphEdge;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Lorg/langgraphkt/GraphEdge;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFrom ()Ljava/lang/String;
+	public final fun getTo ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isConditional ()Z
+	public fun toString ()Ljava/lang/String;
 }
 
 public abstract interface class org/langgraphkt/GraphEvent {
@@ -183,6 +200,22 @@ public final class org/langgraphkt/GraphResult$Interrupted : org/langgraphkt/Gra
 	public final fun getNextNodes ()Ljava/util/List;
 	public fun getState ()Ljava/lang/Object;
 	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/langgraphkt/GraphTopology {
+	public fun <init> (Ljava/util/List;Ljava/util/List;Ljava/util/Set;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Ljava/util/Set;
+	public final fun copy (Ljava/util/List;Ljava/util/List;Ljava/util/Set;)Lorg/langgraphkt/GraphTopology;
+	public static synthetic fun copy$default (Lorg/langgraphkt/GraphTopology;Ljava/util/List;Ljava/util/List;Ljava/util/Set;ILjava/lang/Object;)Lorg/langgraphkt/GraphTopology;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDynamicRoutes ()Ljava/util/Set;
+	public final fun getEdges ()Ljava/util/List;
+	public final fun getNodes ()Ljava/util/List;
+	public fun hashCode ()I
+	public final fun successors (Ljava/lang/String;)Ljava/util/List;
 	public fun toString ()Ljava/lang/String;
 }
 

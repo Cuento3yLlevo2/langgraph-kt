@@ -35,6 +35,28 @@ public class CompiledGraph<State> internal constructor(
     internal val conditionalEdges: Map<String, ConditionalEdge<State>>,
     internal val reducer: Reducer<State>? = null,
 ) {
+    /** The nodes and edges of this graph, for drawing or inspecting it. */
+    public val topology: GraphTopology =
+        GraphTopology(
+            nodes = nodes.keys.toList(),
+            edges =
+                (listOf(START) + nodes.keys).flatMap { source ->
+                    val conditional = conditionalEdges[source]
+                    val targets = edges[source].orEmpty()
+                    when {
+                        conditional != null -> conditional.targets.orEmpty().map { GraphEdge(source, it, isConditional = true) }
+                        targets.isNotEmpty() -> targets.map { GraphEdge(source, it) }
+                        // A node without an outgoing edge ends its branch.
+                        else -> listOf(GraphEdge(source, END))
+                    }
+                },
+            dynamicRoutes =
+                conditionalEdges.values
+                    .filter { it.targets == null }
+                    .map { it.from }
+                    .toSet(),
+        )
+
     /**
      * Runs the graph from [START] with [input] until it completes or reaches an interrupt.
      *
