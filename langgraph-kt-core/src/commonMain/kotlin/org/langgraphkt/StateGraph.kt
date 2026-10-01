@@ -18,6 +18,18 @@ package org.langgraphkt
  *
  * Execution starts at [START] and ends when every active branch reaches [END]. A node with no
  * outgoing edge routes to [END].
+ *
+ * [node] returns a [NodeRef]. Using the references with [then] instead of repeating node names lets
+ * the compiler catch typos:
+ *
+ * ```kotlin
+ * val graph = StateGraph<AgentState> {
+ *     val research = node("research") { ... }
+ *     val write = node("write") { ... }
+ *
+ *     START then research then write then END
+ * }.compile()
+ * ```
  */
 public class StateGraph<State> {
     private val nodes = mutableMapOf<String, Node<State>>()
@@ -25,15 +37,16 @@ public class StateGraph<State> {
     private val conditionalEdges = mutableListOf<ConditionalEdge<State>>()
 
     /**
-     * Adds a node named [name] that runs [action].
+     * Adds a node named [name] that runs [action] and returns a reference to it for use with [then].
      *
      * @throws GraphValidationException if the name is blank, reserved ([START], [END]) or already used.
      */
-    public fun node(name: String, action: NodeAction<State>) {
+    public fun node(name: String, action: NodeAction<State>): NodeRef {
         if (name.isBlank()) throw GraphValidationException("Node name must not be blank.")
         if (name == START || name == END) throw GraphValidationException("'$name' is a reserved node name.")
         if (name in nodes) throw GraphValidationException("Node with name '$name' already exists.")
         nodes[name] = Node(name, action)
+        return NodeRef(name)
     }
 
     /**
@@ -43,6 +56,18 @@ public class StateGraph<State> {
     public fun edge(from: String, to: String) {
         edges.add(Edge(from, to))
     }
+
+    /**
+     * Adds a static edge from this node to [to] and returns [to], so edges can be chained:
+     * `START then research then write then END`.
+     */
+    public infix fun NodeRef.then(to: NodeRef): NodeRef = to.also { edge(name, it.name) }
+
+    /** Adds a static edge from this node to the node named [to], usually [END]. */
+    public infix fun NodeRef.then(to: String): String = to.also { edge(name, it) }
+
+    /** Adds a static edge from the node named by this string, usually [START], to [to]. */
+    public infix fun String.then(to: NodeRef): NodeRef = to.also { edge(this, it.name) }
 
     /**
      * Adds a conditional edge: after [from] finishes, [condition] picks the next node from the state.
@@ -55,6 +80,11 @@ public class StateGraph<State> {
      */
     public fun conditionalEdge(from: String, targets: Set<String>? = null, condition: EdgeCondition<State>) {
         conditionalEdges.add(ConditionalEdge(from, targets, condition))
+    }
+
+    /** Adds a conditional edge from the node referenced by [from]. See the overload taking a node name. */
+    public fun conditionalEdge(from: NodeRef, targets: Set<String>? = null, condition: EdgeCondition<State>) {
+        conditionalEdge(from.name, targets, condition)
     }
 
     /**

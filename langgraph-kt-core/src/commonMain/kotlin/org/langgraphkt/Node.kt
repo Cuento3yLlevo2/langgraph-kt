@@ -9,6 +9,17 @@ package org.langgraphkt
  */
 public typealias NodeAction<State> = suspend (State) -> State
 
+/**
+ * A reference to a node added with [StateGraph.node]. Use it with [StateGraph.then] to connect
+ * nodes without repeating their names, and read [name] where a node name is needed (for example as
+ * the return value of a conditional edge or in [GraphConfig.interruptBefore]).
+ */
+public class NodeRef internal constructor(
+    public val name: String,
+) {
+    override fun toString(): String = name
+}
+
 internal data class Node<State>(
     val name: String,
     val action: NodeAction<State>,
