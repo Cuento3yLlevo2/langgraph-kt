@@ -96,6 +96,28 @@ class InterruptTest {
         }
 
     @Test
+    fun `a new run that fails in its first step cannot be resumed into the previous run`() =
+        runTest {
+            val failing =
+                StateGraph<TestState> {
+                    node("a") { if (it.count >= 1000) error("rejected") else it.copy(count = it.count + 1) }
+                    node("b") { it.copy(count = it.count + 10) }
+
+                    edge(START, "a")
+                    edge("a", "b")
+                    edge("b", END)
+                }.compile()
+            val checkpointer = MemoryCheckpointer<TestState>()
+            val config = GraphConfig(checkpointer = checkpointer, interruptBefore = setOf("b"))
+            failing.invoke(TestState(0), config)
+
+            assertFailsWith<NodeExecutionException> { failing.invoke(TestState(1000), config) }
+
+            assertNull(checkpointer.load("default"))
+            assertFailsWith<CheckpointNotFoundException> { failing.resume(config) }
+        }
+
+    @Test
     fun `a completed thread can be invoked again`() =
         runTest {
             val config = GraphConfig(checkpointer = MemoryCheckpointer<TestState>())

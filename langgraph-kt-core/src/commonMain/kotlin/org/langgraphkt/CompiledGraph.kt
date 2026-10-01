@@ -38,7 +38,7 @@ public class CompiledGraph<State> internal constructor(
      * Runs the graph from [START] with [input] until it completes or reaches an interrupt.
      *
      * A call always starts a new run: if [config] has a checkpointer, any earlier checkpoint of the
-     * thread is replaced. Use [resume] to continue a paused run.
+     * thread is deleted before the run starts. Use [resume] to continue a paused run.
      *
      * @throws GraphValidationException if [config] names interrupt nodes that are not in the graph.
      * @throws MaxIterationsExceededException if the run needs more than [GraphConfig.maxIterations] steps.
@@ -69,6 +69,8 @@ public class CompiledGraph<State> internal constructor(
     public fun stream(input: State, config: GraphConfig<State> = GraphConfig()): Flow<GraphEvent<State>> =
         flow {
             validateInterrupts(config)
+            // Drop the previous run now, so that a failure before the first save cannot be resumed into it.
+            config.checkpointer?.delete(config.threadId)
             run(config, RunStart(input, resolveNextNodes(listOf(START), input), step = 0, resumed = false))
         }
 
