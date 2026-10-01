@@ -31,6 +31,8 @@ fun articleGraph() =
 suspend fun main() {
     articleGraph().stream(ArticleState(topic = "Kotlin")).collect { event ->
         when (event) {
+            is GraphEvent.NodeStarted -> println("  ${event.node} started")
+            is GraphEvent.NodeCompleted -> println("  ${event.node} finished")
             is GraphEvent.StepCompleted -> println("step ${event.step} ${event.nodes}: ${event.state.draft.ifEmpty { "(no draft yet)" }}")
             is GraphEvent.Completed -> println("done after ${event.state.revisions} revisions")
             is GraphEvent.Interrupted -> println("paused before ${event.nextNodes}")

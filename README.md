@@ -93,11 +93,14 @@ suspend fun main() {
 
 ### Streaming
 
-`stream()` emits an event after every step and ends with `Completed` or `Interrupted`:
+`stream()` emits an event when a node starts, when it finishes and after every step, and ends with
+`Completed` or `Interrupted`:
 
 ```kotlin
 graph.stream(ArticleState(topic = "Kotlin")).collect { event ->
     when (event) {
+        is GraphEvent.NodeStarted -> println("${event.node} started")
+        is GraphEvent.NodeCompleted -> println("${event.node} finished")
         is GraphEvent.StepCompleted -> println("step ${event.step} ran ${event.nodes}")
         is GraphEvent.Completed -> println("done: ${event.state.draft}")
         is GraphEvent.Interrupted -> println("paused before ${event.nextNodes}")
@@ -105,7 +108,9 @@ graph.stream(ArticleState(topic = "Kotlin")).collect { event ->
 }
 ```
 
-For a UI that only renders the latest state, use `graph.stream(input).states()`, which is a `Flow<State>`.
+The node events let a UI show what is running, including which parallel branches are still
+working. For a UI that only renders the latest state, use `graph.stream(input).states()`, which is a
+`Flow<State>`.
 
 ### Human-in-the-loop
 
