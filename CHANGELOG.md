@@ -14,7 +14,9 @@ First public release. Everything below is new compared with the unpublished beta
 - Kotlin Multiplatform support: JVM/Android, iOS, macOS, Linux, Windows, JS and Wasm.
 - `GraphResult` (`Completed` / `Interrupted`) as the return type of `invoke` and `resume`.
 - `CompiledGraph.resume()` and `streamResume()` to continue a paused run, optionally editing the state.
-- `GraphEvent` stream (`StepCompleted`, `Interrupted`, `Completed`) and `Flow<GraphEvent>.states()`.
+- `GraphEvent` stream (`NodeStarted`, `NodeCompleted`, `StepCompleted`, `Interrupted`, `Completed`)
+  and `Flow<GraphEvent>.states()`.
+- `CompiledGraph.topology` (`GraphTopology`, `GraphEdge`) to inspect or draw a compiled graph.
 - Graph validation in `compile()`: unknown, unreachable and duplicate nodes or edges, conflicting
   edge kinds, and fan-out without a reducer.
 - `conditionalEdge(from, targets)` with declared targets, checked at compile time and at run time.
@@ -23,7 +25,8 @@ First public release. Everything below is new compared with the unpublished beta
   `InvalidRouteException`, `MaxIterationsExceededException`, `CheckpointNotFoundException`,
   `GraphAlreadyCompletedException`, `CheckpointCorruptedException`.
 - `Checkpointer.delete()`, and a checkpoint after every step with a step counter.
-- `langgraph-kt-serialization` module with `KotlinxStateSerializer`.
+- `langgraph-kt-serialization` module with `KotlinxStateSerializer`, and `CheckpointCodec` to build
+  a checkpointer for any storage.
 - `langgraph-kt-checkpoint-file` module: `FileCheckpointer` with atomic writes and a versioned format.
 - `chatNode` and `chatMessagesNode` for LangChain4j 1.x `ChatModel`.
 - Runnable samples in `samples/`.
@@ -54,5 +57,6 @@ First public release. Everything below is new compared with the unpublished beta
   `interruptAfter` or was resumed after a crash. `Checkpoint.interruptedBefore` records the pause.
 - Different thread ids could map to the same checkpoint file.
 - `START` counted toward `maxIterations`.
+- `FileCheckpointer` did not write the format version into its files.
 
 [Unreleased]: https://github.com/Cuento3yLlevo2/langgraph-kt/commits/develop

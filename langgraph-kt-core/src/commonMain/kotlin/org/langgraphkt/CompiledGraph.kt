@@ -3,6 +3,7 @@ package org.langgraphkt
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -34,6 +35,28 @@ public class CompiledGraph<State> internal constructor(
     internal val conditionalEdges: Map<String, ConditionalEdge<State>>,
     internal val reducer: Reducer<State>? = null,
 ) {
+    /** The nodes and edges of this graph, for drawing or inspecting it. */
+    public val topology: GraphTopology =
+        GraphTopology(
+            nodes = nodes.keys.toList(),
+            edges =
+                (listOf(START) + nodes.keys).flatMap { source ->
+                    val conditional = conditionalEdges[source]
+                    val targets = edges[source].orEmpty()
+                    when {
+                        conditional != null -> conditional.targets.orEmpty().map { GraphEdge(source, it, isConditional = true) }
+                        targets.isNotEmpty() -> targets.map { GraphEdge(source, it) }
+                        // A node without an outgoing edge ends its branch.
+                        else -> listOf(GraphEdge(source, END))
+                    }
+                },
+            dynamicRoutes =
+                conditionalEdges.values
+                    .filter { it.targets == null }
+                    .map { it.from }
+                    .toSet(),
+        )
+
     /**
      * Runs the graph from [START] with [input] until it completes or reaches an interrupt.
      *
@@ -62,9 +85,10 @@ public class CompiledGraph<State> internal constructor(
         streamResume(config, update).last().toResult()
 
     /**
-     * Like [invoke], but returns a cold [Flow] that emits a [GraphEvent] after every step and ends
-     * with [GraphEvent.Completed] or [GraphEvent.Interrupted]. Nothing runs until the flow is
-     * collected, and each collection is a new run.
+     * Like [invoke], but returns a cold [Flow] that emits a [GraphEvent] as each node starts and
+     * finishes and after every step, and ends with [GraphEvent.Completed] or
+     * [GraphEvent.Interrupted]. Nothing runs until the flow is collected, and each collection is a
+     * new run.
      */
     public fun stream(input: State, config: GraphConfig<State> = GraphConfig()): Flow<GraphEvent<State>> =
         flow {
@@ -122,7 +146,7 @@ public class CompiledGraph<State> internal constructor(
             executedSteps++
             step++
 
-            state = runStep(activeNodes, state)
+            state = runStep(step, activeNodes, state)
             val nextNodes = resolveNextNodes(activeNodes, state)
             checkpoint(nextNodes)
             emit(GraphEvent.StepCompleted(step, activeNodes, state))
@@ -138,12 +162,27 @@ public class CompiledGraph<State> internal constructor(
         emit(GraphEvent.Completed(state))
     }
 
-    private suspend fun runStep(activeNodes: List<String>, state: State): State {
-        if (activeNodes.size == 1) return runNode(nodes.getValue(activeNodes.single()), state)
+    private suspend fun FlowCollector<GraphEvent<State>>.runStep(step: Int, activeNodes: List<String>, state: State): State {
+        activeNodes.forEach { emit(GraphEvent.NodeStarted(step, it, state)) }
+        if (activeNodes.size == 1) {
+            val name = activeNodes.single()
+            return runNode(nodes.getValue(name), state).also { emit(GraphEvent.NodeCompleted(step, name, it)) }
+        }
 
+        // A flow may only emit from the coroutine that collects it, so the parallel nodes hand their
+        // results over a channel and this coroutine emits them in the order the nodes finish.
         val updates =
             coroutineScope {
-                activeNodes.map { name -> async { runNode(nodes.getValue(name), state) } }.awaitAll()
+                val finished = Channel<Pair<String, State>>(Channel.UNLIMITED)
+                val results =
+                    activeNodes.map { name ->
+                        async { runNode(nodes.getValue(name), state).also { finished.send(name to it) } }
+                    }
+                repeat(activeNodes.size) {
+                    val (name, result) = finished.receive()
+                    emit(GraphEvent.NodeCompleted(step, name, result))
+                }
+                results.awaitAll()
             }
         return checkNotNull(reducer) { "compile() guarantees a reducer for graphs that fan out" }.reduce(state, updates)
     }
@@ -194,6 +233,7 @@ public class CompiledGraph<State> internal constructor(
         when (this) {
             is GraphEvent.Completed -> GraphResult.Completed(state)
             is GraphEvent.Interrupted -> GraphResult.Interrupted(state, nextNodes)
-            is GraphEvent.StepCompleted -> error("A graph stream always ends with Completed or Interrupted")
+            is GraphEvent.NodeStarted, is GraphEvent.NodeCompleted, is GraphEvent.StepCompleted ->
+                error("A graph stream always ends with Completed or Interrupted")
         }
 }

@@ -9,11 +9,10 @@ kotlin {
         commonMain.dependencies {
             api(project(":langgraph-kt-core"))
             api(libs.kotlinx.io.core)
-            implementation(libs.kotlinx.serialization.json)
+            implementation(project(":langgraph-kt-serialization"))
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
-            implementation(project(":langgraph-kt-serialization"))
             implementation(libs.kotlinx.coroutines.test)
         }
     }

@@ -47,8 +47,10 @@ class ReducerTest {
             val events = app.stream(ParallelState()).toList()
 
             assertEquals(listOf("A", "B", "Aggregated"), events.last().state.messages)
-            assertEquals(listOf("branchA", "branchB"), (events[0] as GraphEvent.StepCompleted).nodes)
-            assertEquals(listOf("aggregator"), (events[1] as GraphEvent.StepCompleted).nodes)
+            assertEquals(
+                listOf(listOf("branchA", "branchB"), listOf("aggregator")),
+                events.filterIsInstance<GraphEvent.StepCompleted<ParallelState>>().map { it.nodes },
+            )
             // Both 100 ms branches overlap, so virtual time advances by 100 ms, not 200 ms.
             assertEquals(100, currentTime)
         }

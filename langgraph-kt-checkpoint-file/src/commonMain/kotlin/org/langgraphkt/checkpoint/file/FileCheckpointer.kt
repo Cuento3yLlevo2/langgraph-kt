@@ -9,27 +9,10 @@ import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import kotlinx.io.readString
 import kotlinx.io.writeString
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerializationException
-import kotlinx.serialization.json.Json
 import org.langgraphkt.Checkpoint
-import org.langgraphkt.CheckpointCorruptedException
 import org.langgraphkt.Checkpointer
 import org.langgraphkt.StateSerializer
-
-/** On-disk envelope around the serialized state. [version] allows the format to evolve. */
-@Serializable
-internal data class SerializedCheckpoint(
-    val version: Int = FORMAT_VERSION,
-    val state: String,
-    val nextNodes: List<String>,
-    val step: Int = 0,
-    val interruptedBefore: Boolean = false,
-) {
-    companion object {
-        const val FORMAT_VERSION = 1
-    }
-}
+import org.langgraphkt.serialization.CheckpointCodec
 
 /**
  * A persistent [Checkpointer] that stores the latest checkpoint of each thread as one JSON file
@@ -48,9 +31,10 @@ internal data class SerializedCheckpoint(
  */
 public class FileCheckpointer<State>(
     private val directory: Path,
-    private val serializer: StateSerializer<State>,
+    serializer: StateSerializer<State>,
     private val fileSystem: FileSystem = SystemFileSystem,
 ) : Checkpointer<State> {
+    private val codec = CheckpointCodec(serializer)
     private val writeLock = Mutex()
 
     init {
@@ -58,14 +42,7 @@ public class FileCheckpointer<State>(
     }
 
     override suspend fun save(threadId: String, checkpoint: Checkpoint<State>) {
-        val envelope =
-            SerializedCheckpoint(
-                state = serializer.serialize(checkpoint.state),
-                nextNodes = checkpoint.nextNodes,
-                step = checkpoint.step,
-                interruptedBefore = checkpoint.interruptedBefore,
-            )
-        val json = format.encodeToString(envelope)
+        val json = codec.encode(checkpoint)
         val target = fileFor(threadId)
         val temporary = Path(directory, "${target.name}.tmp")
 
@@ -83,23 +60,7 @@ public class FileCheckpointer<State>(
                 val file = fileFor(threadId)
                 if (fileSystem.exists(file)) fileSystem.source(file).buffered().use { it.readString() } else null
             } ?: return null
-
-        val envelope =
-            try {
-                format.decodeFromString<SerializedCheckpoint>(json)
-            } catch (e: SerializationException) {
-                throw CheckpointCorruptedException(threadId, "the checkpoint file is not valid", e)
-            }
-        if (envelope.version > SerializedCheckpoint.FORMAT_VERSION) {
-            throw CheckpointCorruptedException(threadId, "format version ${envelope.version} is newer than this library supports")
-        }
-        val state =
-            try {
-                serializer.deserialize(envelope.state)
-            } catch (e: SerializationException) {
-                throw CheckpointCorruptedException(threadId, "the stored state does not match the state type", e)
-            }
-        return Checkpoint(state, envelope.nextNodes, envelope.step, envelope.interruptedBefore)
+        return codec.decode(threadId, json)
     }
 
     override suspend fun delete(threadId: String) {
@@ -109,10 +70,6 @@ public class FileCheckpointer<State>(
     }
 
     private fun fileFor(threadId: String): Path = Path(directory, "${encodeFileName(threadId)}.json")
-
-    private companion object {
-        val format = Json { ignoreUnknownKeys = true }
-    }
 }
 
 /**

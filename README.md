@@ -44,7 +44,7 @@ dependencies {
 | Module | Targets | Purpose |
 |---|---|---|
 | `langgraph-kt-core` | JVM/Android, iOS, macOS, Linux, Windows, JS, Wasm | Graph builder, execution engine, checkpointing interfaces |
-| `langgraph-kt-serialization` | same as core | `KotlinxStateSerializer` for `@Serializable` states |
+| `langgraph-kt-serialization` | same as core | `KotlinxStateSerializer` for `@Serializable` states, `CheckpointCodec` for custom checkpointers |
 | `langgraph-kt-checkpoint-file` | same as core (Node.js only for JS/Wasm) | `FileCheckpointer`, one JSON file per thread |
 | `langgraph-kt-langchain4j` | JVM/Android | `chatNode` / `chatMessagesNode` for LangChain4j 1.x `ChatModel` |
 
@@ -93,11 +93,14 @@ suspend fun main() {
 
 ### Streaming
 
-`stream()` emits an event after every step and ends with `Completed` or `Interrupted`:
+`stream()` emits an event when a node starts, when it finishes and after every step, and ends with
+`Completed` or `Interrupted`:
 
 ```kotlin
 graph.stream(ArticleState(topic = "Kotlin")).collect { event ->
     when (event) {
+        is GraphEvent.NodeStarted -> println("${event.node} started")
+        is GraphEvent.NodeCompleted -> println("${event.node} finished")
         is GraphEvent.StepCompleted -> println("step ${event.step} ran ${event.nodes}")
         is GraphEvent.Completed -> println("done: ${event.state.draft}")
         is GraphEvent.Interrupted -> println("paused before ${event.nextNodes}")
@@ -105,7 +108,9 @@ graph.stream(ArticleState(topic = "Kotlin")).collect { event ->
 }
 ```
 
-For a UI that only renders the latest state, use `graph.stream(input).states()`, which is a `Flow<State>`.
+The node events let a UI show what is running, including which parallel branches are still
+working. For a UI that only renders the latest state, use `graph.stream(input).states()`, which is a
+`Flow<State>`.
 
 ### Human-in-the-loop
 
@@ -133,8 +138,24 @@ val finished = graph.resume(config) { state -> state.copy(approved = true) }
 - A checkpoint is saved after every step, so a run can also be resumed after a crash. Such a
   `resume` still pauses before an `interruptBefore` node; only a run that already paused there
   continues past it.
-- `MemoryCheckpointer` is available for tests. To store checkpoints elsewhere (Room, SQLDelight, a
-  server), implement the three-method `Checkpointer` interface.
+- `MemoryCheckpointer` is available for tests. To store checkpoints elsewhere (Room, SQLDelight,
+  browser `localStorage`, a server), implement the three-method `Checkpointer` interface.
+  `CheckpointCodec` turns a checkpoint into a string and back, so only the storage calls are left
+  to write:
+
+```kotlin
+class LocalStorageCheckpointer<State>(private val codec: CheckpointCodec<State>) : Checkpointer<State> {
+    override suspend fun save(threadId: String, checkpoint: Checkpoint<State>) =
+        localStorage.setItem(threadId, codec.encode(checkpoint))
+
+    override suspend fun load(threadId: String): Checkpoint<State>? =
+        localStorage.getItem(threadId)?.let { codec.decode(threadId, it) }
+
+    override suspend fun delete(threadId: String) = localStorage.removeItem(threadId)
+}
+
+val checkpointer = LocalStorageCheckpointer(CheckpointCodec<RefundState>())
+```
 
 ### Parallel branches
 
@@ -159,6 +180,19 @@ val graph = StateGraph<ResearchState> {
 
 If one branch fails, the others are cancelled and the error is rethrown as `NodeExecutionException`
 with the name of the failing node.
+
+### Inspecting a graph
+
+`CompiledGraph.topology` describes the compiled graph, which is enough to draw it or to assert its
+shape in a test:
+
+```kotlin
+val topology = graph.topology
+topology.nodes                 // [web, docs, summarize]
+topology.successors(START)     // [web, docs]
+topology.edges                 // GraphEdge(from, to, isConditional) for every known transition
+topology.dynamicRoutes         // nodes whose conditional edge declares no targets
+```
 
 ### LangChain4j
 

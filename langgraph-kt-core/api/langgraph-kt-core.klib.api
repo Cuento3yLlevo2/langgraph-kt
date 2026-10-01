@@ -54,6 +54,44 @@ sealed interface <#A: out kotlin/Any?> org.langgraphkt/GraphEvent { // org.langg
         final fun toString(): kotlin/String // org.langgraphkt/GraphEvent.Interrupted.toString|toString(){}[0]
     }
 
+    final class <#A1: out kotlin/Any?> NodeCompleted : org.langgraphkt/GraphEvent<#A1> { // org.langgraphkt/GraphEvent.NodeCompleted|null[0]
+        constructor <init>(kotlin/Int, kotlin/String, #A1) // org.langgraphkt/GraphEvent.NodeCompleted.<init>|<init>(kotlin.Int;kotlin.String;1:0){}[0]
+
+        final val node // org.langgraphkt/GraphEvent.NodeCompleted.node|{}node[0]
+            final fun <get-node>(): kotlin/String // org.langgraphkt/GraphEvent.NodeCompleted.node.<get-node>|<get-node>(){}[0]
+        final val state // org.langgraphkt/GraphEvent.NodeCompleted.state|{}state[0]
+            final fun <get-state>(): #A1 // org.langgraphkt/GraphEvent.NodeCompleted.state.<get-state>|<get-state>(){}[0]
+        final val step // org.langgraphkt/GraphEvent.NodeCompleted.step|{}step[0]
+            final fun <get-step>(): kotlin/Int // org.langgraphkt/GraphEvent.NodeCompleted.step.<get-step>|<get-step>(){}[0]
+
+        final fun component1(): kotlin/Int // org.langgraphkt/GraphEvent.NodeCompleted.component1|component1(){}[0]
+        final fun component2(): kotlin/String // org.langgraphkt/GraphEvent.NodeCompleted.component2|component2(){}[0]
+        final fun component3(): #A1 // org.langgraphkt/GraphEvent.NodeCompleted.component3|component3(){}[0]
+        final fun copy(kotlin/Int = ..., kotlin/String = ..., #A1 = ...): org.langgraphkt/GraphEvent.NodeCompleted<#A1> // org.langgraphkt/GraphEvent.NodeCompleted.copy|copy(kotlin.Int;kotlin.String;1:0){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // org.langgraphkt/GraphEvent.NodeCompleted.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // org.langgraphkt/GraphEvent.NodeCompleted.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // org.langgraphkt/GraphEvent.NodeCompleted.toString|toString(){}[0]
+    }
+
+    final class <#A1: out kotlin/Any?> NodeStarted : org.langgraphkt/GraphEvent<#A1> { // org.langgraphkt/GraphEvent.NodeStarted|null[0]
+        constructor <init>(kotlin/Int, kotlin/String, #A1) // org.langgraphkt/GraphEvent.NodeStarted.<init>|<init>(kotlin.Int;kotlin.String;1:0){}[0]
+
+        final val node // org.langgraphkt/GraphEvent.NodeStarted.node|{}node[0]
+            final fun <get-node>(): kotlin/String // org.langgraphkt/GraphEvent.NodeStarted.node.<get-node>|<get-node>(){}[0]
+        final val state // org.langgraphkt/GraphEvent.NodeStarted.state|{}state[0]
+            final fun <get-state>(): #A1 // org.langgraphkt/GraphEvent.NodeStarted.state.<get-state>|<get-state>(){}[0]
+        final val step // org.langgraphkt/GraphEvent.NodeStarted.step|{}step[0]
+            final fun <get-step>(): kotlin/Int // org.langgraphkt/GraphEvent.NodeStarted.step.<get-step>|<get-step>(){}[0]
+
+        final fun component1(): kotlin/Int // org.langgraphkt/GraphEvent.NodeStarted.component1|component1(){}[0]
+        final fun component2(): kotlin/String // org.langgraphkt/GraphEvent.NodeStarted.component2|component2(){}[0]
+        final fun component3(): #A1 // org.langgraphkt/GraphEvent.NodeStarted.component3|component3(){}[0]
+        final fun copy(kotlin/Int = ..., kotlin/String = ..., #A1 = ...): org.langgraphkt/GraphEvent.NodeStarted<#A1> // org.langgraphkt/GraphEvent.NodeStarted.copy|copy(kotlin.Int;kotlin.String;1:0){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // org.langgraphkt/GraphEvent.NodeStarted.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // org.langgraphkt/GraphEvent.NodeStarted.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // org.langgraphkt/GraphEvent.NodeStarted.toString|toString(){}[0]
+    }
+
     final class <#A1: out kotlin/Any?> StepCompleted : org.langgraphkt/GraphEvent<#A1> { // org.langgraphkt/GraphEvent.StepCompleted|null[0]
         constructor <init>(kotlin/Int, kotlin.collections/List<kotlin/String>, #A1) // org.langgraphkt/GraphEvent.StepCompleted.<init>|<init>(kotlin.Int;kotlin.collections.List<kotlin.String>;1:0){}[0]
 
@@ -137,6 +175,9 @@ final class <#A: kotlin/Any?> org.langgraphkt/Checkpoint { // org.langgraphkt/Ch
 }
 
 final class <#A: kotlin/Any?> org.langgraphkt/CompiledGraph { // org.langgraphkt/CompiledGraph|null[0]
+    final val topology // org.langgraphkt/CompiledGraph.topology|{}topology[0]
+        final fun <get-topology>(): org.langgraphkt/GraphTopology // org.langgraphkt/CompiledGraph.topology.<get-topology>|<get-topology>(){}[0]
+
     final fun stream(#A, org.langgraphkt/GraphConfig<#A> = ...): kotlinx.coroutines.flow/Flow<org.langgraphkt/GraphEvent<#A>> // org.langgraphkt/CompiledGraph.stream|stream(1:0;org.langgraphkt.GraphConfig<1:0>){}[0]
     final fun streamResume(org.langgraphkt/GraphConfig<#A>, kotlin.coroutines/SuspendFunction1<#A, #A> = ...): kotlinx.coroutines.flow/Flow<org.langgraphkt/GraphEvent<#A>> // org.langgraphkt/CompiledGraph.streamResume|streamResume(org.langgraphkt.GraphConfig<1:0>;kotlin.coroutines.SuspendFunction1<1:0,1:0>){}[0]
     final suspend fun invoke(#A, org.langgraphkt/GraphConfig<#A> = ...): org.langgraphkt/GraphResult<#A> // org.langgraphkt/CompiledGraph.invoke|invoke(1:0;org.langgraphkt.GraphConfig<1:0>){}[0]
@@ -213,6 +254,45 @@ final class org.langgraphkt/GraphAlreadyCompletedException : org.langgraphkt/Lan
 
     final val threadId // org.langgraphkt/GraphAlreadyCompletedException.threadId|{}threadId[0]
         final fun <get-threadId>(): kotlin/String // org.langgraphkt/GraphAlreadyCompletedException.threadId.<get-threadId>|<get-threadId>(){}[0]
+}
+
+final class org.langgraphkt/GraphEdge { // org.langgraphkt/GraphEdge|null[0]
+    constructor <init>(kotlin/String, kotlin/String, kotlin/Boolean = ...) // org.langgraphkt/GraphEdge.<init>|<init>(kotlin.String;kotlin.String;kotlin.Boolean){}[0]
+
+    final val from // org.langgraphkt/GraphEdge.from|{}from[0]
+        final fun <get-from>(): kotlin/String // org.langgraphkt/GraphEdge.from.<get-from>|<get-from>(){}[0]
+    final val isConditional // org.langgraphkt/GraphEdge.isConditional|{}isConditional[0]
+        final fun <get-isConditional>(): kotlin/Boolean // org.langgraphkt/GraphEdge.isConditional.<get-isConditional>|<get-isConditional>(){}[0]
+    final val to // org.langgraphkt/GraphEdge.to|{}to[0]
+        final fun <get-to>(): kotlin/String // org.langgraphkt/GraphEdge.to.<get-to>|<get-to>(){}[0]
+
+    final fun component1(): kotlin/String // org.langgraphkt/GraphEdge.component1|component1(){}[0]
+    final fun component2(): kotlin/String // org.langgraphkt/GraphEdge.component2|component2(){}[0]
+    final fun component3(): kotlin/Boolean // org.langgraphkt/GraphEdge.component3|component3(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., kotlin/Boolean = ...): org.langgraphkt/GraphEdge // org.langgraphkt/GraphEdge.copy|copy(kotlin.String;kotlin.String;kotlin.Boolean){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // org.langgraphkt/GraphEdge.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // org.langgraphkt/GraphEdge.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // org.langgraphkt/GraphEdge.toString|toString(){}[0]
+}
+
+final class org.langgraphkt/GraphTopology { // org.langgraphkt/GraphTopology|null[0]
+    constructor <init>(kotlin.collections/List<kotlin/String>, kotlin.collections/List<org.langgraphkt/GraphEdge>, kotlin.collections/Set<kotlin/String>) // org.langgraphkt/GraphTopology.<init>|<init>(kotlin.collections.List<kotlin.String>;kotlin.collections.List<org.langgraphkt.GraphEdge>;kotlin.collections.Set<kotlin.String>){}[0]
+
+    final val dynamicRoutes // org.langgraphkt/GraphTopology.dynamicRoutes|{}dynamicRoutes[0]
+        final fun <get-dynamicRoutes>(): kotlin.collections/Set<kotlin/String> // org.langgraphkt/GraphTopology.dynamicRoutes.<get-dynamicRoutes>|<get-dynamicRoutes>(){}[0]
+    final val edges // org.langgraphkt/GraphTopology.edges|{}edges[0]
+        final fun <get-edges>(): kotlin.collections/List<org.langgraphkt/GraphEdge> // org.langgraphkt/GraphTopology.edges.<get-edges>|<get-edges>(){}[0]
+    final val nodes // org.langgraphkt/GraphTopology.nodes|{}nodes[0]
+        final fun <get-nodes>(): kotlin.collections/List<kotlin/String> // org.langgraphkt/GraphTopology.nodes.<get-nodes>|<get-nodes>(){}[0]
+
+    final fun component1(): kotlin.collections/List<kotlin/String> // org.langgraphkt/GraphTopology.component1|component1(){}[0]
+    final fun component2(): kotlin.collections/List<org.langgraphkt/GraphEdge> // org.langgraphkt/GraphTopology.component2|component2(){}[0]
+    final fun component3(): kotlin.collections/Set<kotlin/String> // org.langgraphkt/GraphTopology.component3|component3(){}[0]
+    final fun copy(kotlin.collections/List<kotlin/String> = ..., kotlin.collections/List<org.langgraphkt/GraphEdge> = ..., kotlin.collections/Set<kotlin/String> = ...): org.langgraphkt/GraphTopology // org.langgraphkt/GraphTopology.copy|copy(kotlin.collections.List<kotlin.String>;kotlin.collections.List<org.langgraphkt.GraphEdge>;kotlin.collections.Set<kotlin.String>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // org.langgraphkt/GraphTopology.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // org.langgraphkt/GraphTopology.hashCode|hashCode(){}[0]
+    final fun successors(kotlin/String): kotlin.collections/List<kotlin/String> // org.langgraphkt/GraphTopology.successors|successors(kotlin.String){}[0]
+    final fun toString(): kotlin/String // org.langgraphkt/GraphTopology.toString|toString(){}[0]
 }
 
 final class org.langgraphkt/GraphValidationException : org.langgraphkt/LangGraphException { // org.langgraphkt/GraphValidationException|null[0]
