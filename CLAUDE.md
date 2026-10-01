@@ -34,7 +34,8 @@ is a directed graph: nodes transform an immutable state and edges decide what ru
 
 - **`langgraph-kt-core`** (KMP, `commonMain` only, depends only on kotlinx-coroutines): graph
   builder, engine, checkpoint interfaces
-- **`langgraph-kt-serialization`** (KMP): `KotlinxStateSerializer` for `@Serializable` states
+- **`langgraph-kt-serialization`** (KMP): `KotlinxStateSerializer` for `@Serializable` states,
+  `CheckpointCodec` (the shared checkpoint format, also used by `FileCheckpointer`)
 - **`langgraph-kt-checkpoint-file`** (KMP): `FileCheckpointer` on kotlinx-io
 - **`langgraph-kt-langchain4j`** (JVM): `chatNode` / `chatMessagesNode` for LangChain4j 1.x `ChatModel`
 - **`samples`**: runnable examples with tests; not published
@@ -62,7 +63,8 @@ checkpoint is saved after every step when a checkpointer is configured.
 | `EdgeCondition<State>` | `suspend (State) -> String`, routes to the next node name or `END` |
 | `Reducer<State>` | `fun interface` with a suspend `reduce`; merges parallel updates; required for fan-out |
 | `GraphConfig<State>` | `threadId`, `checkpointer`, `interruptBefore/After` (sets), `maxIterations` |
-| `GraphResult<State>` / `GraphEvent<State>` | Outcome of `invoke`/`resume`, and events from `stream` |
+| `GraphResult<State>` / `GraphEvent<State>` | Outcome of `invoke`/`resume`, and events from `stream` (per node and per step) |
+| `GraphTopology` | Nodes and edges of a compiled graph, from `CompiledGraph.topology` |
 | `Checkpointer<State>` | `save` / `load` / `delete` per thread |
 | `Checkpoint<State>` | `state`, `nextNodes` (empty when complete), `step`, `interruptedBefore` |
 | `LangGraphException` | Base of all library exceptions (see `Exceptions.kt`) |
