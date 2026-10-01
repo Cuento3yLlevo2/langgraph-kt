@@ -80,13 +80,22 @@ final class <#A: kotlin/Any?> org.langgraphkt/StateGraph { // org.langgraphkt/St
     constructor <init>() // org.langgraphkt/StateGraph.<init>|<init>(){}[0]
 
     final fun compile(org.langgraphkt/Reducer<#A>? = ...): org.langgraphkt/CompiledGraph<#A> // org.langgraphkt/StateGraph.compile|compile(org.langgraphkt.Reducer<1:0>?){}[0]
-    final fun conditionalEdge(kotlin/String, kotlin.coroutines/SuspendFunction1<#A, kotlin/String>) // org.langgraphkt/StateGraph.conditionalEdge|conditionalEdge(kotlin.String;kotlin.coroutines.SuspendFunction1<1:0,kotlin.String>){}[0]
+    final fun conditionalEdge(kotlin/String, kotlin.collections/Set<kotlin/String>? = ..., kotlin.coroutines/SuspendFunction1<#A, kotlin/String>) // org.langgraphkt/StateGraph.conditionalEdge|conditionalEdge(kotlin.String;kotlin.collections.Set<kotlin.String>?;kotlin.coroutines.SuspendFunction1<1:0,kotlin.String>){}[0]
     final fun edge(kotlin/String, kotlin/String) // org.langgraphkt/StateGraph.edge|edge(kotlin.String;kotlin.String){}[0]
     final fun node(kotlin/String, kotlin.coroutines/SuspendFunction1<#A, #A>) // org.langgraphkt/StateGraph.node|node(kotlin.String;kotlin.coroutines.SuspendFunction1<1:0,1:0>){}[0]
 }
 
 final class org.langgraphkt/GraphValidationException : org.langgraphkt/LangGraphException { // org.langgraphkt/GraphValidationException|null[0]
     constructor <init>(kotlin/String) // org.langgraphkt/GraphValidationException.<init>|<init>(kotlin.String){}[0]
+}
+
+final class org.langgraphkt/InvalidRouteException : org.langgraphkt/LangGraphException { // org.langgraphkt/InvalidRouteException|null[0]
+    constructor <init>(kotlin/String, kotlin/String) // org.langgraphkt/InvalidRouteException.<init>|<init>(kotlin.String;kotlin.String){}[0]
+
+    final val from // org.langgraphkt/InvalidRouteException.from|{}from[0]
+        final fun <get-from>(): kotlin/String // org.langgraphkt/InvalidRouteException.from.<get-from>|<get-from>(){}[0]
+    final val target // org.langgraphkt/InvalidRouteException.target|{}target[0]
+        final fun <get-target>(): kotlin/String // org.langgraphkt/InvalidRouteException.target.<get-target>|<get-target>(){}[0]
 }
 
 final class org.langgraphkt/MaxIterationsExceededException : org.langgraphkt/LangGraphException { // org.langgraphkt/MaxIterationsExceededException|null[0]

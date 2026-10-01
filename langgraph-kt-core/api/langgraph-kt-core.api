@@ -55,6 +55,12 @@ public final class org/langgraphkt/GraphValidationException : org/langgraphkt/La
 	public fun <init> (Ljava/lang/String;)V
 }
 
+public final class org/langgraphkt/InvalidRouteException : org/langgraphkt/LangGraphException {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun getFrom ()Ljava/lang/String;
+	public final fun getTarget ()Ljava/lang/String;
+}
+
 public abstract class org/langgraphkt/LangGraphException : java/lang/RuntimeException {
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -84,7 +90,8 @@ public final class org/langgraphkt/StateGraph {
 	public fun <init> ()V
 	public final fun compile (Lorg/langgraphkt/Reducer;)Lorg/langgraphkt/CompiledGraph;
 	public static synthetic fun compile$default (Lorg/langgraphkt/StateGraph;Lorg/langgraphkt/Reducer;ILjava/lang/Object;)Lorg/langgraphkt/CompiledGraph;
-	public final fun conditionalEdge (Ljava/lang/String;Lkotlin/jvm/functions/Function2;)V
+	public final fun conditionalEdge (Ljava/lang/String;Ljava/util/Set;Lkotlin/jvm/functions/Function2;)V
+	public static synthetic fun conditionalEdge$default (Lorg/langgraphkt/StateGraph;Ljava/lang/String;Ljava/util/Set;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
 	public final fun edge (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun node (Ljava/lang/String;Lkotlin/jvm/functions/Function2;)V
 }

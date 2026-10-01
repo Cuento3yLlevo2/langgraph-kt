@@ -27,6 +27,15 @@ public class MaxIterationsExceededException(
 ) : LangGraphException("Graph execution exceeded max iterations ($maxIterations). Possible infinite loop.")
 
 /**
+ * A conditional edge from [from] returned [target], which is not a node of the graph or not one of
+ * the edge's declared targets.
+ */
+public class InvalidRouteException(
+    public val from: String,
+    public val target: String,
+) : LangGraphException("Conditional edge from '$from' routed to '$target', which is not a valid target.")
+
+/**
  * A node's action threw an exception. The original exception is available as [cause].
  *
  * Coroutine cancellation is never wrapped: a `CancellationException` propagates unchanged.

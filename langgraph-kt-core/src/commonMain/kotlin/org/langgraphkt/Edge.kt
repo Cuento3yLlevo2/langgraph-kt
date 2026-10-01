@@ -12,8 +12,9 @@ internal data class Edge(
     val to: String,
 )
 
-/** A transition whose target is chosen at run time by [condition]. */
+/** A transition whose target is chosen at run time by [condition], optionally restricted to [targets]. */
 internal data class ConditionalEdge<State>(
     val from: String,
+    val targets: Set<String>?,
     val condition: EdgeCondition<State>,
 )

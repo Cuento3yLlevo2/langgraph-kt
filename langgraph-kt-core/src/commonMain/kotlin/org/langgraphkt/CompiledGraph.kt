@@ -13,8 +13,8 @@ import kotlinx.coroutines.flow.last
  */
 public class CompiledGraph<State> internal constructor(
     internal val nodes: Map<String, Node<State>>,
-    internal val edges: Map<String, List<Edge>>,
-    internal val conditionalEdges: Map<String, List<ConditionalEdge<State>>>,
+    internal val edges: Map<String, List<String>>,
+    internal val conditionalEdges: Map<String, ConditionalEdge<State>>,
     internal val reducer: Reducer<State>? = null,
 ) {
     /**
@@ -63,16 +63,15 @@ public class CompiledGraph<State> internal constructor(
                             nodesToRun
                                 .map { nodeName ->
                                     async {
-                                        val node = nodes[nodeName] ?: throw IllegalStateException("Node '$nodeName' not found")
-                                        runNode(node, currentState)
+                                        runNode(nodes.getValue(nodeName), currentState)
                                     }
                                 }.awaitAll()
                         }
 
                     currentState =
                         if (updates.size > 1) {
-                            requireNotNull(reducer) { "Reducer is required when executing parallel nodes" }
-                            reducer.reduce(currentState, updates)
+                            checkNotNull(reducer) { "compile() guarantees a reducer for graphs that fan out" }
+                                .reduce(currentState, updates)
                         } else if (updates.size == 1) {
                             updates.first()
                         } else {
@@ -109,18 +108,24 @@ public class CompiledGraph<State> internal constructor(
     private suspend fun resolveNextNodes(currentNodes: List<String>, currentState: State): List<String> {
         val nextNodes = mutableListOf<String>()
         for (node in currentNodes) {
-            val condEdges = conditionalEdges[node]
-            val standardEdges = edges[node]
+            val conditionalEdge = conditionalEdges[node]
+            val staticTargets = edges[node]
 
-            if (!condEdges.isNullOrEmpty()) {
-                require(condEdges.size == 1) { "Multiple conditional edges from a single node are not supported" }
-                nextNodes.add(condEdges.first().condition(currentState))
-            } else if (!standardEdges.isNullOrEmpty()) {
-                nextNodes.addAll(standardEdges.map { it.to })
+            if (conditionalEdge != null) {
+                nextNodes.add(route(conditionalEdge, currentState))
+            } else if (!staticTargets.isNullOrEmpty()) {
+                nextNodes.addAll(staticTargets)
             } else {
                 nextNodes.add(END)
             }
         }
         return nextNodes.distinct()
+    }
+
+    private suspend fun route(edge: ConditionalEdge<State>, state: State): String {
+        val target = edge.condition(state)
+        val allowed = edge.targets?.contains(target) ?: (target == END || target in nodes)
+        if (!allowed) throw InvalidRouteException(edge.from, target)
+        return target
     }
 }
