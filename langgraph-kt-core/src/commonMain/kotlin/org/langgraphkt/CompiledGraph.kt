@@ -4,6 +4,8 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
@@ -147,7 +149,10 @@ public class CompiledGraph<State> internal constructor(
         try {
             node.action(state)
         } catch (e: CancellationException) {
-            throw e
+            // Propagate a real cancellation of the run. If the run is still active, the node cancelled
+            // only itself (for example its own withTimeout expired), which is a failure of the node.
+            currentCoroutineContext().ensureActive()
+            throw NodeExecutionException(node.name, e)
         } catch (e: LangGraphException) {
             throw e
         } catch (e: Exception) {

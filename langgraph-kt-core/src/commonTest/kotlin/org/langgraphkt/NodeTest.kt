@@ -1,10 +1,16 @@
 package org.langgraphkt
 
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeout
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertIs
 import kotlin.test.assertNotSame
 import kotlin.test.assertSame
 
@@ -50,10 +56,40 @@ class NodeFailureTest {
         }
 
     @Test
-    fun `cancellation inside a node is not wrapped`() =
+    fun `cancelling the run is not wrapped`() =
         runTest {
-            assertFailsWith<CancellationException> {
-                graphWith { throw CancellationException("cancelled") }.invoke(TestState())
+            val nodeStarted = CompletableDeferred<Unit>()
+            val run =
+                async {
+                    graphWith {
+                        nodeStarted.complete(Unit)
+                        awaitCancellation()
+                    }.invoke(TestState())
+                }
+
+            nodeStarted.await()
+            run.cancel()
+
+            assertFailsWith<CancellationException> { run.await() }
+        }
+
+    @Test
+    fun `a timeout inside a node is a node failure`() =
+        runTest {
+            val exception =
+                assertFailsWith<NodeExecutionException> {
+                    graphWith { withTimeout(10) { awaitCancellation() } }.invoke(TestState())
+                }
+
+            assertEquals("boom", exception.nodeName)
+            assertIs<TimeoutCancellationException>(exception.cause)
+        }
+
+    @Test
+    fun `a timeout around the run is not wrapped`() =
+        runTest {
+            assertFailsWith<TimeoutCancellationException> {
+                withTimeout(10) { graphWith { awaitCancellation() }.invoke(TestState()) }
             }
         }
 
