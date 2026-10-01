@@ -45,7 +45,7 @@ class FileCheckpointerTest {
     fun `saves and loads a checkpoint`() =
         runTest {
             val checkpointer = newCheckpointer()
-            val checkpoint = Checkpoint(SerializableState(42), listOf("nodeA", "nodeB"), step = 3)
+            val checkpoint = Checkpoint(SerializableState(42), listOf("nodeA", "nodeB"), step = 3, interruptedBefore = true)
 
             checkpointer.save("thread-x", checkpoint)
 

@@ -28,7 +28,7 @@ class InterruptTest {
             val paused = app.invoke(TestState(0), config)
 
             assertEquals(GraphResult.Interrupted(TestState(1), listOf("b")), paused)
-            assertEquals(Checkpoint(TestState(1), listOf("b"), step = 1), checkpointer.load("t"))
+            assertEquals(Checkpoint(TestState(1), listOf("b"), step = 1, interruptedBefore = true), checkpointer.load("t"))
 
             val finished = app.resume(config)
 
@@ -75,6 +75,30 @@ class InterruptTest {
         }
 
     @Test
+    fun `interruptBefore still pauses after an interruptAfter pause`() =
+        runTest {
+            val config =
+                GraphConfig(checkpointer = MemoryCheckpointer<TestState>(), interruptAfter = setOf("a"), interruptBefore = setOf("b"))
+
+            assertEquals(GraphResult.Interrupted(TestState(1), listOf("b")), app.invoke(TestState(0), config))
+            // The first pause came from interruptAfter, so the pause before "b" is still due.
+            assertEquals(GraphResult.Interrupted(TestState(1), listOf("b")), app.resume(config))
+            assertEquals(GraphResult.Completed(TestState(111)), app.resume(config))
+        }
+
+    @Test
+    fun `resume after a crash between steps still pauses before the next node`() =
+        runTest {
+            val checkpointer = MemoryCheckpointer<TestState>()
+            val config = GraphConfig(checkpointer = checkpointer, interruptBefore = setOf("b"))
+            // The checkpoint saved after step "a"; the process died before the run could pause before "b".
+            checkpointer.save("default", Checkpoint(TestState(1), listOf("b"), step = 1))
+
+            assertEquals(GraphResult.Interrupted(TestState(1), listOf("b")), app.resume(config))
+            assertEquals(GraphResult.Completed(TestState(111)), app.resume(config))
+        }
+
+    @Test
     fun `interruptBefore on the first node pauses before anything runs`() =
         runTest {
             val checkpointer = MemoryCheckpointer<TestState>()
@@ -93,6 +117,28 @@ class InterruptTest {
 
             // A second invoke on a paused thread must not continue from the old checkpoint.
             assertEquals(GraphResult.Interrupted(TestState(1001), listOf("b")), app.invoke(TestState(1000), config))
+        }
+
+    @Test
+    fun `a new run that fails in its first step cannot be resumed into the previous run`() =
+        runTest {
+            val failing =
+                StateGraph<TestState> {
+                    node("a") { if (it.count >= 1000) error("rejected") else it.copy(count = it.count + 1) }
+                    node("b") { it.copy(count = it.count + 10) }
+
+                    edge(START, "a")
+                    edge("a", "b")
+                    edge("b", END)
+                }.compile()
+            val checkpointer = MemoryCheckpointer<TestState>()
+            val config = GraphConfig(checkpointer = checkpointer, interruptBefore = setOf("b"))
+            failing.invoke(TestState(0), config)
+
+            assertFailsWith<NodeExecutionException> { failing.invoke(TestState(1000), config) }
+
+            assertNull(checkpointer.load("default"))
+            assertFailsWith<CheckpointNotFoundException> { failing.resume(config) }
         }
 
     @Test

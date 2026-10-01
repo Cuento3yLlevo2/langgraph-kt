@@ -39,7 +39,9 @@ public class InvalidRouteException(
 /**
  * A node's action threw an exception. The original exception is available as [cause].
  *
- * Coroutine cancellation is never wrapped: a `CancellationException` propagates unchanged.
+ * Cancellation of the run itself is never wrapped: it propagates as a `CancellationException`. A
+ * `CancellationException` that a node raises while the run is still active, such as an expired
+ * `withTimeout` inside the node, is a failure of that node and is wrapped like any other.
  */
 public class NodeExecutionException(
     public val nodeName: String,
