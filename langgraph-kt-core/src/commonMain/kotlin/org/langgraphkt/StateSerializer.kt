@@ -1,7 +1,10 @@
 package org.langgraphkt
 
-interface StateSerializer<State> {
-    fun serialize(state: State): String
+/**
+ * Converts a graph state to and from a string so a [Checkpointer] can persist it.
+ */
+public interface StateSerializer<State> {
+    public fun serialize(state: State): String
 
-    fun deserialize(data: String): State
+    public fun deserialize(data: String): State
 }

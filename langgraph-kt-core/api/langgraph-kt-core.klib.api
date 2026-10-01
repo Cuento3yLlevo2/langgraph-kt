@@ -40,35 +40,8 @@ final class <#A: kotlin/Any?> org.langgraphkt/Checkpoint { // org.langgraphkt/Ch
 }
 
 final class <#A: kotlin/Any?> org.langgraphkt/CompiledGraph { // org.langgraphkt/CompiledGraph|null[0]
-    constructor <init>(kotlin.collections/Map<kotlin/String, org.langgraphkt/Node<#A>>, kotlin.collections/Map<kotlin/String, kotlin.collections/List<org.langgraphkt/Edge>>, kotlin.collections/Map<kotlin/String, kotlin.collections/List<org.langgraphkt/ConditionalEdge<#A>>>, org.langgraphkt/Reducer<#A>? = ...) // org.langgraphkt/CompiledGraph.<init>|<init>(kotlin.collections.Map<kotlin.String,org.langgraphkt.Node<1:0>>;kotlin.collections.Map<kotlin.String,kotlin.collections.List<org.langgraphkt.Edge>>;kotlin.collections.Map<kotlin.String,kotlin.collections.List<org.langgraphkt.ConditionalEdge<1:0>>>;org.langgraphkt.Reducer<1:0>?){}[0]
-
-    final val conditionalEdges // org.langgraphkt/CompiledGraph.conditionalEdges|{}conditionalEdges[0]
-        final fun <get-conditionalEdges>(): kotlin.collections/Map<kotlin/String, kotlin.collections/List<org.langgraphkt/ConditionalEdge<#A>>> // org.langgraphkt/CompiledGraph.conditionalEdges.<get-conditionalEdges>|<get-conditionalEdges>(){}[0]
-    final val edges // org.langgraphkt/CompiledGraph.edges|{}edges[0]
-        final fun <get-edges>(): kotlin.collections/Map<kotlin/String, kotlin.collections/List<org.langgraphkt/Edge>> // org.langgraphkt/CompiledGraph.edges.<get-edges>|<get-edges>(){}[0]
-    final val nodes // org.langgraphkt/CompiledGraph.nodes|{}nodes[0]
-        final fun <get-nodes>(): kotlin.collections/Map<kotlin/String, org.langgraphkt/Node<#A>> // org.langgraphkt/CompiledGraph.nodes.<get-nodes>|<get-nodes>(){}[0]
-    final val reducer // org.langgraphkt/CompiledGraph.reducer|{}reducer[0]
-        final fun <get-reducer>(): org.langgraphkt/Reducer<#A>? // org.langgraphkt/CompiledGraph.reducer.<get-reducer>|<get-reducer>(){}[0]
-
     final fun stream(#A, org.langgraphkt/GraphConfig<#A>? = ..., kotlin/Boolean = ...): kotlinx.coroutines.flow/Flow<#A> // org.langgraphkt/CompiledGraph.stream|stream(1:0;org.langgraphkt.GraphConfig<1:0>?;kotlin.Boolean){}[0]
     final suspend fun invoke(#A, org.langgraphkt/GraphConfig<#A>? = ..., kotlin/Boolean = ...): #A // org.langgraphkt/CompiledGraph.invoke|invoke(1:0;org.langgraphkt.GraphConfig<1:0>?;kotlin.Boolean){}[0]
-}
-
-final class <#A: kotlin/Any?> org.langgraphkt/ConditionalEdge { // org.langgraphkt/ConditionalEdge|null[0]
-    constructor <init>(kotlin/String, kotlin.coroutines/SuspendFunction1<#A, kotlin/String>) // org.langgraphkt/ConditionalEdge.<init>|<init>(kotlin.String;kotlin.coroutines.SuspendFunction1<1:0,kotlin.String>){}[0]
-
-    final val condition // org.langgraphkt/ConditionalEdge.condition|{}condition[0]
-        final fun <get-condition>(): kotlin.coroutines/SuspendFunction1<#A, kotlin/String> // org.langgraphkt/ConditionalEdge.condition.<get-condition>|<get-condition>(){}[0]
-    final val from // org.langgraphkt/ConditionalEdge.from|{}from[0]
-        final fun <get-from>(): kotlin/String // org.langgraphkt/ConditionalEdge.from.<get-from>|<get-from>(){}[0]
-
-    final fun component1(): kotlin/String // org.langgraphkt/ConditionalEdge.component1|component1(){}[0]
-    final fun component2(): kotlin.coroutines/SuspendFunction1<#A, kotlin/String> // org.langgraphkt/ConditionalEdge.component2|component2(){}[0]
-    final fun copy(kotlin/String = ..., kotlin.coroutines/SuspendFunction1<#A, kotlin/String> = ...): org.langgraphkt/ConditionalEdge<#A> // org.langgraphkt/ConditionalEdge.copy|copy(kotlin.String;kotlin.coroutines.SuspendFunction1<1:0,kotlin.String>){}[0]
-    final fun equals(kotlin/Any?): kotlin/Boolean // org.langgraphkt/ConditionalEdge.equals|equals(kotlin.Any?){}[0]
-    final fun hashCode(): kotlin/Int // org.langgraphkt/ConditionalEdge.hashCode|hashCode(){}[0]
-    final fun toString(): kotlin/String // org.langgraphkt/ConditionalEdge.toString|toString(){}[0]
 }
 
 final class <#A: kotlin/Any?> org.langgraphkt/GraphConfig { // org.langgraphkt/GraphConfig|null[0]
@@ -103,22 +76,6 @@ final class <#A: kotlin/Any?> org.langgraphkt/MemoryCheckpointer : org.langgraph
     final suspend fun save(kotlin/String, org.langgraphkt/Checkpoint<#A>) // org.langgraphkt/MemoryCheckpointer.save|save(kotlin.String;org.langgraphkt.Checkpoint<1:0>){}[0]
 }
 
-final class <#A: kotlin/Any?> org.langgraphkt/Node { // org.langgraphkt/Node|null[0]
-    constructor <init>(kotlin/String, kotlin.coroutines/SuspendFunction1<#A, #A>) // org.langgraphkt/Node.<init>|<init>(kotlin.String;kotlin.coroutines.SuspendFunction1<1:0,1:0>){}[0]
-
-    final val action // org.langgraphkt/Node.action|{}action[0]
-        final fun <get-action>(): kotlin.coroutines/SuspendFunction1<#A, #A> // org.langgraphkt/Node.action.<get-action>|<get-action>(){}[0]
-    final val name // org.langgraphkt/Node.name|{}name[0]
-        final fun <get-name>(): kotlin/String // org.langgraphkt/Node.name.<get-name>|<get-name>(){}[0]
-
-    final fun component1(): kotlin/String // org.langgraphkt/Node.component1|component1(){}[0]
-    final fun component2(): kotlin.coroutines/SuspendFunction1<#A, #A> // org.langgraphkt/Node.component2|component2(){}[0]
-    final fun copy(kotlin/String = ..., kotlin.coroutines/SuspendFunction1<#A, #A> = ...): org.langgraphkt/Node<#A> // org.langgraphkt/Node.copy|copy(kotlin.String;kotlin.coroutines.SuspendFunction1<1:0,1:0>){}[0]
-    final fun equals(kotlin/Any?): kotlin/Boolean // org.langgraphkt/Node.equals|equals(kotlin.Any?){}[0]
-    final fun hashCode(): kotlin/Int // org.langgraphkt/Node.hashCode|hashCode(){}[0]
-    final fun toString(): kotlin/String // org.langgraphkt/Node.toString|toString(){}[0]
-}
-
 final class <#A: kotlin/Any?> org.langgraphkt/StateGraph { // org.langgraphkt/StateGraph|null[0]
     constructor <init>() // org.langgraphkt/StateGraph.<init>|<init>(){}[0]
 
@@ -128,25 +85,25 @@ final class <#A: kotlin/Any?> org.langgraphkt/StateGraph { // org.langgraphkt/St
     final fun node(kotlin/String, kotlin.coroutines/SuspendFunction1<#A, #A>) // org.langgraphkt/StateGraph.node|node(kotlin.String;kotlin.coroutines.SuspendFunction1<1:0,1:0>){}[0]
 }
 
-final class org.langgraphkt/Edge { // org.langgraphkt/Edge|null[0]
-    constructor <init>(kotlin/String, kotlin/String) // org.langgraphkt/Edge.<init>|<init>(kotlin.String;kotlin.String){}[0]
-
-    final val from // org.langgraphkt/Edge.from|{}from[0]
-        final fun <get-from>(): kotlin/String // org.langgraphkt/Edge.from.<get-from>|<get-from>(){}[0]
-    final val to // org.langgraphkt/Edge.to|{}to[0]
-        final fun <get-to>(): kotlin/String // org.langgraphkt/Edge.to.<get-to>|<get-to>(){}[0]
-
-    final fun component1(): kotlin/String // org.langgraphkt/Edge.component1|component1(){}[0]
-    final fun component2(): kotlin/String // org.langgraphkt/Edge.component2|component2(){}[0]
-    final fun copy(kotlin/String = ..., kotlin/String = ...): org.langgraphkt/Edge // org.langgraphkt/Edge.copy|copy(kotlin.String;kotlin.String){}[0]
-    final fun equals(kotlin/Any?): kotlin/Boolean // org.langgraphkt/Edge.equals|equals(kotlin.Any?){}[0]
-    final fun hashCode(): kotlin/Int // org.langgraphkt/Edge.hashCode|hashCode(){}[0]
-    final fun toString(): kotlin/String // org.langgraphkt/Edge.toString|toString(){}[0]
+final class org.langgraphkt/GraphValidationException : org.langgraphkt/LangGraphException { // org.langgraphkt/GraphValidationException|null[0]
+    constructor <init>(kotlin/String) // org.langgraphkt/GraphValidationException.<init>|<init>(kotlin.String){}[0]
 }
 
-final class org.langgraphkt/MaxIterationsExceededException : kotlin/RuntimeException { // org.langgraphkt/MaxIterationsExceededException|null[0]
-    constructor <init>(kotlin/String) // org.langgraphkt/MaxIterationsExceededException.<init>|<init>(kotlin.String){}[0]
+final class org.langgraphkt/MaxIterationsExceededException : org.langgraphkt/LangGraphException { // org.langgraphkt/MaxIterationsExceededException|null[0]
+    constructor <init>(kotlin/Int) // org.langgraphkt/MaxIterationsExceededException.<init>|<init>(kotlin.Int){}[0]
+
+    final val maxIterations // org.langgraphkt/MaxIterationsExceededException.maxIterations|{}maxIterations[0]
+        final fun <get-maxIterations>(): kotlin/Int // org.langgraphkt/MaxIterationsExceededException.maxIterations.<get-maxIterations>|<get-maxIterations>(){}[0]
 }
+
+final class org.langgraphkt/NodeExecutionException : org.langgraphkt/LangGraphException { // org.langgraphkt/NodeExecutionException|null[0]
+    constructor <init>(kotlin/String, kotlin/Throwable) // org.langgraphkt/NodeExecutionException.<init>|<init>(kotlin.String;kotlin.Throwable){}[0]
+
+    final val nodeName // org.langgraphkt/NodeExecutionException.nodeName|{}nodeName[0]
+        final fun <get-nodeName>(): kotlin/String // org.langgraphkt/NodeExecutionException.nodeName.<get-nodeName>|<get-nodeName>(){}[0]
+}
+
+sealed class org.langgraphkt/LangGraphException : kotlin/RuntimeException // org.langgraphkt/LangGraphException|null[0]
 
 final const val org.langgraphkt/END // org.langgraphkt/END|{}END[0]
     final fun <get-END>(): kotlin/String // org.langgraphkt/END.<get-END>|<get-END>(){}[0]

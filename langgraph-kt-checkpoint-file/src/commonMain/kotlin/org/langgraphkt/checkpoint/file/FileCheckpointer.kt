@@ -14,7 +14,7 @@ import org.langgraphkt.Checkpointer
 import org.langgraphkt.StateSerializer
 
 @Serializable
-data class SerializedCheckpoint(
+internal data class SerializedCheckpoint(
     val stateJson: String,
     val nextNodes: List<String>,
 )
@@ -25,7 +25,7 @@ data class SerializedCheckpoint(
  * Works on every target that has a file system: JVM/Android, Apple, Linux and Windows native, and
  * JS/Wasm running on Node.js. It is not available in browsers.
  */
-class FileCheckpointer<State>(
+public class FileCheckpointer<State>(
     private val directory: Path,
     private val serializer: StateSerializer<State>,
     private val fileSystem: FileSystem = SystemFileSystem,

@@ -9,6 +9,7 @@ plugins {
 }
 
 kotlin {
+    explicitApi()
     // Build with JDK 17, but emit Java 11 bytecode so Android and older JVM consumers can use the library.
     jvmToolchain(17)
     compilerOptions {

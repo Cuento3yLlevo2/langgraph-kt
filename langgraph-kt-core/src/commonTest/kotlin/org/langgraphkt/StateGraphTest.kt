@@ -38,7 +38,7 @@ class StateGraphTest {
             }
 
         val exception =
-            assertFailsWith<IllegalStateException> {
+            assertFailsWith<GraphValidationException> {
                 workflow.compile()
             }
         assertEquals("Graph must have at least one edge originating from START", exception.message)
@@ -54,7 +54,7 @@ class StateGraphTest {
             }
 
         val exception =
-            assertFailsWith<IllegalArgumentException> {
+            assertFailsWith<GraphValidationException> {
                 workflow.compile()
             }
         assertEquals("Edge references unknown to-node: unknown", exception.message)

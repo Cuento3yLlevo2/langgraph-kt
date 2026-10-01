@@ -18,7 +18,7 @@ import org.langgraphkt.StateSerializer
  * @param serializer the kotlinx.serialization serializer for [State].
  * @param json the [Json] instance used for encoding and decoding.
  */
-class KotlinxStateSerializer<State>(
+public class KotlinxStateSerializer<State>(
     private val serializer: KSerializer<State>,
     private val json: Json = Json,
 ) : StateSerializer<State> {
@@ -28,5 +28,5 @@ class KotlinxStateSerializer<State>(
 }
 
 /** Creates a [KotlinxStateSerializer] for the reified `@Serializable` [State] type. */
-inline fun <reified State> KotlinxStateSerializer(json: Json = Json): KotlinxStateSerializer<State> =
+public inline fun <reified State> KotlinxStateSerializer(json: Json = Json): KotlinxStateSerializer<State> =
     KotlinxStateSerializer(serializer<State>(), json)

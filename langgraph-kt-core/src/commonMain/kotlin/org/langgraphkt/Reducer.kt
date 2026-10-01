@@ -7,6 +7,6 @@ package org.langgraphkt
  * The Reducer is responsible for taking the original state and the list of updated states,
  * and combining them into a single definitive state for the next step of execution.
  */
-fun interface Reducer<State> {
-    fun reduce(currentState: State, updates: List<State>): State
+public fun interface Reducer<State> {
+    public fun reduce(currentState: State, updates: List<State>): State
 }

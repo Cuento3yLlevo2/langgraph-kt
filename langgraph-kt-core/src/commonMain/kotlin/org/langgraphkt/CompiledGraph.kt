@@ -1,5 +1,6 @@
 package org.langgraphkt
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -7,22 +8,25 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.last
 
-class CompiledGraph<State>(
-    val nodes: Map<String, Node<State>>,
-    val edges: Map<String, List<Edge>>,
-    val conditionalEdges: Map<String, List<ConditionalEdge<State>>>,
-    val reducer: Reducer<State>? = null,
+/**
+ * An executable graph produced by [StateGraph.compile].
+ */
+public class CompiledGraph<State> internal constructor(
+    internal val nodes: Map<String, Node<State>>,
+    internal val edges: Map<String, List<Edge>>,
+    internal val conditionalEdges: Map<String, List<ConditionalEdge<State>>>,
+    internal val reducer: Reducer<State>? = null,
 ) {
     /**
      * Executes the compiled graph from START to END, returning only the final state.
      */
-    suspend fun invoke(initialState: State, config: GraphConfig<State>? = null, resume: Boolean = false): State =
+    public suspend fun invoke(initialState: State, config: GraphConfig<State>? = null, resume: Boolean = false): State =
         stream(initialState, config, resume).last()
 
     /**
      * Executes the compiled graph from START to END, emitting the state after each step.
      */
-    fun stream(initialState: State, config: GraphConfig<State>? = null, resume: Boolean = false): Flow<State> =
+    public fun stream(initialState: State, config: GraphConfig<State>? = null, resume: Boolean = false): Flow<State> =
         flow {
             var currentState = initialState
             var currentNodesToExecute = listOf(START)
@@ -43,7 +47,7 @@ class CompiledGraph<State>(
 
             while (currentNodesToExecute.isNotEmpty() && !currentNodesToExecute.contains(END)) {
                 if (iterations >= maxIters) {
-                    throw MaxIterationsExceededException("Graph execution exceeded max iterations ($maxIters). Possible infinite loop.")
+                    throw MaxIterationsExceededException(maxIters)
                 }
                 iterations++
 
@@ -60,7 +64,7 @@ class CompiledGraph<State>(
                                 .map { nodeName ->
                                     async {
                                         val node = nodes[nodeName] ?: throw IllegalStateException("Node '$nodeName' not found")
-                                        node.action(currentState)
+                                        runNode(node, currentState)
                                     }
                                 }.awaitAll()
                         }
@@ -89,6 +93,17 @@ class CompiledGraph<State>(
             }
 
             config?.checkpointer?.save(config.threadId, Checkpoint(currentState, listOf(END)))
+        }
+
+    private suspend fun runNode(node: Node<State>, state: State): State =
+        try {
+            node.action(state)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: LangGraphException) {
+            throw e
+        } catch (e: Exception) {
+            throw NodeExecutionException(node.name, e)
         }
 
     private suspend fun resolveNextNodes(currentNodes: List<String>, currentState: State): List<String> {
