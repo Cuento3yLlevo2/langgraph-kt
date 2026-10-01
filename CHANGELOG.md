@@ -48,6 +48,10 @@ First public release. Everything below is new compared with the unpublished beta
 
 - A completed thread could not be run again.
 - `invoke` ignored its input when the thread had a checkpoint.
+- A `withTimeout` that expired inside a node cancelled the caller instead of raising
+  `NodeExecutionException`.
+- `resume` ran an `interruptBefore` node without pausing when the run had paused through
+  `interruptAfter` or was resumed after a crash. `Checkpoint.interruptedBefore` records the pause.
 - Different thread ids could map to the same checkpoint file.
 - `START` counted toward `maxIterations`.
 
