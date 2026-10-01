@@ -113,8 +113,10 @@ abstract class org.langgraphkt/LangGraphException : kotlin/RuntimeException { //
 }
 
 final class <#A: kotlin/Any?> org.langgraphkt/Checkpoint { // org.langgraphkt/Checkpoint|null[0]
-    constructor <init>(#A, kotlin.collections/List<kotlin/String>, kotlin/Int = ...) // org.langgraphkt/Checkpoint.<init>|<init>(1:0;kotlin.collections.List<kotlin.String>;kotlin.Int){}[0]
+    constructor <init>(#A, kotlin.collections/List<kotlin/String>, kotlin/Int = ..., kotlin/Boolean = ...) // org.langgraphkt/Checkpoint.<init>|<init>(1:0;kotlin.collections.List<kotlin.String>;kotlin.Int;kotlin.Boolean){}[0]
 
+    final val interruptedBefore // org.langgraphkt/Checkpoint.interruptedBefore|{}interruptedBefore[0]
+        final fun <get-interruptedBefore>(): kotlin/Boolean // org.langgraphkt/Checkpoint.interruptedBefore.<get-interruptedBefore>|<get-interruptedBefore>(){}[0]
     final val isComplete // org.langgraphkt/Checkpoint.isComplete|{}isComplete[0]
         final fun <get-isComplete>(): kotlin/Boolean // org.langgraphkt/Checkpoint.isComplete.<get-isComplete>|<get-isComplete>(){}[0]
     final val nextNodes // org.langgraphkt/Checkpoint.nextNodes|{}nextNodes[0]
@@ -127,7 +129,8 @@ final class <#A: kotlin/Any?> org.langgraphkt/Checkpoint { // org.langgraphkt/Ch
     final fun component1(): #A // org.langgraphkt/Checkpoint.component1|component1(){}[0]
     final fun component2(): kotlin.collections/List<kotlin/String> // org.langgraphkt/Checkpoint.component2|component2(){}[0]
     final fun component3(): kotlin/Int // org.langgraphkt/Checkpoint.component3|component3(){}[0]
-    final fun copy(#A = ..., kotlin.collections/List<kotlin/String> = ..., kotlin/Int = ...): org.langgraphkt/Checkpoint<#A> // org.langgraphkt/Checkpoint.copy|copy(1:0;kotlin.collections.List<kotlin.String>;kotlin.Int){}[0]
+    final fun component4(): kotlin/Boolean // org.langgraphkt/Checkpoint.component4|component4(){}[0]
+    final fun copy(#A = ..., kotlin.collections/List<kotlin/String> = ..., kotlin/Int = ..., kotlin/Boolean = ...): org.langgraphkt/Checkpoint<#A> // org.langgraphkt/Checkpoint.copy|copy(1:0;kotlin.collections.List<kotlin.String>;kotlin.Int;kotlin.Boolean){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // org.langgraphkt/Checkpoint.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // org.langgraphkt/Checkpoint.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // org.langgraphkt/Checkpoint.toString|toString(){}[0]
