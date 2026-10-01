@@ -9,6 +9,8 @@ plugins {
 }
 
 apiValidation {
+    // Samples are not published, so they have no API to keep stable.
+    ignoredProjects.add("samples")
     @OptIn(kotlinx.validation.ExperimentalBCVApi::class)
     klib {
         enabled = true
