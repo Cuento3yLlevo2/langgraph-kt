@@ -5,7 +5,7 @@ package org.langgraphkt
  */
 data class Edge(
     val from: String,
-    val to: String
+    val to: String,
 )
 
 /**
@@ -15,5 +15,5 @@ typealias EdgeCondition<State> = suspend (State) -> String
 
 data class ConditionalEdge<State>(
     val from: String,
-    val condition: EdgeCondition<State>
+    val condition: EdgeCondition<State>,
 )

@@ -10,5 +10,5 @@ typealias NodeAction<State> = suspend (State) -> State
 
 data class Node<State>(
     val name: String,
-    val action: NodeAction<State>
+    val action: NodeAction<State>,
 )

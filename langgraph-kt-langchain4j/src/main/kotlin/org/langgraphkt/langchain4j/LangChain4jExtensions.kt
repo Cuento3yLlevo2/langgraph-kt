@@ -9,11 +9,10 @@ import org.langgraphkt.NodeAction
  * Executes a LangChain4j ChatLanguageModel generation within the IO dispatcher
  * to prevent the blocking network/JNI call from starving the main coroutine thread.
  */
-suspend fun ChatLanguageModel.generateSuspending(message: String): String {
-    return withContext(Dispatchers.IO) {
+suspend fun ChatLanguageModel.generateSuspending(message: String): String =
+    withContext(Dispatchers.IO) {
         generate(message)
     }
-}
 
 /**
  * A helper DSL function to create a NodeAction that leverages a ChatLanguageModel.
@@ -25,11 +24,10 @@ suspend fun ChatLanguageModel.generateSuspending(message: String): String {
 fun <State> generateNode(
     model: ChatLanguageModel,
     promptBuilder: (State) -> String,
-    stateUpdater: (State, String) -> State
-): NodeAction<State> {
-    return { state ->
+    stateUpdater: (State, String) -> State,
+): NodeAction<State> =
+    { state ->
         val prompt = promptBuilder(state)
         val response = model.generateSuspending(prompt)
         stateUpdater(state, response)
     }
-}

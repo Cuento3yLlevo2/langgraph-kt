@@ -10,7 +10,7 @@ import java.io.File
 @Serializable
 data class SerializedCheckpoint(
     val stateJson: String,
-    val nextNodes: List<String>
+    val nextNodes: List<String>,
 )
 
 /**
@@ -19,9 +19,8 @@ data class SerializedCheckpoint(
  */
 class FileCheckpointer<State>(
     private val directory: File,
-    private val serializer: StateSerializer<State>
+    private val serializer: StateSerializer<State>,
 ) : Checkpointer<State> {
-
     init {
         if (!directory.exists()) {
             directory.mkdirs()
@@ -50,7 +49,7 @@ class FileCheckpointer<State>(
             val json = file.readText()
             val serialized = Json.decodeFromString<SerializedCheckpoint>(json)
             val state = serializer.deserialize(serialized.stateJson)
-            
+
             Checkpoint(state, serialized.nextNodes)
         }
     }

@@ -1,0 +1,5 @@
+public final class org/langgraphkt/langchain4j/LangChain4jExtensionsKt {
+	public static final fun generateNode (Ldev/langchain4j/model/chat/ChatLanguageModel;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;)Lkotlin/jvm/functions/Function2;
+	public static final fun generateSuspending (Ldev/langchain4j/model/chat/ChatLanguageModel;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
