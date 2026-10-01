@@ -85,6 +85,28 @@ public class CompiledGraph<State> internal constructor(
         streamResume(config, update).last().toResult()
 
     /**
+     * Returns where the run of [GraphConfig.threadId] stopped, read from its last checkpoint, without
+     * running anything. Use it to restore a screen after a restart, or to build the next input of a
+     * conversation from the state the last run ended with.
+     *
+     * The result is [GraphResult.Completed] when the run finished, and [GraphResult.Interrupted] when
+     * [resume] can continue it: the run paused at an interrupt, or stopped between two steps because
+     * a node failed or the process ended. It is `null` when the thread has no checkpoint.
+     *
+     * @throws GraphValidationException if [config] has no checkpointer.
+     */
+    public suspend fun lastResult(config: GraphConfig<State>): GraphResult<State>? {
+        val checkpointer =
+            config.checkpointer ?: throw GraphValidationException("lastResult() needs a GraphConfig with a checkpointer.")
+        val checkpoint = checkpointer.load(config.threadId) ?: return null
+        return if (checkpoint.isComplete) {
+            GraphResult.Completed(checkpoint.state)
+        } else {
+            GraphResult.Interrupted(checkpoint.state, checkpoint.nextNodes)
+        }
+    }
+
+    /**
      * Like [invoke], but returns a cold [Flow] that emits a [GraphEvent] as each node starts and
      * finishes and after every step, and ends with [GraphEvent.Completed] or
      * [GraphEvent.Interrupted]. Nothing runs until the flow is collected, and each collection is a

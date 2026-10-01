@@ -38,6 +38,7 @@ public final class org/langgraphkt/CompiledGraph {
 	public final fun getTopology ()Lorg/langgraphkt/GraphTopology;
 	public final fun invoke (Ljava/lang/Object;Lorg/langgraphkt/GraphConfig;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun invoke$default (Lorg/langgraphkt/CompiledGraph;Ljava/lang/Object;Lorg/langgraphkt/GraphConfig;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun lastResult (Lorg/langgraphkt/GraphConfig;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun resume (Lorg/langgraphkt/GraphConfig;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun resume$default (Lorg/langgraphkt/CompiledGraph;Lorg/langgraphkt/GraphConfig;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun stream (Ljava/lang/Object;Lorg/langgraphkt/GraphConfig;)Lkotlinx/coroutines/flow/Flow;

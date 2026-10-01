@@ -181,6 +181,7 @@ final class <#A: kotlin/Any?> org.langgraphkt/CompiledGraph { // org.langgraphkt
     final fun stream(#A, org.langgraphkt/GraphConfig<#A> = ...): kotlinx.coroutines.flow/Flow<org.langgraphkt/GraphEvent<#A>> // org.langgraphkt/CompiledGraph.stream|stream(1:0;org.langgraphkt.GraphConfig<1:0>){}[0]
     final fun streamResume(org.langgraphkt/GraphConfig<#A>, kotlin.coroutines/SuspendFunction1<#A, #A> = ...): kotlinx.coroutines.flow/Flow<org.langgraphkt/GraphEvent<#A>> // org.langgraphkt/CompiledGraph.streamResume|streamResume(org.langgraphkt.GraphConfig<1:0>;kotlin.coroutines.SuspendFunction1<1:0,1:0>){}[0]
     final suspend fun invoke(#A, org.langgraphkt/GraphConfig<#A> = ...): org.langgraphkt/GraphResult<#A> // org.langgraphkt/CompiledGraph.invoke|invoke(1:0;org.langgraphkt.GraphConfig<1:0>){}[0]
+    final suspend fun lastResult(org.langgraphkt/GraphConfig<#A>): org.langgraphkt/GraphResult<#A>? // org.langgraphkt/CompiledGraph.lastResult|lastResult(org.langgraphkt.GraphConfig<1:0>){}[0]
     final suspend fun resume(org.langgraphkt/GraphConfig<#A>, kotlin.coroutines/SuspendFunction1<#A, #A> = ...): org.langgraphkt/GraphResult<#A> // org.langgraphkt/CompiledGraph.resume|resume(org.langgraphkt.GraphConfig<1:0>;kotlin.coroutines.SuspendFunction1<1:0,1:0>){}[0]
 }
 
