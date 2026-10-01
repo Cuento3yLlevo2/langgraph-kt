@@ -1,0 +1,21 @@
+name: Feature request
+description: Suggest an addition or a change
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: The use case, and why it is hard or impossible today.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed API or behaviour
+      description: A sketch of how it could look. Code is welcome.
+      render: kotlin
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered
