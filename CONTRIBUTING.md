@@ -1,80 +1,122 @@
 # Contributing to langgraph-kt
 
-First off, thank you for considering contributing to `langgraph-kt`! Our goal is to build the definitive, native Kotlin engine for stateful AI workflows.
+Thank you for considering a contribution. This guide covers the setup, the checks a change must
+pass, and the design rules the project follows.
 
-Whether you are a human developer or an autonomous CLI agent (like OpenCode), you must adhere to the core architectural principles outlined below to maintain the safety, concurrency, and predictability of the graph execution.
+By participating you agree to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
-## Core Architectural Rules
+## Getting started
 
-This repository enforces strict Kotlin-idiomatic patterns. All pull requests and automated commits will be reviewed against these three rules:
+Requirements: JDK 17 or newer. Everything else (Gradle, Kotlin, Kotlin/Native toolchains, Node.js for
+JS tests) is downloaded by the Gradle wrapper.
 
-### 1. Immutability is Law
-
-LangGraph's state routing relies on predictable state updates.
-
-* **DO:** Use Kotlin `data class` structures for all state representations.
-* **DO:** Use the `.copy()` function to apply state updates.
-* **DO:** Use Kotlin collection operators (e.g., `list + newItem`) to append data.
-* **DO NOT:** Use mutable collections (`MutableList`, `ArrayList`) or `var` properties inside state objects.
-
-### 2. Native Coroutines Only
-
-We are building for the JVM and Android, maximizing asynchronous performance without blocking threads.
-
-* **DO:** Make every node and edge evaluation a `suspend` function.
-* **DO:** Use `coroutineScope` and `async { ... }` for parallel node execution.
-* **DO NOT:** Use `Thread.sleep()`, Java's `CompletableFuture`, or `RxJava`.
-* **DO NOT:** Block the main thread for any LLM network or JNI calls.
-
-### 3. Type-Safe DSL
-
-The graph builder must remain intuitive and safe at compile time.
-
-* **DO:** Use Kotlin's `infix` functions and reified type parameters to keep the routing syntax clean.
-* **DO:** Ensure edges cannot connect nodes that do not share compatible state contracts.
-
-## Development Setup
-
-1. Clone the repository:
 ```bash
 git clone git@github.com:Cuento3yLlevo2/langgraph-kt.git
-
-```
-
-
-2. Open the project in **IntelliJ IDEA**. The project uses the Gradle Kotlin DSL (`build.gradle.kts`).
-3. Ensure your JDK is set to version 17 or higher.
-4. Run the initial build to download dependencies:
-```bash
-./gradlew build
-
-```
-
-
-
-## Guidelines for CLI Agents (OpenCode / LLMs)
-
-If this repository is being modified by an autonomous AI agent, the agent must observe the following constraints:
-
-* **Context Scope:** Always parse this `CONTRIBUTING.md` file before generating code.
-* **Dependencies:** Do not introduce heavy third-party libraries without explicit user permission. Rely on Kotlin Standard Library (`kotlinx.coroutines`, `kotlinx.serialization`) and `LangChain4j` core interfaces.
-* **Testing:** Every new `suspend` Node or Edge implementation must be accompanied by a unit test using `kotlinx-coroutines-test` (`runTest { ... }`).
-* **Formatting:** Follow standard `ktlint` styling.
-
-## Pull Request Process
-
-1. Check the **Issues** tab for an existing task, or open a new one to discuss your proposed changes.
-2. Create a new branch from `main` (e.g., `feature/room-checkpointer`).
-3. Write your code, ensuring all new functions are documented with KotlinDoc.
-4. Run the test suite locally:
-```bash
+cd langgraph-kt
 ./gradlew check
-
 ```
 
+Useful commands:
 
-5. Submit a Pull Request. Include a brief summary of the changes and link to the relevant GitHub Issue.
+| Command | What it does |
+|---|---|
+| `./gradlew check` | Compiles every target, runs all tests that can run on your OS, ktlint, and the coverage gate |
+| `./gradlew :langgraph-kt-core:jvmTest` | Fast feedback: core tests on the JVM only |
+| `./gradlew :langgraph-kt-core:jvmTest --tests "org.langgraphkt.InterruptTest"` | A single test class |
+| `./gradlew ktlintFormat` | Fixes formatting |
+| `./gradlew apiCheck` / `apiDump` | Checks / updates the public API dumps (see below) |
+| `./gradlew :samples:runQuickStart` | Runs a sample |
+| `./gradlew dokkaGenerate` | Builds the API reference into `build/dokka/html` |
+
+Apple targets (iOS, macOS) only build and test on macOS, and the Windows target only tests on
+Windows. CI covers all of them, so you do not need every OS locally.
+
+## Project layout
+
+| Path | Contents |
+|---|---|
+| `langgraph-kt-core` | Graph builder, execution engine, checkpoint interfaces (multiplatform, depends only on kotlinx-coroutines) |
+| `langgraph-kt-serialization` | `KotlinxStateSerializer` (multiplatform) |
+| `langgraph-kt-checkpoint-file` | `FileCheckpointer` on kotlinx-io (multiplatform) |
+| `langgraph-kt-langchain4j` | LangChain4j integration (JVM) |
+| `samples` | Runnable examples, not published |
+| `build-logic` | Gradle convention plugins shared by all modules |
+| `gradle/libs.versions.toml` | Every dependency version |
+
+## Design rules
+
+### 1. State is immutable
+
+- State types are `data class`es with `val` properties and read-only collections.
+- Nodes return a new state with `.copy()`. They never mutate the state they receive.
+- Parallel branches depend on this: each branch gets the same input and a `Reducer` merges the outputs.
+
+### 2. Coroutines only
+
+- Node actions, routers and reducers are `suspend` functions.
+- Parallel work uses structured concurrency (`coroutineScope` / `async`), so cancellation and
+  failures propagate.
+- Do not block a thread (`Thread.sleep`, `runBlocking`, blocking I/O). Wrap calls to blocking
+  libraries in `withContext(Dispatchers.IO)`, as the LangChain4j module does.
+- Never catch `CancellationException` without rethrowing it.
+
+### 3. A small, type-safe public API
+
+- All modules use Kotlin's explicit API mode: every public declaration needs `public`, an explicit
+  type, and KDoc.
+- Keep implementation details `internal`. Graphs are only created through `StateGraph`.
+- Prefer checks that fail in `compile()` over checks that fail in the middle of a run, and throw a
+  `LangGraphException` subclass rather than a generic exception.
+- Core must stay in `commonMain` and depend only on kotlinx-coroutines. Platform- or
+  library-specific code belongs in its own module.
+
+## Making a change
+
+1. For anything larger than a small fix, open an issue first so the approach can be discussed.
+2. Branch from `develop` (for example `feature/room-checkpointer` or `fix/resume-after-crash`).
+3. Write the code and its tests. Core tests go in `commonTest` and use `runTest { }` from
+   `kotlinx-coroutines-test`, so they run on every platform. Use `MemoryCheckpointer` unless the
+   test is about files.
+4. Run `./gradlew check apiCheck`.
+5. If you changed the public API on purpose, run `./gradlew apiDump` and commit the updated files in
+   `*/api/`. Reviewers use that diff to see exactly what changed for users.
+6. Add a line to the "Unreleased" section of [CHANGELOG.md](CHANGELOG.md) when users will notice
+   the change.
+7. Open a pull request against `develop` and link the issue.
+
+### Commit messages
+
+Use a short area prefix and an imperative summary, as the history does:
+
+```
+Feature: Add RoomCheckpointer
+Fix: Keep step counter when resuming
+Docs: Explain reducers
+Build: Upgrade Kotlin to 2.5
+```
+
+Mention breaking changes in the body with a line starting with `BREAKING:`.
+
+### Dependencies
+
+Core depends only on kotlinx-coroutines, and that is deliberate. New third-party dependencies need a
+good reason and usually belong in a separate module. Add versions to `gradle/libs.versions.toml`.
+
+### AI coding agents
+
+Changes made with AI assistance are welcome and are held to the same standard: you are responsible
+for understanding and testing what you submit. Agent-specific instructions live in
+[CLAUDE.md](CLAUDE.md).
+
+## Releasing (maintainers)
+
+1. Move the "Unreleased" entries in `CHANGELOG.md` under the new version and date.
+2. Set `VERSION_NAME` in `gradle.properties` to the release version and merge to `main`.
+3. Tag the commit `vX.Y.Z` and push the tag. The release workflow publishes to Maven Central and
+   creates the GitHub release.
+4. Set `VERSION_NAME` to the next `-SNAPSHOT` on `develop`.
 
 ## License
 
-By contributing to `langgraph-kt`, you agree that your contributions will be licensed under its **Apache License 2.0**.
+By contributing, you agree that your contributions are licensed under the
+[Apache License 2.0](LICENSE).
