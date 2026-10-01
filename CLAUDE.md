@@ -64,7 +64,7 @@ checkpoint is saved after every step when a checkpointer is configured.
 | `GraphConfig<State>` | `threadId`, `checkpointer`, `interruptBefore/After` (sets), `maxIterations` |
 | `GraphResult<State>` / `GraphEvent<State>` | Outcome of `invoke`/`resume`, and events from `stream` |
 | `Checkpointer<State>` | `save` / `load` / `delete` per thread |
-| `Checkpoint<State>` | `state`, `nextNodes` (empty when complete), `step` |
+| `Checkpoint<State>` | `state`, `nextNodes` (empty when complete), `step`, `interruptedBefore` |
 | `LangGraphException` | Base of all library exceptions (see `Exceptions.kt`) |
 
 ### Key Design Rules

@@ -130,7 +130,9 @@ val finished = graph.resume(config) { state -> state.copy(approved = true) }
 
 - `invoke` always starts a new run for the thread. `resume` continues the saved one, optionally
   editing the state first.
-- A checkpoint is saved after every step, so a run can also be resumed after a crash.
+- A checkpoint is saved after every step, so a run can also be resumed after a crash. Such a
+  `resume` still pauses before an `interruptBefore` node; only a run that already paused there
+  continues past it.
 - `MemoryCheckpointer` is available for tests. To store checkpoints elsewhere (Room, SQLDelight, a
   server), implement the three-method `Checkpointer` interface.
 
@@ -180,7 +182,7 @@ Everything the library throws extends `LangGraphException`:
 | Exception | When |
 |---|---|
 | `GraphValidationException` | The graph or `GraphConfig` is invalid. Thrown by `compile()` or when a run starts. |
-| `NodeExecutionException` | A node threw. `nodeName` and the original `cause` are available. |
+| `NodeExecutionException` | A node threw, or a `withTimeout` inside it expired. `nodeName` and the original `cause` are available. |
 | `InvalidRouteException` | A conditional edge returned a node that does not exist or is not a declared target. |
 | `MaxIterationsExceededException` | The run took more steps than `GraphConfig.maxIterations` (default 25). |
 | `CheckpointNotFoundException`, `GraphAlreadyCompletedException` | `resume` had nothing to continue. |
