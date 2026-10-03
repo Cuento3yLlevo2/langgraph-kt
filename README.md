@@ -89,7 +89,15 @@ suspend fun main() {
 `node()` returns a reference you can connect with `then`. If you prefer plain names,
 `edge("research", "write")` does the same thing.
 
+## Tutorial
+
+New to agent workflows, or to graphs? The [tutorial](docs/README.md) starts from zero and adds one
+idea per level, like a game: a node, a choice, a loop, parallel work, pausing for a human. Every
+level is a small program you can run, for example `./gradlew :samples:runLevel1`.
+
 ## Guides
+
+The guides below are the short version, for readers who know the basics.
 
 ### Streaming
 
@@ -296,6 +304,7 @@ Runnable examples live in [`samples/`](samples/src/main/kotlin/org/langgraphkt/s
 ./gradlew :samples:runReviewLoop
 ./gradlew :samples:runParallelResearch
 ./gradlew :samples:runChatAgent
+./gradlew :samples:runLevel1        # ... runLevel10, the levels of the tutorial
 ```
 
 ## Contributing

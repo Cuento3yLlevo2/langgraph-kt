@@ -38,7 +38,8 @@ is a directed graph: nodes transform an immutable state and edges decide what ru
   `CheckpointCodec` (the shared checkpoint format, also used by `FileCheckpointer`)
 - **`langgraph-kt-checkpoint-file`** (KMP): `FileCheckpointer` on kotlinx-io
 - **`langgraph-kt-langchain4j`** (JVM): `chatNode` / `chatMessagesNode` for LangChain4j 1.x `ChatModel`
-- **`samples`**: runnable examples with tests; not published
+- **`samples`**: runnable examples with tests; not published. `samples/.../tutorial/levelN` is the
+  code of the tutorial in `docs/`; a page shows its level's code and output, so change both together
 - **`build-logic`**: convention plugins `langgraph.kmp-library`, `langgraph.jvm-library`,
   `langgraph.quality` (ktlint, Kover, Dokka), `langgraph.publishing`, `langgraph.root`
 

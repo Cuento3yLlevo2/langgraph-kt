@@ -39,7 +39,8 @@ Windows. CI covers all of them, so you do not need every OS locally.
 | `langgraph-kt-serialization` | `KotlinxStateSerializer` (multiplatform) |
 | `langgraph-kt-checkpoint-file` | `FileCheckpointer` on kotlinx-io (multiplatform) |
 | `langgraph-kt-langchain4j` | LangChain4j integration (JVM) |
-| `samples` | Runnable examples, not published |
+| `samples` | Runnable examples, not published. `samples/.../tutorial` holds the code of the tutorial |
+| `docs` | The tutorial, one Markdown page per level |
 | `build-logic` | Gradle convention plugins shared by all modules |
 | `gradle/libs.versions.toml` | Every dependency version |
 
@@ -80,9 +81,11 @@ Windows. CI covers all of them, so you do not need every OS locally.
 4. Run `./gradlew check apiCheck`.
 5. If you changed the public API on purpose, run `./gradlew apiDump` and commit the updated files in
    `*/api/`. Reviewers use that diff to see exactly what changed for users.
-6. Add a line to the "Unreleased" section of [CHANGELOG.md](CHANGELOG.md) when users will notice
+6. If you change a tutorial level in `samples/.../tutorial`, update its page in `docs/` so the code
+   and the output shown there stay the same as the program. `TutorialTest` pins the output.
+7. Add a line to the "Unreleased" section of [CHANGELOG.md](CHANGELOG.md) when users will notice
    the change.
-7. Open a pull request against `develop` and link the issue.
+8. Open a pull request against `develop` and link the issue.
 
 ### Commit messages
 
