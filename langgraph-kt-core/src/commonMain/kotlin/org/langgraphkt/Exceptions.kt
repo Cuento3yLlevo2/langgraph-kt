@@ -58,8 +58,8 @@ public class EdgeConditionException(
 ) : LangGraphException("Conditional edge from '$from' failed: ${cause.message}", cause)
 
 /**
- * The [Reducer] threw an exception while it merged the results of [nodes], the nodes that ran in
- * parallel in the failed step. The original exception is available as [cause]. Cancellation is
+ * The [Reducer] threw an exception while it merged the results of [nodes], the nodes of the failed
+ * step that each returned a whole state. The original exception is available as [cause]. Cancellation is
  * handled as for [NodeExecutionException].
  */
 public class ReducerException(

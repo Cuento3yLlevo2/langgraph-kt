@@ -19,9 +19,11 @@ import kotlinx.coroutines.flow.last
  * ## Execution model
  *
  * A run advances in steps. In each step all currently active nodes run in parallel on the same
- * input state, and their results are merged by the [Reducer] when there is more than one. The
- * outgoing edges of those nodes then decide which nodes are active in the next step. A branch that
- * routes to [END] simply stops; the run completes when no nodes are active.
+ * input state. When there is more than one, their results are combined: the [Reducer] merges the
+ * nodes that returned a whole state, and the updates of the nodes that were added with a `work` and
+ * an `update` are then applied one after another, in the order those nodes were added to the graph.
+ * The outgoing edges of the nodes then decide which nodes are active in the next step. A branch
+ * that routes to [END] simply stops; the run completes when no nodes are active.
  *
  * A node reached by several branches in the same step runs once. If the branches have different
  * lengths, the node runs once for each step in which a branch reaches it.
@@ -43,6 +45,9 @@ public class CompiledGraph<State> internal constructor(
     internal val conditionalEdges: Map<String, ConditionalEdge<State>>,
     internal val reducer: Reducer<State>? = null,
 ) {
+    /** The position of each node in the order the nodes were added to the graph. */
+    private val nodeOrder: Map<String, Int> = nodes.keys.withIndex().associate { it.value to it.index }
+
     /** The nodes and edges of this graph, for drawing or inspecting it. */
     public val topology: GraphTopology =
         GraphTopology(
@@ -201,17 +206,17 @@ public class CompiledGraph<State> internal constructor(
         activeNodes.forEach { emit(GraphEvent.NodeStarted(step, it, state)) }
         if (activeNodes.size == 1) {
             val name = activeNodes.single()
-            return runNode(nodes.getValue(name), state).also { emit(GraphEvent.NodeCompleted(step, name, it)) }
+            return runNode(nodes.getValue(name), state).state.also { emit(GraphEvent.NodeCompleted(step, name, it)) }
         }
 
         // A flow may only emit from the coroutine that collects it, so the parallel nodes hand their
         // results over a channel and this coroutine emits them in the order the nodes finish.
-        val updates =
+        val outputs =
             coroutineScope {
                 val finished = Channel<Pair<String, State>>(Channel.UNLIMITED)
                 val results =
                     activeNodes.map { name ->
-                        async { runNode(nodes.getValue(name), state).also { finished.send(name to it) } }
+                        async { runNode(nodes.getValue(name), state).also { finished.send(name to it.state) } }
                     }
                 repeat(activeNodes.size) {
                     val (name, result) = finished.receive()
@@ -219,12 +224,39 @@ public class CompiledGraph<State> internal constructor(
                 }
                 results.awaitAll()
             }
-        val reducer = checkNotNull(reducer) { "compile() guarantees a reducer for graphs that fan out" }
-        return wrapFailure({ ReducerException(activeNodes, it) }) { reducer.reduce(state, updates) }
+        return combine(state, activeNodes.zip(outputs))
     }
 
-    private suspend fun runNode(node: Node<State>, state: State): State =
-        wrapFailure({ NodeExecutionException(node.name, it) }) { node.action(state) }
+    /**
+     * Combines what the nodes of a parallel step produced, each given with the name of its node.
+     *
+     * The nodes that returned a whole state decide the state to start from: [state] when there is
+     * none, the state of the only one, or what the reducer makes of several. The updates of the
+     * other nodes are then applied to it one after another, in the order those nodes were added to
+     * the graph.
+     */
+    private suspend fun combine(state: State, outputs: List<Pair<String, NodeOutput<State>>>): State {
+        val states = outputs.filter { (_, output) -> output.update == null }
+        var combined =
+            when (states.size) {
+                0 -> state
+                1 -> states.single().second.state
+                else -> {
+                    val reducer =
+                        checkNotNull(reducer) { "compile() guarantees a reducer when two nodes that return a state can run together" }
+                    val names = states.map { it.first }
+                    wrapFailure({ cause -> ReducerException(names, cause) }) { reducer.reduce(state, states.map { it.second.state }) }
+                }
+            }
+        for ((name, output) in outputs.sortedBy { nodeOrder.getValue(it.first) }) {
+            val update = output.update ?: continue
+            combined = wrapFailure({ cause -> NodeExecutionException(name, cause) }) { update(combined) }
+        }
+        return combined
+    }
+
+    private suspend fun runNode(node: Node<State>, state: State): NodeOutput<State> =
+        wrapFailure({ NodeExecutionException(node.name, it) }) { node.run(state) }
 
     /**
      * Runs [block], which calls code of the application (a node, the condition of an edge or the
