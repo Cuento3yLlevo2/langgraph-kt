@@ -41,7 +41,8 @@ First public release. Everything below is new compared with the unpublished beta
 - `Reducer.reduce` is a suspend function.
 - `FileCheckpointer` takes a `kotlinx.io.files.Path` and lives in `org.langgraphkt.checkpoint.file`.
 - `MemoryCheckpointer` is safe for concurrent use.
-- Requires Kotlin 2.x; JVM artifacts target Java 11.
+- Requires Kotlin 2.x; JVM artifacts target Java 11, except `langgraph-kt-langchain4j`, which needs
+  Java 17 because LangChain4j does.
 
 ### Removed
 

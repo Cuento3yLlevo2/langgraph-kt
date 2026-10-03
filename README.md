@@ -154,9 +154,10 @@ dependencies {
 | `langgraph-kt-core` | JVM/Android, iOS, macOS, Linux, Windows, JS, Wasm | Graph builder, execution engine, checkpointing interfaces |
 | `langgraph-kt-serialization` | same as core | `KotlinxStateSerializer` for `@Serializable` states, `CheckpointCodec` for custom checkpointers |
 | `langgraph-kt-checkpoint-file` | same as core (Node.js only for JS/Wasm) | `FileCheckpointer`, one JSON file per thread |
-| `langgraph-kt-langchain4j` | JVM/Android | `chatNode` / `chatMessagesNode` for LangChain4j 1.x `ChatModel` |
+| `langgraph-kt-langchain4j` | JVM (Java 17+) | `chatNode` / `chatMessagesNode` for LangChain4j 1.x `ChatModel` |
 
-Requires Kotlin 2.x. JVM artifacts target Java 11.
+Requires Kotlin 2.x. JVM artifacts target Java 11, except `langgraph-kt-langchain4j`, which needs
+Java 17 because LangChain4j does.
 
 ### Status
 
@@ -427,7 +428,7 @@ A node is a `suspend` function, so it can call any AI model with any client libr
 val classify = node("classify") { email -> email.copy(category = askMyModel(email.body)) }
 ```
 
-On the JVM and Android, `langgraph-kt-langchain4j` builds such a node from any
+On the JVM, `langgraph-kt-langchain4j` builds such a node from any
 [LangChain4j](https://docs.langchain4j.dev) `ChatModel`, which covers most model providers:
 
 ```kotlin
