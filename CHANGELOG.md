@@ -31,6 +31,7 @@ First public release. Everything below is new compared with the unpublished beta
 - `langgraph-kt-checkpoint-file` module: `FileCheckpointer` with atomic writes and a versioned format.
 - `chatNode` and `chatMessagesNode` for LangChain4j 1.x `ChatModel`.
 - Runnable samples in `samples/`.
+- A step-by-step tutorial in `docs/`, with a runnable program for every level.
 
 ### Changed
 
