@@ -288,6 +288,7 @@ public final class org/langgraphkt/StateGraph {
 	public final fun conditionalEdgeToRefs (Lorg/langgraphkt/NodeRef;Ljava/util/Set;Lkotlin/jvm/functions/Function2;)V
 	public final fun edge (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun node (Ljava/lang/String;Lkotlin/jvm/functions/Function2;)Lorg/langgraphkt/NodeRef;
+	public final fun node (Ljava/lang/String;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;)Lorg/langgraphkt/NodeRef;
 	public final fun then (Ljava/lang/String;Lorg/langgraphkt/NodeRef;)Lorg/langgraphkt/NodeRef;
 	public final fun then (Lorg/langgraphkt/NodeRef;Ljava/lang/String;)Ljava/lang/String;
 	public final fun then (Lorg/langgraphkt/NodeRef;Lorg/langgraphkt/NodeRef;)Lorg/langgraphkt/NodeRef;

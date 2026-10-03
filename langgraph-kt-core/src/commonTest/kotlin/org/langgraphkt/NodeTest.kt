@@ -23,12 +23,12 @@ class NodeTest {
     fun `node execution should not mutate original state but return copy`() =
         runTest {
             val node =
-                Node<TestState>("increment") { state ->
+                stateNode<TestState>("increment") { state ->
                     state.copy(count = state.count + 1)
                 }
 
             val initialState = TestState(0)
-            val finalState = node.action(initialState)
+            val finalState = node.run(initialState).state
 
             assertEquals(0, initialState.count)
             assertEquals(1, finalState.count)

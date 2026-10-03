@@ -62,7 +62,7 @@ The values are **events**. There are five kinds:
 |---|---|---|
 | `NodeStarted` | A node is about to run | `step`, `node`, the state the node receives |
 | `NodeCompleted` | A node finished | `step`, `node`, the state the node returned |
-| `StepCompleted` | All nodes of a step finished | `step`, `nodes`, the state after the step (after the reducer, if several nodes ran) |
+| `StepCompleted` | All nodes of a step finished | `step`, `nodes`, the state after the step, with the results of all its nodes |
 | `Completed` | The run reached `END` | The final state. Always the last event. |
 | `Interrupted` | The run paused | The state and the nodes that are next. Level 7 explains pausing. |
 

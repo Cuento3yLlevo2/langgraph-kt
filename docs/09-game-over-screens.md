@@ -19,7 +19,7 @@ This level makes five mistakes on purpose.
 ```
 GraphValidationException: Edge references unknown to-node: anwser
 GraphValidationException: Node 'check' is not reachable from START
-GraphValidationException: Node 'read' fans out to several nodes, so compile() needs a Reducer to merge their results
+GraphValidationException: Node 'read' fans out to several nodes that return a whole state, so compile() needs a Reducer, or those nodes need a work and an update
 MaxIterationsExceededException: Graph execution exceeded max iterations (25). Possible infinite loop.
 NodeExecutionException: Node 'kitchen' failed: the kitchen phone is busy
 After a retry: Hi Ana! Your pizza is in the oven.
@@ -68,7 +68,7 @@ Node 'check' is not reachable from START
 
 You added a node and forgot its arrow. It could never run, which is never what you meant.
 
-### 3. Parallel nodes without a reducer
+### 3. Two parallel nodes that each return the whole ticket
 
 ```kotlin
 StateGraph<Ticket> {
@@ -83,11 +83,13 @@ StateGraph<Ticket> {
 ```
 
 ```
-Node 'read' fans out to several nodes, so compile() needs a Reducer to merge their results
+Node 'read' fans out to several nodes that return a whole state, so compile() needs a Reducer, or those nodes need a work and an update
 ```
 
-Two arrows leave `read`, so `kitchen` and `driver` run at the same time, and nothing says how to
-merge their results. Pass a reducer to `compile` (level 5).
+Two arrows leave `read`, so `kitchen` and `driver` run at the same time. Each returns a whole
+ticket, and nothing says how to make one ticket out of two. Give the two nodes a `work` and an
+`update` (level 5). The other way out is a `Reducer`, a function that merges whole states; the
+[README](../README.md#merging-whole-states) shows one.
 
 If a map has several mistakes, the message lists all of them at once.
 

@@ -1,11 +1,14 @@
 package org.langgraphkt
 
 /**
- * Defines how to merge state updates from parallel node execution.
+ * Merges the states of nodes that ran in the same step and each returned a whole state.
  *
- * When multiple nodes execute in parallel (fan-out), they each produce a modified copy of the state.
- * The Reducer is responsible for taking the original state and the list of updated states,
- * and combining them into a single definitive state for the next step of execution.
+ * Such nodes each produce their own copy of the state. The reducer takes the state before the step
+ * and those copies, and returns the one state the run continues with. Whatever it does not carry
+ * over from the copies is lost.
+ *
+ * Nodes added with a `work` and an `update` do not go through the reducer, and a graph whose
+ * parallel nodes are all of that kind needs none. See [StateGraph.node] and [StateGraph.compile].
  */
 public fun interface Reducer<State> {
     public suspend fun reduce(currentState: State, updates: List<State>): State

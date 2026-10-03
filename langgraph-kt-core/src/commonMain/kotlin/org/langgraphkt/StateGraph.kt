@@ -47,17 +47,44 @@ public class StateGraph<State> {
      *
      * @throws GraphValidationException if the name is blank, reserved ([START], [END]) or already used.
      */
-    public fun node(name: String, action: NodeAction<State>): NodeRef {
+    public fun node(name: String, action: NodeAction<State>): NodeRef = add(stateNode(name, action))
+
+    /**
+     * Adds a node whose job is split in two, so that it can run next to other nodes without a
+     * [Reducer]. [work] does the slow part, such as a call to a model or a service, and returns a
+     * result. [update] writes that result into the state.
+     *
+     * ```kotlin
+     * val web = node("web", work = { searchWeb(it.question) }) { state, found ->
+     *     state.copy(findings = state.findings + found)
+     * }
+     * ```
+     *
+     * When several nodes run in the same step, their [work] runs in parallel on the same state.
+     * Their updates are then applied one after another, in the order the nodes were added to the
+     * graph, each to the state that the previous one produced. No change is lost, and if two nodes
+     * write the same property, the node that was added later wins.
+     *
+     * [update] must only build the new state. The engine may call it more than once for one run of
+     * the node.
+     *
+     * @throws GraphValidationException if the name is blank, reserved ([START], [END]) or already used.
+     */
+    public fun <Result> node(name: String, work: suspend (State) -> Result, update: suspend (State, Result) -> State): NodeRef =
+        add(workNode(name, work, update))
+
+    private fun add(node: Node<State>): NodeRef {
+        val name = node.name
         if (name.isBlank()) throw GraphValidationException("Node name must not be blank.")
         if (name == START || name == END) throw GraphValidationException("'$name' is a reserved node name.")
         if (name in nodes) throw GraphValidationException("Node with name '$name' already exists.")
-        nodes[name] = Node(name, action)
+        nodes[name] = node
         return NodeRef(name)
     }
 
     /**
      * Adds a static edge: after [from] finishes, [to] runs. Several static edges from the same node
-     * fan out and run their targets in parallel, which requires a [Reducer] at [compile] time.
+     * fan out and run their targets in parallel. See [compile] for when that needs a [Reducer].
      */
     public fun edge(from: String, to: String) {
         edges.add(Edge(from, to))
@@ -122,8 +149,9 @@ public class StateGraph<State> {
     /**
      * Validates the graph and returns an executable [CompiledGraph].
      *
-     * @param reducer merges the states produced by nodes that ran in parallel. Required when any
-     * node (or [START]) has more than one static edge.
+     * @param reducer merges the states of nodes that ran in the same step and each returned a whole
+     * state. Required when two such nodes can run in the same step. Nodes added with a `work` and an
+     * `update` do not need it.
      * @throws GraphValidationException listing every problem found in the graph definition.
      */
     public fun compile(reducer: Reducer<State>? = null): CompiledGraph<State> {
@@ -175,16 +203,63 @@ public class StateGraph<State> {
         }
 
         if (reducer == null) {
-            edges.groupingBy { it.from }.eachCount().filterValues { it > 1 }.keys.forEach {
-                problems += "Node '$it' fans out to several nodes, so compile() needs a Reducer to merge their results"
-            }
+            edges
+                .groupBy({ it.from }, { it.to })
+                .filterValues { targets -> targets.count { nodes[it]?.returnsState == true } > 1 }
+                .keys
+                .forEach {
+                    problems +=
+                        "Node '$it' fans out to several nodes that return a whole state, " +
+                        "so compile() needs a Reducer, or those nodes need a work and an update"
+                }
         }
 
         // Reachability is only decidable when every conditional edge declares its targets.
         if (problems.isEmpty() && conditionalEdges.all { it.targets != null }) {
             (nodes.keys - reachableNodes()).forEach { problems += "Node '$it' is not reachable from START" }
         }
+
+        // Branches of a fan-out can also meet later in the graph, away from the node that fans out.
+        if (problems.isEmpty() && reducer == null) {
+            parallelStateNodes()?.let { (first, second) ->
+                problems +=
+                    "Nodes '$first' and '$second' can run in the same step and both return a whole state, " +
+                    "so compile() needs a Reducer, or those nodes need a work and an update"
+            }
+        }
         return problems
+    }
+
+    /**
+     * Returns two nodes that each return a whole state and can run in the same step, or `null` if
+     * there are none. Two nodes can run in the same step when they are targets of the same fan-out,
+     * or when they follow two nodes that can. A conditional edge without declared targets may lead
+     * to any node.
+     */
+    private fun parallelStateNodes(): Pair<String, String>? {
+        val routes = conditionalEdges.associateBy { it.from }
+        val staticTargets = edges.groupBy({ it.from }, { it.to })
+
+        fun successors(node: String): Collection<String> {
+            val route = routes[node] ?: return staticTargets[node].orEmpty()
+            return route.targets ?: nodes.keys
+        }
+
+        val together = mutableSetOf<Pair<String, String>>()
+        val queue = ArrayDeque<Pair<String, String>>()
+
+        fun add(first: String, second: String) {
+            if (first != second && first != END && second != END && together.add(first to second)) queue.add(first to second)
+        }
+
+        for (targets in staticTargets.values) {
+            for (first in targets) for (second in targets) add(first, second)
+        }
+        while (queue.isNotEmpty()) {
+            val (first, second) = queue.removeFirst()
+            for (afterFirst in successors(first)) for (afterSecond in successors(second)) add(afterFirst, afterSecond)
+        }
+        return together.firstOrNull { (first, second) -> nodes.getValue(first).returnsState && nodes.getValue(second).returnsState }
     }
 
     private fun reachableNodes(): Set<String> {

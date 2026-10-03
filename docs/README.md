@@ -34,7 +34,7 @@ plugs in.
 | [2. A line of nodes](02-a-line-of-nodes.md) | Pass work from one node to the next | `copy`, several nodes |
 | [3. Choices](03-choices.md) | Take a different path depending on the state | `conditionalEdge`, `targets` |
 | [4. Loops](04-loops.md) | Repeat a step until the result is good | an edge that goes back, `maxIterations` |
-| [5. Doing two things at once](05-parallel.md) | Run nodes at the same time | fan-out, `Reducer` |
+| [5. Doing two things at once](05-parallel.md) | Run nodes at the same time | fan-out, `work` and `update` |
 | [6. Watching a run](06-watching-a-run.md) | See what the graph is doing while it runs | `stream`, `GraphEvent`, `states` |
 | [7. Save points](07-save-points.md) | Pause for a human and continue later | `GraphConfig`, checkpointer, `resume`, `lastResult` |
 | [8. A real AI model](08-a-real-ai-model.md) | Let a model write the reply | `chatNode` |

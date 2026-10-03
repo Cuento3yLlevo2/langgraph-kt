@@ -19,8 +19,11 @@ First public release. Everything below is new compared with the unpublished beta
   and `Flow<GraphEvent>.states()`.
 - `CompiledGraph.topology` (`GraphTopology`, `GraphEdge`) to inspect or draw a compiled graph.
 - Graph validation in `compile()`: unknown, unreachable and duplicate nodes or edges, conflicting
-  edge kinds, and fan-out without a reducer.
+  edge kinds, and two nodes that return a whole state in the same step without a reducer.
 - `conditionalEdge(from, targets)` with declared targets, checked at compile time and at run time.
+- Nodes with a `work` and an `update`, `node(name, work) { state, result -> ... }`, for parallel
+  branches. Their work runs at the same time and their updates are applied one after another, so
+  they need no `Reducer`.
 - `NodeRef` and the infix `then` for type-safe edges: `START then a then b then END`.
 - Conditional edges that route between node references instead of names:
   `conditionalEdge(a, targets = setOf(b, c)) { b }`, with `NodeRef.END` to finish.

@@ -27,9 +27,10 @@ public sealed interface GraphEvent<out State> {
     ) : GraphEvent<State>
 
     /**
-     * [node] finished in [step]. [state] is what the node returned. In a step with several nodes
-     * this is the node's own result, before the [Reducer] merges it with the others; the merged
-     * state arrives with [StepCompleted].
+     * [node] finished in [step]. [state] is what the node returned, or for a node with a `work` and
+     * an `update`, its update applied to the state the node received. In a step with several nodes
+     * this is the node's own result, before it is combined with the others; the combined state
+     * arrives with [StepCompleted].
      */
     public data class NodeCompleted<out State>(
         val step: Int,

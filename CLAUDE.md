@@ -45,17 +45,21 @@ is a directed graph: nodes transform an immutable state and edges decide what ru
 
 ### Execution Flow
 
-1. **Define** with the `StateGraph<State> { ... }` DSL. `node()` returns a `NodeRef`; connect nodes
-   with `START then a then b then END`, `edge(from, to)`, or `conditionalEdge(from, targets) { ... }`.
-2. **Compile** with `.compile(reducer = ...)`, which validates the graph and returns a `CompiledGraph<State>`.
+1. **Define** with the `StateGraph<State> { ... }` DSL. `node(name) { ... }` returns a whole state;
+   `node(name, work) { state, result -> ... }` splits a node into slow work and a state update, for
+   nodes that run in parallel. Both return a `NodeRef`; connect nodes with
+   `START then a then b then END`, `edge(from, to)`, or `conditionalEdge(from, targets) { ... }`.
+2. **Compile** with `.compile()`, which validates the graph and returns a `CompiledGraph<State>`. It
+   needs a `reducer` only when two nodes that return a whole state can run in the same step.
 3. **Execute** with `invoke(input, config)` (returns `GraphResult.Completed` or `.Interrupted`) or
    `stream(input, config)` (a `Flow<GraphEvent<State>>`). Continue a paused run with
    `resume(config) { state -> ... }` / `streamResume`. `lastResult(config)` reads where a thread
    stopped without running it.
 
 The engine (`CompiledGraph.kt`) runs in steps: all active nodes run in parallel on the same input
-state, the `Reducer` merges their results, and outgoing edges select the next active nodes. A
-checkpoint is saved after every step when a checkpointer is configured.
+state, their results are combined (the `Reducer` merges whole states, then the updates of
+work/update nodes are applied in the order the nodes were added), and outgoing edges select the
+next active nodes. A checkpoint is saved after every step when a checkpointer is configured.
 
 ### Core Abstractions
 
@@ -63,7 +67,7 @@ checkpoint is saved after every step when a checkpointer is configured.
 |------|---------|
 | `NodeAction<State>` | `suspend (State) -> State`, a node's transformation |
 | `EdgeCondition<State>` | `suspend (State) -> String`, routes to the next node name or `END` |
-| `Reducer<State>` | `fun interface` with a suspend `reduce`; merges parallel updates; required for fan-out |
+| `Reducer<State>` | `fun interface` with a suspend `reduce`; merges whole states of parallel nodes; not needed for work/update nodes |
 | `GraphConfig<State>` | `threadId`, `checkpointer`, `interruptBefore/After` (sets), `maxIterations` |
 | `GraphResult<State>` / `GraphEvent<State>` | Outcome of `invoke`/`resume`, and events from `stream` (per node and per step) |
 | `GraphTopology` | Nodes and edges of a compiled graph, from `CompiledGraph.topology` |

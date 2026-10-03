@@ -61,7 +61,7 @@ Open the file and find each move:
 | Move | Where | Level |
 |---|---|---|
 | A choice | The conditional edge after `read` | 3 |
-| Two things at once | `look_up` has two arrows, to `kitchen` and `driver`; `collectFacts` merges them | 5 |
+| Two things at once | `look_up` has two arrows, to `kitchen` and `driver`, which each have a `work` and an `update` | 5 |
 | A loop | `check` sends a reply without the customer's name back to `write` | 4 |
 | A pause | `interruptBefore = setOf(PAY)` in `main`, then `resume` | 7 |
 | A save slot per job | `threadId = "ticket-1"`, `"ticket-2"`, ... | 7 |
@@ -95,8 +95,8 @@ write the fact into the state, and let the router only look at it.
 state and a limit in the router.
 
 **7. Can anything run at the same time?** Work that does not depend on each other, such as several
-lookups, can share a step. Draw several arrows from one node and write a reducer for the fields
-those nodes fill.
+lookups, can share a step. Draw several arrows from one node, and give each of those nodes a
+`work` and an `update`.
 
 **8. Where must a human look first?** Anything that costs money, cannot be undone, or goes out to a
 customer. Put `interruptBefore` there, give the run a checkpointer and a `threadId`, and continue
