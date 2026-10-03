@@ -25,6 +25,9 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6
       - name: Build, test, lint and verify API
         run: ./gradlew check apiCheck koverXmlReport --continue
+      # The docs and release workflows only run on main and on a tag, so build what they build here too.
+      - name: Build the API docs and the publications
+        run: ./gradlew dokkaGenerate publishToMavenLocal
       - name: Upload test reports
         if: failure()
         uses: actions/upload-artifact@v7
