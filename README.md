@@ -363,9 +363,9 @@ val checkpointer = LocalStorageCheckpointer(CheckpointCodec<RefundState>())
 
 ### Parallel branches
 
-When several edges leave the same place, their target nodes run at the same time. Each one returns
-its own copy of the state, so the graph needs a `Reducer`: a function that merges those copies into
-one.
+When several edges leave the same place, their target nodes run at the same time. Write such a node
+in two parts: `work` is the slow part, for example a call to a model, and returns a result. The
+block after it is the node's `update`, which writes that result into the state.
 
 ```kotlin
 data class ResearchState(
@@ -374,29 +374,58 @@ data class ResearchState(
     val summary: String = "",
 )
 
-// `current` is the state before the step. `updates` has one state per node that ran in the step.
-// The merged state keeps the old findings and adds what each node found.
-val mergeFindings = Reducer<ResearchState> { current, updates ->
-    current.copy(findings = current.findings + updates.flatMap { it.findings - current.findings.toSet() })
-}
-
 val graph = StateGraph<ResearchState> {
-    val web = node("web") { it.copy(findings = it.findings + searchWeb(it.question)) }
-    val docs = node("docs") { it.copy(findings = it.findings + searchDocs(it.question)) }
+    // The `work` of both nodes runs at the same time. Their updates are then applied one after the other.
+    val web = node("web", work = { searchWeb(it.question) }) { state, found ->
+        state.copy(findings = state.findings + found)
+    }
+    val docs = node("docs", work = { searchDocs(it.question) }) { state, found ->
+        state.copy(findings = state.findings + found)
+    }
     val summarize = node("summarize") { it.copy(summary = summarize(it.findings)) }
 
     // Two edges leave START, so "web" and "docs" run at the same time.
     START then web then summarize
     START then docs then summarize
-    // "summarize" runs once, after both have finished and the reducer has merged their results.
+    // "summarize" runs once, after both have finished, with the findings of both.
     summarize then END
-}.compile(reducer = mergeFindings) // without a reducer, compile() rejects this graph
+}.compile()
 ```
 
 Runnable version: [`ParallelResearch`](samples/src/main/kotlin/org/langgraphkt/samples/ParallelResearch.kt).
 
-If one branch fails, the others are cancelled and the error is rethrown as `NodeExecutionException`
-with the name of the failing node.
+- The updates are applied in the order the nodes were added to the graph (`web`, then `docs`), each
+  to the state that the previous one produced. If two nodes write the same property, the one added
+  later wins.
+- `update` only builds the new state, and the engine may call it more than once. Keep slow calls
+  and side effects in `work`.
+- If one branch fails, the others are cancelled and the error is rethrown as
+  `NodeExecutionException` with the name of the failing node.
+
+#### Merging whole states
+
+A node written as `node(name) { ... }` returns a whole state. One such node can share a step with
+the nodes above, but when two of them run in the same step there are two states and the run can
+continue with only one. `compile()` then asks for a `Reducer`, which makes one state out of them:
+
+```kotlin
+data class Pitch(val product: String, val text: String = "")
+
+// `current` is the state before the step. `updates` has one state per node that returned a whole state.
+// Two writers each return a complete pitch, and the shorter one is kept.
+val keepShortest = Reducer<Pitch> { current, updates -> updates.minBy { it.text.length } }
+
+val graph = StateGraph<Pitch> {
+    val formal = node("formal") { it.copy(text = writeFormally(it.product)) }
+    val casual = node("casual") { it.copy(text = writeCasually(it.product)) }
+
+    START then formal then END
+    START then casual then END
+}.compile(reducer = keepShortest) // without a reducer, compile() rejects this graph
+```
+
+A reducer has to carry over everything it wants to keep from `updates`, so prefer `work` and
+`update` when nodes add to the state, and use a reducer when the step has to choose or compare.
 
 ### Loops
 
@@ -492,8 +521,8 @@ topology.dynamicRoutes         // nodes whose conditional edge declares no targe
 
 ## Errors
 
-Mistakes in the graph itself (an unknown node name, a node nothing leads to, parallel branches
-without a reducer) are reported by `compile()`, before anything runs. Everything the library throws
+Mistakes in the graph itself (an unknown node name, a node nothing leads to, two nodes that return
+a whole state in the same step without a reducer) are reported by `compile()`, before anything runs. Everything the library throws
 extends `LangGraphException`:
 
 | Exception | When |
@@ -501,7 +530,7 @@ extends `LangGraphException`:
 | `GraphValidationException` | The graph or `GraphConfig` is invalid. Thrown by `compile()` or when a run starts. |
 | `NodeExecutionException` | A node threw, or a `withTimeout` inside it expired. `nodeName` and the original `cause` are available. |
 | `EdgeConditionException` | The function of a conditional edge threw. `from` and the original `cause` are available. |
-| `ReducerException` | The reducer threw. `nodes` (the nodes it was merging) and the original `cause` are available. |
+| `ReducerException` | The reducer threw. `nodes` (the nodes whose states it was merging) and the original `cause` are available. |
 | `InvalidRouteException` | A conditional edge returned a node that does not exist or is not a declared target. |
 | `MaxIterationsExceededException` | The run took more steps than `GraphConfig.maxIterations` (default 25). |
 | `CheckpointNotFoundException`, `GraphAlreadyCompletedException` | `resume` had nothing to continue. |

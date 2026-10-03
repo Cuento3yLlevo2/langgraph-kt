@@ -207,7 +207,11 @@ public class StateGraph<State> {
                 .groupBy({ it.from }, { it.to })
                 .filterValues { targets -> targets.count { nodes[it]?.returnsState == true } > 1 }
                 .keys
-                .forEach { problems += "Node '$it' fans out to several nodes, so compile() needs a Reducer to merge their results" }
+                .forEach {
+                    problems +=
+                        "Node '$it' fans out to several nodes that return a whole state, " +
+                        "so compile() needs a Reducer, or those nodes need a work and an update"
+                }
         }
 
         // Reachability is only decidable when every conditional edge declares its targets.
@@ -218,7 +222,9 @@ public class StateGraph<State> {
         // Branches of a fan-out can also meet later in the graph, away from the node that fans out.
         if (problems.isEmpty() && reducer == null) {
             parallelStateNodes()?.let { (first, second) ->
-                problems += "Nodes '$first' and '$second' can run in the same step, so compile() needs a Reducer to merge their results"
+                problems +=
+                    "Nodes '$first' and '$second' can run in the same step and both return a whole state, " +
+                    "so compile() needs a Reducer, or those nodes need a work and an update"
             }
         }
         return problems

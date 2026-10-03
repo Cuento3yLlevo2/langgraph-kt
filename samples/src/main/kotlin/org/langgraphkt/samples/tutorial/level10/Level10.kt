@@ -7,7 +7,6 @@ import org.langgraphkt.GraphConfig
 import org.langgraphkt.GraphResult
 import org.langgraphkt.MemoryCheckpointer
 import org.langgraphkt.NodeRef
-import org.langgraphkt.Reducer
 import org.langgraphkt.START
 import org.langgraphkt.StateGraph
 
@@ -41,7 +40,17 @@ fun writeReply(ticket: Ticket): String {
 
 fun problemWith(ticket: Ticket): String = if (ticket.customer in ticket.reply) "" else "use the customer's name"
 
-val collectFacts = Reducer<Ticket> { current, updates -> current.copy(facts = updates.flatMap { it.facts }.distinct()) }
+/** A slow call to the kitchen. `delay` stands in for the time a real call to another system takes. */
+suspend fun askKitchen(millis: Long): String {
+    delay(millis)
+    return "your pizza left the oven"
+}
+
+/** A slow call to the driver. */
+suspend fun askDriver(millis: Long): String {
+    delay(millis)
+    return "the driver is 5 minutes away"
+}
 
 /** Level 10 of the tutorial in `docs/`: every move of the earlier levels in one graph. */
 fun helpDesk(lookupMillis: Long = 1_000): CompiledGraph<Ticket> =
@@ -50,16 +59,8 @@ fun helpDesk(lookupMillis: Long = 1_000): CompiledGraph<Ticket> =
 
         // Delivery questions: two lookups at the same time.
         val lookUp = node("look_up") { ticket -> ticket }
-        val kitchen =
-            node("kitchen") { ticket ->
-                delay(lookupMillis)
-                ticket.copy(facts = ticket.facts + "your pizza left the oven")
-            }
-        val driver =
-            node("driver") { ticket ->
-                delay(lookupMillis)
-                ticket.copy(facts = ticket.facts + "the driver is 5 minutes away")
-            }
+        val kitchen = node("kitchen", work = { askKitchen(lookupMillis) }) { ticket, fact -> ticket.copy(facts = ticket.facts + fact) }
+        val driver = node("driver", work = { askDriver(lookupMillis) }) { ticket, fact -> ticket.copy(facts = ticket.facts + fact) }
 
         // Every reply is written and checked, and rewritten if the check finds a problem.
         val write = node("write") { ticket -> ticket.copy(reply = writeReply(ticket), attempts = ticket.attempts + 1) }
@@ -93,7 +94,7 @@ fun helpDesk(lookupMillis: Long = 1_000): CompiledGraph<Ticket> =
         }
 
         prepare then pay then END
-    }.compile(reducer = collectFacts)
+    }.compile()
 
 suspend fun main() {
     val graph = helpDesk()

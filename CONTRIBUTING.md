@@ -50,7 +50,8 @@ Windows. CI covers all of them, so you do not need every OS locally.
 
 - State types are `data class`es with `val` properties and read-only collections.
 - Nodes return a new state with `.copy()`. They never mutate the state they receive.
-- Parallel branches depend on this: each branch gets the same input and a `Reducer` merges the outputs.
+- Parallel branches depend on this: each branch gets the same input, and their results are combined
+  after the step.
 
 ### 2. Coroutines only
 

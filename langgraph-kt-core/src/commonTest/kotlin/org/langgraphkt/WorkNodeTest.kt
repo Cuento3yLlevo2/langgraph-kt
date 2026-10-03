@@ -245,7 +245,8 @@ class WorkNodeTest {
         val exception = assertFailsWith<GraphValidationException> { graph.compile() }
 
         assertEquals(
-            "Nodes 'count' and 'summarize' can run in the same step, so compile() needs a Reducer to merge their results",
+            "Nodes 'count' and 'summarize' can run in the same step and both return a whole state, " +
+                "so compile() needs a Reducer, or those nodes need a work and an update",
             exception.message,
         )
         graph.compile { current, _ -> current }

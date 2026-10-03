@@ -183,7 +183,7 @@ class TutorialTest {
                 assertFailsWith<GraphValidationException> { forgottenArrow() }.message,
             )
             assertEquals(
-                "Node 'read' fans out to several nodes, so compile() needs a Reducer to merge their results",
+                "Node 'read' fans out to several nodes that return a whole state, so compile() needs a Reducer, or those nodes need a work and an update",
                 assertFailsWith<GraphValidationException> { missingReducer() }.message,
             )
             assertEquals(

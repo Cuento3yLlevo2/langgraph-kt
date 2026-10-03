@@ -18,7 +18,8 @@ Every word and every move of the [tutorial](README.md) on one page.
 | Router | The function of a conditional edge. It returns the name of the next node, or `END`. | [3](03-choices.md) |
 | Step | One round of the engine: run the current nodes, then follow their arrows | [4](04-loops.md) |
 | Fan-out | Several ordinary arrows from one place. Their nodes run at the same time, in one step. | [5](05-parallel.md) |
-| Reducer | The function that merges the states returned by nodes that ran at the same time | [5](05-parallel.md) |
+| `work` and `update` | The two parts of a node that can run next to others: `work` returns a result, `update` writes it into the state | [5](05-parallel.md) |
+| Reducer | A function that merges whole states. Only needed when two nodes that each return a whole state run at the same time. | [9](09-game-over-screens.md) |
 | Event | A message about a run in progress: a node started, a step finished, ... | [6](06-watching-a-run.md) |
 | Checkpoint | A save: the state, and which nodes come next | [7](07-save-points.md) |
 | Checkpointer | Where checkpoints are stored (memory, files, your own storage) | [7](07-save-points.md) |
@@ -52,7 +53,7 @@ val graph = StateGraph<Ticket> {
 | A line | `START then a then b then END` |
 | A choice | `conditionalEdge(a, targets = setOf(b, c)) { state -> ... }` |
 | A loop | A conditional edge whose router can return an earlier node, with a limit |
-| Parallel nodes | Several arrows from one place, and `compile(reducer = ...)` |
+| Parallel nodes | Several arrows from one place, to nodes written as `node("a", work = { ... }) { state, result -> ... }` |
 | An arrow by name | `edge("a", "b")` |
 | A choice by name | `conditionalEdge("a", targets = setOf("b", END)) { state -> "b" }` |
 
@@ -109,8 +110,8 @@ Pauses need a checkpointer.
 3. A router decides and does not change the state.
 4. A node has either ordinary arrows or one conditional edge.
 5. Every loop needs a limit.
-6. A graph that runs nodes in parallel needs a reducer, and the reducer must merge every field
-   those nodes write.
+6. Nodes that run in parallel have a `work` and an `update`. Slow calls and side effects go in
+   `work`; the update only builds the new state.
 7. `invoke` starts over. `resume` continues.
 
 ## Errors

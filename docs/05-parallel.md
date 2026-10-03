@@ -3,7 +3,7 @@
 **Goal:** to answer "Where is my pizza?", the help desk asks the kitchen and the driver at the same
 time instead of one after the other.
 
-**New moves:** fan-out (several arrows from one place), `Reducer`.
+**New moves:** fan-out (several arrows from one place), a node with a `work` and an `update`.
 
 ## The map
 
@@ -28,27 +28,29 @@ data class Ticket(
     val reply: String = "",
 )
 
-/** Merges the copies returned by nodes that ran at the same time: keep every fact, once. */
-val collectFacts = Reducer<Ticket> { current, updates -> current.copy(facts = updates.flatMap { it.facts }.distinct()) }
+/** A slow call to the kitchen. `delay` stands in for the time a real call to another system takes. */
+suspend fun askKitchen(millis: Long): String {
+    delay(millis)
+    return "your pizza left the oven"
+}
+
+/** A slow call to the driver. */
+suspend fun askDriver(millis: Long): String {
+    delay(millis)
+    return "the driver is 5 minutes away"
+}
 
 fun helpDesk(lookupMillis: Long = 1_000): CompiledGraph<Ticket> =
     StateGraph<Ticket> {
-        val kitchen =
-            node("kitchen") { ticket ->
-                delay(lookupMillis)
-                ticket.copy(facts = ticket.facts + "your pizza left the oven")
-            }
-        val driver =
-            node("driver") { ticket ->
-                delay(lookupMillis)
-                ticket.copy(facts = ticket.facts + "the driver is 5 minutes away")
-            }
+        // `work` asks and returns what it found. The block after it writes that fact into the ticket.
+        val kitchen = node("kitchen", work = { askKitchen(lookupMillis) }) { ticket, fact -> ticket.copy(facts = ticket.facts + fact) }
+        val driver = node("driver", work = { askDriver(lookupMillis) }) { ticket, fact -> ticket.copy(facts = ticket.facts + fact) }
         val answer = node("answer") { ticket -> ticket.copy(reply = "Hi ${ticket.customer}, ${ticket.facts.joinToString(" and ")}.") }
 
         START then kitchen then answer
         START then driver then answer
         answer then END
-    }.compile(reducer = collectFacts)
+    }.compile()
 
 suspend fun main() {
     val (result, time) = measureTimedValue { helpDesk().invoke(Ticket(customer = "Ana", message = "Where is my pizza?")) }
@@ -57,8 +59,7 @@ suspend fun main() {
 }
 ```
 
-`delay(lookupMillis)` makes each lookup wait one second, the way a real call to another system
-would.
+`delay(millis)` makes each lookup wait one second, the way a real call to another system would.
 
 ## Run it
 
@@ -78,52 +79,55 @@ The number of milliseconds varies a little. What matters is that it is about one
 When several ordinary arrows leave the same place, the engine runs all the nodes they point to **in
 the same step, at the same time**. This is called *fan-out*.
 
-That raises a question that did not exist before. Both nodes received the same ticket, with no
-facts, and each returned its own copy:
+That raises a question that did not exist before. Until now a node returned the whole ticket. If
+`kitchen` and `driver` both did that, there would be two tickets after the step, each with one
+fact, and the run can only continue with one.
 
-- `kitchen` returned a ticket with the fact "your pizza left the oven".
-- `driver` returned a ticket with the fact "the driver is 5 minutes away".
-
-There are now two tickets and the run can only continue with one. The library cannot guess how to
-combine them, so you tell it with a **`Reducer`**: a function that receives the state before the
-step (`current`) and the list of copies the nodes returned (`updates`), and returns the one state
-to continue with.
+So these two nodes are written in two parts:
 
 ```kotlin
-val collectFacts = Reducer<Ticket> { current, updates ->
-    current.copy(facts = updates.flatMap { it.facts }.distinct())
+val kitchen = node("kitchen", work = { askKitchen(lookupMillis) }) { ticket, fact ->
+    ticket.copy(facts = ticket.facts + fact)
 }
 ```
 
-In words: take the ticket as it was, and set its facts to all the facts from all the copies,
-without repeats. You pass the reducer to `compile(reducer = ...)`.
+- **`work`** is the slow part. It receives the ticket and returns a result, here the fact as a
+  text. The `work` of all the nodes of a step runs at the same time.
+- **The block after it** is the node's `update`. It receives the ticket and the result, and returns
+  the ticket with the result written into it. Updates do not run at the same time: when all the
+  work is done, the engine applies them one after the other, each to the ticket that the previous
+  one produced.
+
+So `kitchen` adds its fact to the ticket, and `driver` adds its fact to the ticket that already has
+the kitchen's. Nothing is lost, and there are never two tickets to choose from.
 
 Three things to know:
 
-- **A reducer keeps only what you tell it to keep.** `collectFacts` merges `facts` and nothing
-  else. If `kitchen` also changed `reply`, that change would be lost, because the reducer starts
-  from `current`. Merge every field that parallel nodes write.
-- **A graph that fans out needs a reducer.** Without one, `compile()` refuses the graph. You will
-  see that message in level 9.
-- **The reducer is only used when a step ran more than one node.** In all the other steps there is
-  one result and nothing to merge.
+- **The order is the order of the `node(...)` lines**, not the order in which the work finishes.
+  `kitchen` was added first, so its fact comes first, even if the driver answers sooner. If two
+  nodes write the same field, the one added later wins.
+- **Slow calls belong in `work`.** The update only builds the new ticket. The engine may call it
+  more than once, so it must not send, save or pay anything.
+- **A node that returns the whole ticket still works here.** One of them can share a step with
+  nodes like `kitchen`. Two of them cannot: `compile()` refuses that graph, and you will see its
+  message in level 9.
 
 And `answer`? Two arrows lead to it, but they arrive in the same step, so it runs once, with the
-merged ticket.
+ticket that has both facts.
 
 ## Your turn
 
 1. Add a third lookup, `weather`, that adds the fact "it is raining". Connect it like the other
    two. The reply now has three facts, and the time is still about one second.
-2. Make `driver` wait three times as long (`delay(lookupMillis * 3)`). How long does the run take
-   now? A step is finished when its slowest node is finished.
+2. Make `driver` wait three times as long (`askDriver(lookupMillis * 3)`). How long does the run
+   take now? A step is finished when its slowest node is finished.
 
 ## Level complete
 
 You can now:
 
 - run nodes at the same time by drawing several arrows from one place,
-- write a reducer that merges their results,
-- explain why parallel nodes need immutable state (each gets its own copy, level 2).
+- write a node as a `work` and an `update`, so that it can run next to other nodes,
+- say in which order the results of parallel nodes are written into the state.
 
 [Back to level 4](04-loops.md) · [All levels](README.md) · Next: [Level 6, watching a run](06-watching-a-run.md)
