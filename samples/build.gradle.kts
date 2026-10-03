@@ -40,7 +40,7 @@ listOf("QuickStart", "HumanInTheLoop", "ReviewLoop", "ParallelResearch", "ChatAg
 }
 
 // The levels of the tutorial in docs/, for example: ./gradlew :samples:runLevel1
-(1..9).forEach { level ->
+(1..10).forEach { level ->
     tasks.register<JavaExec>("runLevel$level") {
         group = "tutorial"
         description = "Runs level $level of the tutorial in docs/."

@@ -25,6 +25,9 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 import org.langgraphkt.samples.tutorial.level1.Ticket as Ticket1
 import org.langgraphkt.samples.tutorial.level1.helpDesk as helpDesk1
+import org.langgraphkt.samples.tutorial.level10.PAY as PAY10
+import org.langgraphkt.samples.tutorial.level10.Ticket as Ticket10
+import org.langgraphkt.samples.tutorial.level10.helpDesk as helpDesk10
 import org.langgraphkt.samples.tutorial.level2.Ticket as Ticket2
 import org.langgraphkt.samples.tutorial.level2.helpDesk as helpDesk2
 import org.langgraphkt.samples.tutorial.level3.Ticket as Ticket3
@@ -201,5 +204,25 @@ class TutorialTest {
             assertEquals("kitchen", failure.nodeName)
 
             assertEquals("Hi Ana! Your pizza is in the oven.", graph.resume(config).state.reply)
+        }
+
+    @Test
+    fun `level 10 handles a delivery question, a refund and anything else`() =
+        runTest {
+            val graph = helpDesk10()
+            val checkpointer = MemoryCheckpointer<Ticket10>()
+
+            fun config(threadId: String) = GraphConfig(threadId = threadId, checkpointer = checkpointer, interruptBefore = setOf(PAY10))
+
+            val delivery = graph.invoke(Ticket10("Ana", "Where is my pizza?"), config("ticket-1"))
+            assertEquals("Hi Ana, your pizza left the oven and the driver is 5 minutes away.", delivery.state.reply)
+            assertEquals(2, delivery.state.attempts)
+
+            val refund = graph.invoke(Ticket10("Ana", "My pizza arrived cold. I want a refund."), config("ticket-2"))
+            assertIs<GraphResult.Interrupted<Ticket10>>(refund)
+            assertEquals("Sorry Ana! We sent you 12 euros.", graph.resume(config("ticket-2")) { it.copy(approved = true) }.state.reply)
+
+            val other = graph.invoke(Ticket10("Ana", "Do you sell salad?"), config("ticket-3"))
+            assertEquals("Hi Ana, a colleague will reply soon.", other.state.reply)
         }
 }
