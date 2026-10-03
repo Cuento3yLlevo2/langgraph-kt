@@ -23,7 +23,8 @@ First public release. Everything below is new compared with the unpublished beta
 - `conditionalEdge(from, targets)` with declared targets, checked at compile time and at run time.
 - `NodeRef` and the infix `then` for type-safe edges: `START then a then b then END`.
 - `LangGraphException` hierarchy: `GraphValidationException`, `NodeExecutionException`,
-  `InvalidRouteException`, `MaxIterationsExceededException`, `CheckpointNotFoundException`,
+  `EdgeConditionException`, `ReducerException`, `InvalidRouteException`,
+  `MaxIterationsExceededException`, `CheckpointNotFoundException`,
   `GraphAlreadyCompletedException`, `CheckpointCorruptedException`.
 - `Checkpointer.delete()`, and a checkpoint after every step with a step counter.
 - `langgraph-kt-serialization` module with `KotlinxStateSerializer`, and `CheckpointCodec` to build
@@ -57,6 +58,8 @@ First public release. Everything below is new compared with the unpublished beta
   `NodeExecutionException`.
 - `resume` ran an `interruptBefore` node without pausing when the run had paused through
   `interruptAfter` or was resumed after a crash. `Checkpoint.interruptedBefore` records the pause.
+- An exception thrown by the function of a conditional edge or by the reducer reached the caller
+  unwrapped. It is now an `EdgeConditionException` or a `ReducerException`.
 - A run that failed in its first step left no checkpoint, so `resume` could not retry it. The
   run's input is now saved before the first node runs.
 - Different thread ids could map to the same checkpoint file.

@@ -273,6 +273,8 @@ Runnable version: [`HumanInTheLoop`](samples/src/main/kotlin/org/langgraphkt/sam
 - A checkpoint is saved after every step, so a run can also be resumed after a crash. Such a
   `resume` still pauses before an `interruptBefore` node; only a run that already paused there
   continues past it.
+- A step that fails is not saved, so `resume` runs all of its nodes again, including the ones that
+  had already finished. Make side effects such as sending an email safe to repeat.
 - `interruptAfter` pauses after a node instead of before it.
 - `MemoryCheckpointer` keeps checkpoints in memory, which is what tests want.
 
@@ -493,6 +495,8 @@ extends `LangGraphException`:
 |---|---|
 | `GraphValidationException` | The graph or `GraphConfig` is invalid. Thrown by `compile()` or when a run starts. |
 | `NodeExecutionException` | A node threw, or a `withTimeout` inside it expired. `nodeName` and the original `cause` are available. |
+| `EdgeConditionException` | The function of a conditional edge threw. `from` and the original `cause` are available. |
+| `ReducerException` | The reducer threw. `nodes` (the nodes it was merging) and the original `cause` are available. |
 | `InvalidRouteException` | A conditional edge returned a node that does not exist or is not a declared target. |
 | `MaxIterationsExceededException` | The run took more steps than `GraphConfig.maxIterations` (default 25). |
 | `CheckpointNotFoundException`, `GraphAlreadyCompletedException` | `resume` had nothing to continue. |

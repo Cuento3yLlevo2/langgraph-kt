@@ -100,6 +100,24 @@ class ReducerTest {
         }
 
     @Test
+    fun `a failing reducer is reported with the nodes it was merging`() =
+        runTest {
+            val app =
+                StateGraph<ParallelState> {
+                    node("a") { it }
+                    node("b") { it }
+                    edge(START, "a")
+                    edge(START, "b")
+                }.compile(reducer = { _, _ -> error("cannot merge") })
+
+            val exception = assertFailsWith<ReducerException> { app.invoke(ParallelState()) }
+
+            assertEquals(listOf("a", "b"), exception.nodes)
+            assertEquals("cannot merge", exception.cause?.message)
+            assertEquals("Reducer failed to merge the results of [a, b]: cannot merge", exception.message)
+        }
+
+    @Test
     fun `parallel interrupt lists every pending node`() =
         runTest {
             val app =

@@ -27,7 +27,15 @@ import kotlinx.coroutines.flow.last
  * lengths, the node runs once for each step in which a branch reaches it.
  *
  * Nodes run in the coroutine context of the caller. If a node fails, the other nodes of that step
- * are cancelled and the failure is rethrown as [NodeExecutionException].
+ * are cancelled and the failure is rethrown as [NodeExecutionException]. A failure of the reducer or
+ * of the condition of an edge is rethrown as [ReducerException] or [EdgeConditionException].
+ *
+ * ## Failures and retries
+ *
+ * With a checkpointer, a step is saved once its nodes have run, their results are merged and the
+ * next nodes are chosen. A step that fails at any of these points is not saved, so [resume] runs the
+ * whole step again, including the nodes of that step that had already finished. Make the side
+ * effects of a node safe to repeat.
  */
 public class CompiledGraph<State> internal constructor(
     internal val nodes: Map<String, Node<State>>,
@@ -67,6 +75,8 @@ public class CompiledGraph<State> internal constructor(
      * @throws GraphValidationException if [config] names interrupt nodes that are not in the graph.
      * @throws MaxIterationsExceededException if the run needs more than [GraphConfig.maxIterations] steps.
      * @throws NodeExecutionException if a node throws.
+     * @throws ReducerException if the reducer throws.
+     * @throws EdgeConditionException if the condition of a conditional edge throws.
      * @throws InvalidRouteException if a conditional edge returns an invalid target.
      */
     public suspend fun invoke(input: State, config: GraphConfig<State> = GraphConfig()): GraphResult<State> =
@@ -209,21 +219,29 @@ public class CompiledGraph<State> internal constructor(
                 }
                 results.awaitAll()
             }
-        return checkNotNull(reducer) { "compile() guarantees a reducer for graphs that fan out" }.reduce(state, updates)
+        val reducer = checkNotNull(reducer) { "compile() guarantees a reducer for graphs that fan out" }
+        return wrapFailure({ ReducerException(activeNodes, it) }) { reducer.reduce(state, updates) }
     }
 
     private suspend fun runNode(node: Node<State>, state: State): State =
+        wrapFailure({ NodeExecutionException(node.name, it) }) { node.action(state) }
+
+    /**
+     * Runs [block], which calls code of the application (a node, the condition of an edge or the
+     * reducer), and rethrows what it throws as the exception that [failure] builds.
+     */
+    private suspend inline fun <T> wrapFailure(failure: (Exception) -> LangGraphException, block: () -> T): T =
         try {
-            node.action(state)
+            block()
         } catch (e: CancellationException) {
-            // Propagate a real cancellation of the run. If the run is still active, the node cancelled
-            // only itself (for example its own withTimeout expired), which is a failure of the node.
+            // Propagate a real cancellation of the run. If the run is still active, the code cancelled
+            // only itself (for example its own withTimeout expired), which is a failure of that code.
             currentCoroutineContext().ensureActive()
-            throw NodeExecutionException(node.name, e)
+            throw failure(e)
         } catch (e: LangGraphException) {
             throw e
         } catch (e: Exception) {
-            throw NodeExecutionException(node.name, e)
+            throw failure(e)
         }
 
     /** Returns the nodes to run after [currentNodes], without [END]. */
@@ -241,7 +259,7 @@ public class CompiledGraph<State> internal constructor(
     }
 
     private suspend fun route(edge: ConditionalEdge<State>, state: State): String {
-        val target = edge.condition(state)
+        val target = wrapFailure({ EdgeConditionException(edge.from, it) }) { edge.condition(state) }
         val allowed = edge.targets?.contains(target) ?: (target == END || target in nodes)
         if (!allowed) throw InvalidRouteException(edge.from, target)
         return target

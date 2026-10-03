@@ -49,6 +49,25 @@ public class NodeExecutionException(
 ) : LangGraphException("Node '$nodeName' failed: ${cause.message}", cause)
 
 /**
+ * The condition of the conditional edge from [from] threw an exception. The original exception is
+ * available as [cause]. Cancellation is handled as for [NodeExecutionException].
+ */
+public class EdgeConditionException(
+    public val from: String,
+    cause: Throwable,
+) : LangGraphException("Conditional edge from '$from' failed: ${cause.message}", cause)
+
+/**
+ * The [Reducer] threw an exception while it merged the results of [nodes], the nodes that ran in
+ * parallel in the failed step. The original exception is available as [cause]. Cancellation is
+ * handled as for [NodeExecutionException].
+ */
+public class ReducerException(
+    public val nodes: List<String>,
+    cause: Throwable,
+) : LangGraphException("Reducer failed to merge the results of $nodes: ${cause.message}", cause)
+
+/**
  * [CompiledGraph.resume] was called for [threadId], but the checkpointer has no checkpoint for it.
  */
 public class CheckpointNotFoundException(

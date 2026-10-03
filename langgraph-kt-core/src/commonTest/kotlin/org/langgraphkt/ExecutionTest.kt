@@ -1,6 +1,8 @@
 package org.langgraphkt
 
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeout
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -75,6 +77,60 @@ class ExecutionTest {
             val config = GraphConfig(checkpointer = MemoryCheckpointer<TestState>())
             app.invoke(TestState(-1), config)
             assertEquals(GraphResult.Completed(TestState(-1)), app.lastResult(config))
+        }
+
+    @Test
+    fun `a failing condition is reported with the node its edge starts from`() =
+        runTest {
+            val app =
+                StateGraph<TestState> {
+                    node("a") { it.copy(count = it.count + 1) }
+                    edge(START, "a")
+                    conditionalEdge("a", targets = setOf(END)) { error("no route") }
+                }.compile()
+
+            val exception = assertFailsWith<EdgeConditionException> { app.invoke(TestState(0)) }
+
+            assertEquals("a", exception.from)
+            assertEquals("no route", exception.cause?.message)
+            assertEquals("Conditional edge from 'a' failed: no route", exception.message)
+        }
+
+    @Test
+    fun `a condition whose own timeout expires fails instead of cancelling the caller`() =
+        runTest {
+            val app =
+                StateGraph<TestState> {
+                    node("a") { it }
+                    conditionalEdge(START, targets = setOf("a")) { withTimeout(10) { awaitCancellation() } }
+                }.compile()
+
+            assertEquals(START, assertFailsWith<EdgeConditionException> { app.invoke(TestState(0)) }.from)
+        }
+
+    @Test
+    fun `a step whose condition failed runs again on resume`() =
+        runTest {
+            var runsOfA = 0
+            var conditionFails = true
+            val app =
+                StateGraph<TestState> {
+                    node("a") {
+                        runsOfA++
+                        it.copy(count = it.count + 1)
+                    }
+                    edge(START, "a")
+                    conditionalEdge("a", targets = setOf(END)) { if (conditionFails) error("no route") else END }
+                }.compile()
+            val config = GraphConfig(checkpointer = MemoryCheckpointer<TestState>())
+
+            assertFailsWith<EdgeConditionException> { app.invoke(TestState(0), config) }
+            // The failed step was not saved, so the thread still stands before "a".
+            assertEquals(GraphResult.Interrupted(TestState(0), listOf("a")), app.lastResult(config))
+
+            conditionFails = false
+            assertEquals(GraphResult.Completed(TestState(1)), app.resume(config))
+            assertEquals(2, runsOfA)
         }
 
     @Test

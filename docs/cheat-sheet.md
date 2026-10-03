@@ -120,6 +120,8 @@ All are `LangGraphException`s. [Level 9](09-game-over-screens.md) explains each 
 |---|---|
 | `GraphValidationException` | The graph or the settings are wrong. Found before anything runs. |
 | `NodeExecutionException` | A node threw an exception |
+| `EdgeConditionException` | A router threw an exception |
+| `ReducerException` | The reducer threw an exception |
 | `InvalidRouteException` | A router returned a name that is not allowed |
 | `MaxIterationsExceededException` | The run took more steps than `maxIterations` |
 | `CheckpointNotFoundException` | `resume` found no save |
