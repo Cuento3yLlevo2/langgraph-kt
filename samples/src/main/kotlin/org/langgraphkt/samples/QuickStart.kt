@@ -66,12 +66,12 @@ fun emailSupportGraph(): CompiledGraph<SupportEmail> =
         START then classify
 
         // A conditional edge picks the next node by looking at the state.
-        // `targets` lists every node it may pick, so a wrong name is found by compile(), not during a run.
-        conditionalEdge(classify, targets = setOf(refund.name, technical.name, escalate.name)) { email ->
+        // `targets` lists every node it may pick, so compile() can check that no node is left out.
+        conditionalEdge(classify, targets = setOf(refund, technical, escalate)) { email ->
             when (email.category) {
-                Category.REFUND -> refund.name
-                Category.TECHNICAL -> technical.name
-                else -> escalate.name
+                Category.REFUND -> refund
+                Category.TECHNICAL -> technical
+                else -> escalate
             }
         }
 

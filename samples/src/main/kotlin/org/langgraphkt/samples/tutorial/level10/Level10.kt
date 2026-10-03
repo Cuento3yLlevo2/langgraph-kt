@@ -6,6 +6,7 @@ import org.langgraphkt.END
 import org.langgraphkt.GraphConfig
 import org.langgraphkt.GraphResult
 import org.langgraphkt.MemoryCheckpointer
+import org.langgraphkt.NodeRef
 import org.langgraphkt.Reducer
 import org.langgraphkt.START
 import org.langgraphkt.StateGraph
@@ -76,19 +77,19 @@ fun helpDesk(lookupMillis: Long = 1_000): CompiledGraph<Ticket> =
             }
 
         START then read
-        conditionalEdge(read, targets = setOf(lookUp.name, prepare.name, write.name)) { ticket ->
+        conditionalEdge(read, targets = setOf(lookUp, prepare, write)) { ticket ->
             when (ticket.topic) {
-                "delivery" -> lookUp.name
-                "refund" -> prepare.name
-                else -> write.name
+                "delivery" -> lookUp
+                "refund" -> prepare
+                else -> write
             }
         }
 
         lookUp then kitchen then write
         lookUp then driver then write
         write then check
-        conditionalEdge(check, targets = setOf(write.name, END)) { ticket ->
-            if (ticket.problem.isEmpty() || ticket.attempts >= MAX_ATTEMPTS) END else write.name
+        conditionalEdge(check, targets = setOf(write, NodeRef.END)) { ticket ->
+            if (ticket.problem.isEmpty() || ticket.attempts >= MAX_ATTEMPTS) NodeRef.END else write
         }
 
         prepare then pay then END

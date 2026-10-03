@@ -28,11 +28,11 @@ fun helpDesk(): CompiledGraph<Ticket> =
         val answer = node("answer") { ticket -> ticket.copy(reply = "Thanks for your message. A human will reply soon.") }
 
         START then read
-        conditionalEdge(read, targets = setOf(track.name, refund.name, answer.name)) { ticket ->
+        conditionalEdge(read, targets = setOf(track, refund, answer)) { ticket ->
             when (ticket.topic) {
-                "delivery" -> track.name
-                "refund" -> refund.name
-                else -> answer.name
+                "delivery" -> track
+                "refund" -> refund
+                else -> answer
             }
         }
         track then END

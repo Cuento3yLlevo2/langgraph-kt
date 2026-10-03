@@ -38,8 +38,8 @@ fun announcementGraph(): CompiledGraph<AnnouncementState> =
         val publish = node("publish") { it.copy(published = true) }
 
         START then draft then review
-        conditionalEdge(review, targets = setOf(publish.name, draft.name)) { state ->
-            if (state.approved) publish.name else draft.name
+        conditionalEdge(review, targets = setOf(publish, draft)) { state ->
+            if (state.approved) publish else draft
         }
         publish then END
     }.compile()

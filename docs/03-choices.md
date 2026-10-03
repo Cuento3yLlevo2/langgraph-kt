@@ -34,11 +34,11 @@ fun helpDesk(): CompiledGraph<Ticket> =
         val answer = node("answer") { ticket -> ticket.copy(reply = "Thanks for your message. A human will reply soon.") }
 
         START then read
-        conditionalEdge(read, targets = setOf(track.name, refund.name, answer.name)) { ticket ->
+        conditionalEdge(read, targets = setOf(track, refund, answer)) { ticket ->
             when (ticket.topic) {
-                "delivery" -> track.name
-                "refund" -> refund.name
-                else -> answer.name
+                "delivery" -> track
+                "refund" -> refund
+                else -> answer
             }
         }
         track then END
@@ -73,20 +73,19 @@ Do you sell salad? -> Thanks for your message. A human will reply soon.
 has three parts:
 
 ```kotlin
-conditionalEdge(read, targets = setOf(track.name, refund.name, answer.name)) { ticket -> ... }
-//              ^     ^                                                      ^
-//              |     the places this arrow may lead to                      the function that picks one
+conditionalEdge(read, targets = setOf(track, refund, answer)) { ticket -> ... }
+//              ^     ^                                       ^
+//              |     the places this arrow may lead to       the function that picks one
 //              the node the arrow starts from
 ```
 
-- **The function** runs after `read` has finished. It receives the state and returns the **name**
-  of the node to run next. This function is often called a *router*. `track.name` is simply the
-  text `"track"`; using the handle saves you from typing mistakes. To finish the run, a router
-  returns `END`.
-- **`targets`** lists every name the router may return. You could leave it out, but declare it
-  whenever you can: `compile()` then checks that all those nodes exist and that every node can be
-  reached, and during a run the library stops with a clear error if the router returns something
-  that is not on the list.
+- **The function** runs after `read` has finished. It receives the state and returns the node to
+  run next: one of the handles that `node(...)` gave you. This function is often called a *router*.
+  Because it returns a handle and not a text, the compiler catches a misspelled node. To finish the
+  run, a router returns `NodeRef.END` (level 4 does that).
+- **`targets`** lists every node the router may return. With it, `compile()` checks that every node
+  can be reached, and during a run the library stops with a clear error if the router returns
+  something that is not on the list.
 
 Two rules:
 
@@ -98,7 +97,7 @@ Two rules:
 
 1. Add a fourth path: when the message contains "menu", go to a new `menu` node that replies with
    today's pizzas. You have to touch four places: `topicOf`, a new node, the router and `targets`.
-2. Now remove `menu.name` from `targets` and run it again. `compile()` refuses the graph with
+2. Now remove `menu` from `targets` and run it again. `compile()` refuses the graph with
    `Node 'menu' is not reachable from START`, because as far as the map says, no arrow leads there.
    The mistake is found before a single customer is answered.
 

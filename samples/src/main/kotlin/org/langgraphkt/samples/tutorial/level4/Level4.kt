@@ -1,7 +1,7 @@
 package org.langgraphkt.samples.tutorial.level4
 
 import org.langgraphkt.CompiledGraph
-import org.langgraphkt.END
+import org.langgraphkt.NodeRef
 import org.langgraphkt.START
 import org.langgraphkt.StateGraph
 
@@ -38,8 +38,8 @@ fun helpDesk(): CompiledGraph<Ticket> =
         val check = node("check") { ticket -> ticket.copy(problem = problemWith(ticket)) }
 
         START then write then check
-        conditionalEdge(check, targets = setOf(write.name, END)) { ticket ->
-            if (ticket.problem.isEmpty() || ticket.attempts >= MAX_ATTEMPTS) END else write.name
+        conditionalEdge(check, targets = setOf(write, NodeRef.END)) { ticket ->
+            if (ticket.problem.isEmpty() || ticket.attempts >= MAX_ATTEMPTS) NodeRef.END else write
         }
     }.compile()
 
