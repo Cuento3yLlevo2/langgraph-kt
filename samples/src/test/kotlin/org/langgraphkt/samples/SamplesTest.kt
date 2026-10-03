@@ -1,0 +1,118 @@
+package org.langgraphkt.samples
+
+import dev.langchain4j.data.message.UserMessage
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.currentTime
+import kotlinx.coroutines.test.runTest
+import kotlinx.io.files.Path
+import org.langgraphkt.GraphConfig
+import org.langgraphkt.GraphResult
+import org.langgraphkt.MemoryCheckpointer
+import java.nio.file.Files
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertIs
+import kotlin.test.assertTrue
+
+/** Keeps the samples (and the README snippets based on them) working. */
+class SamplesTest {
+    @Test
+    fun `quick start answers each email according to its category`() =
+        runTest {
+            val graph = emailSupportGraph()
+
+            val refund = graph.invoke(SupportEmail("Ana", "I was charged twice, I would like a refund.")).state
+            assertEquals(Category.REFUND, refund.category)
+            assertEquals("Hi Ana, your refund is on its way. It takes 3 to 5 days.", refund.reply)
+
+            val technical = graph.invoke(SupportEmail("Ben", "The app shows an error when I log in.")).state
+            assertEquals(Category.TECHNICAL, technical.category)
+            assertEquals("Hi Ben, please update the app and try again. Here is our guide.", technical.reply)
+
+            val angry = graph.invoke(SupportEmail("Cleo", "This is unacceptable, third time I write to you!!")).state
+            assertEquals(Category.ESCALATION, angry.category)
+            assertEquals("Hi Cleo, a colleague from our team will reply to you personally today.", angry.reply)
+        }
+
+    @Test
+    fun `quick start escalates emails that are complex or unclear`() {
+        assertEquals(Category.ESCALATION, categoryOf("The app keeps crashing and I want my money back"))
+        assertEquals(Category.ESCALATION, categoryOf("Do you sell gift cards?"))
+    }
+
+    @Test
+    fun `refund waits for approval and survives a restart`() =
+        runTest {
+            val directory = Path(Files.createTempDirectory("refunds").toString())
+
+            val paused = refundGraph().invoke(RefundState("1001", 250), refundConfig(directory, "order-1001"))
+            assertIs<GraphResult.Interrupted<RefundState>>(paused)
+            assertEquals(listOf(ISSUE_REFUND), paused.nextNodes)
+
+            // New graph and checkpointer instances, as after a process restart.
+            val finished = refundGraph().resume(refundConfig(directory, "order-1001")) { it.copy(approved = true) }
+            assertEquals("Refund issued", finished.state.log.last())
+        }
+
+    @Test
+    fun `announcement is redrafted until the reviewer approves`() =
+        runTest {
+            val graph = announcementGraph()
+            val config = GraphConfig(checkpointer = MemoryCheckpointer<AnnouncementState>(), interruptBefore = setOf(REVIEW))
+
+            val first = graph.invoke(AnnouncementState(topic = "the 1.0 release"), config)
+            assertEquals("Announcing the 1.0 release", first.state.draft)
+
+            val second = graph.resume(config) { it.copy(approved = false, feedback = "mention Wasm") }
+            assertIs<GraphResult.Interrupted<AnnouncementState>>(second)
+            assertEquals("Announcing the 1.0 release (mention Wasm)", second.state.draft)
+            assertEquals(second, graph.lastResult(config))
+
+            val finished = graph.resume(config) { it.copy(approved = true) }
+            assertIs<GraphResult.Completed<AnnouncementState>>(finished)
+            assertTrue(finished.state.published)
+            assertEquals(2, finished.state.revisions)
+        }
+
+    @Test
+    fun `support agent continues a conversation from the last result`() =
+        runTest {
+            val agent = supportAgent(CannedModel())
+            val config = GraphConfig(threadId = "customer-7", checkpointer = MemoryCheckpointer<ChatState>())
+
+            for (question in listOf("The app is frozen", "I want a refund")) {
+                val history =
+                    agent
+                        .lastResult(config)
+                        ?.state
+                        ?.messages
+                        .orEmpty()
+                agent.invoke(ChatState(history + UserMessage.from(question)), config)
+            }
+
+            val state = agent.lastResult(config)?.state
+            assertEquals(4, state?.messages?.size)
+            assertEquals(true, state?.needsEscalation)
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `research sources run in parallel`() =
+        runTest {
+            val state = researchGraph(sourceDelayMillis = 300).invoke(ResearchState("coroutines")).state
+
+            assertEquals(3, state.findings.size)
+            assertEquals("3 sources agree.", state.summary)
+            assertEquals(300, currentTime)
+        }
+
+    @Test
+    fun `support agent escalates refund questions`() =
+        runTest {
+            val agent = supportAgent(CannedModel())
+
+            assertTrue(agent.invoke(ChatState(listOf(UserMessage.from("I want a refund")))).state.needsEscalation)
+            assertFalse(agent.invoke(ChatState(listOf(UserMessage.from("The app is frozen")))).state.needsEscalation)
+        }
+}

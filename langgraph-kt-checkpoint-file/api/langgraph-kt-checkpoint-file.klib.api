@@ -1,0 +1,15 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, linuxArm64, linuxX64, macosArm64, mingwX64, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <langgraph-kt:langgraph-kt-checkpoint-file>
+final class <#A: kotlin/Any?> org.langgraphkt.checkpoint.file/FileCheckpointer : org.langgraphkt/Checkpointer<#A> { // org.langgraphkt.checkpoint.file/FileCheckpointer|null[0]
+    constructor <init>(kotlinx.io.files/Path, org.langgraphkt/StateSerializer<#A>, kotlinx.io.files/FileSystem = ...) // org.langgraphkt.checkpoint.file/FileCheckpointer.<init>|<init>(kotlinx.io.files.Path;org.langgraphkt.StateSerializer<1:0>;kotlinx.io.files.FileSystem){}[0]
+
+    final suspend fun delete(kotlin/String) // org.langgraphkt.checkpoint.file/FileCheckpointer.delete|delete(kotlin.String){}[0]
+    final suspend fun load(kotlin/String): org.langgraphkt/Checkpoint<#A>? // org.langgraphkt.checkpoint.file/FileCheckpointer.load|load(kotlin.String){}[0]
+    final suspend fun save(kotlin/String, org.langgraphkt/Checkpoint<#A>) // org.langgraphkt.checkpoint.file/FileCheckpointer.save|save(kotlin.String;org.langgraphkt.Checkpoint<1:0>){}[0]
+}

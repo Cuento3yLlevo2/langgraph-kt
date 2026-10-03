@@ -1,0 +1,27 @@
+[versions]
+kotlin = "2.4.20"
+coroutines = "1.11.0"
+serialization = "1.11.0"
+kotlinx-io = "0.9.1"
+langchain4j = "1.20.2"
+dokka = "2.2.0"
+kover = "0.9.11"
+ktlint-gradle = "14.2.0"
+bcv = "0.18.2"
+maven-publish = "0.37.0"
+
+[libraries]
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
+kotlinx-io-core = { module = "org.jetbrains.kotlinx:kotlinx-io-core", version.ref = "kotlinx-io" }
+langchain4j = { module = "dev.langchain4j:langchain4j", version.ref = "langchain4j" }
+
+# Gradle plugins consumed by build-logic convention plugins
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+kotlin-serialization-plugin = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
+dokka-gradle-plugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
+kover-gradle-plugin = { module = "org.jetbrains.kotlinx:kover-gradle-plugin", version.ref = "kover" }
+ktlint-gradle-plugin = { module = "org.jlleitschuh.gradle:ktlint-gradle", version.ref = "ktlint-gradle" }
+bcv-gradle-plugin = { module = "org.jetbrains.kotlinx:binary-compatibility-validator", version.ref = "bcv" }
+maven-publish-gradle-plugin = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "maven-publish" }
