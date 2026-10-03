@@ -167,7 +167,7 @@ dependencies {
     // Only if you need them:
     implementation("io.github.cuento3yllevo2:langgraph-kt-serialization:0.1.0")   // save @Serializable states
     implementation("io.github.cuento3yllevo2:langgraph-kt-checkpoint-file:0.1.0") // FileCheckpointer
-    implementation("io.github.cuento3yllevo2:langgraph-kt-langchain4j:0.1.0")     // chatNode (JVM, Android)
+    implementation("io.github.cuento3yllevo2:langgraph-kt-langchain4j:0.1.0")     // chatNode (JVM, Java 17+)
 }
 ```
 

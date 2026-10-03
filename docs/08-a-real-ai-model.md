@@ -122,8 +122,8 @@ anything, with any library, on any platform:
 val answer = node("answer") { ticket -> ticket.copy(reply = askMyModel(ticket.message)) }
 ```
 
-`langgraph-kt-langchain4j` works on the JVM and Android. On iOS, in the browser and on the other
-platforms, write the node this way with an HTTP client of your choice.
+`langgraph-kt-langchain4j` is for the JVM (Java 17 or newer, which LangChain4j requires). On the
+other platforms, write the node this way with an HTTP client of your choice.
 
 ### What changes when the model is real
 

@@ -120,7 +120,7 @@ class InterruptTest {
         }
 
     @Test
-    fun `a new run that fails in its first step cannot be resumed into the previous run`() =
+    fun `a new run that fails in its first step resumes from its own input instead of the previous run`() =
         runTest {
             val failing =
                 StateGraph<TestState> {
@@ -137,8 +137,26 @@ class InterruptTest {
 
             assertFailsWith<NodeExecutionException> { failing.invoke(TestState(1000), config) }
 
-            assertNull(checkpointer.load("default"))
-            assertFailsWith<CheckpointNotFoundException> { failing.resume(config) }
+            assertEquals(Checkpoint(TestState(1000), listOf("a")), checkpointer.load("default"))
+            assertEquals(GraphResult.Interrupted(TestState(11), listOf("b")), failing.resume(config) { it.copy(count = 10) })
+        }
+
+    @Test
+    fun `a run that fails in its first step can be retried with resume`() =
+        runTest {
+            var attempts = 0
+            val flaky =
+                StateGraph<TestState> {
+                    node("a") { if (++attempts == 1) error("busy") else it.copy(count = it.count + 1) }
+
+                    edge(START, "a")
+                }.compile()
+            val config = GraphConfig(checkpointer = MemoryCheckpointer<TestState>())
+
+            assertFailsWith<NodeExecutionException> { flaky.invoke(TestState(5), config) }
+
+            assertEquals(GraphResult.Interrupted(TestState(5), listOf("a")), flaky.lastResult(config))
+            assertEquals(GraphResult.Completed(TestState(6)), flaky.resume(config))
         }
 
     @Test
@@ -165,7 +183,7 @@ class InterruptTest {
         }
 
     @Test
-    fun `a checkpoint is saved after every step`() =
+    fun `a checkpoint is saved when the run starts and after every step`() =
         runTest {
             val saved = mutableListOf<Checkpoint<TestState>>()
             val recording =
@@ -183,6 +201,7 @@ class InterruptTest {
 
             assertEquals(
                 listOf(
+                    Checkpoint(TestState(0), listOf("a"), step = 0),
                     Checkpoint(TestState(1), listOf("b"), step = 1),
                     Checkpoint(TestState(11), listOf("c"), step = 2),
                     Checkpoint(TestState(111), emptyList(), step = 3),

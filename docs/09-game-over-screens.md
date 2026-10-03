@@ -158,6 +158,8 @@ Every exception the library throws is a `LangGraphException`, so one `catch` can
 |---|---|---|
 | `GraphValidationException` | The map or the run's settings are wrong. Thrown by `compile()` or when a run starts. | Read the message and fix the graph or the `GraphConfig`. |
 | `NodeExecutionException` | A node threw an exception. | Look at `nodeName` and `cause`. Retry with `resume` if the cause was temporary. |
+| `EdgeConditionException` | A router threw an exception. | Look at `from` (the node the arrow starts at) and `cause`. |
+| `ReducerException` | The reducer threw an exception. | Look at `nodes` (the nodes it was merging) and `cause`. |
 | `InvalidRouteException` | A router returned a name that is not a node, or not in its `targets`. | Fix the router or add the name to `targets`. |
 | `MaxIterationsExceededException` | The run took more steps than `maxIterations`. | Give the loop an exit, or raise the limit if the run really needs more steps. |
 | `CheckpointNotFoundException` | `resume` found no save for this `threadId`. | Start the run with `invoke`. |

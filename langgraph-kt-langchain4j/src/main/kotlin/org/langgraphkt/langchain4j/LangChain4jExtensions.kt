@@ -11,7 +11,7 @@ import org.langgraphkt.NodeAction
  * Sends a single user message to this [ChatModel] and returns the model's text reply.
  *
  * LangChain4j calls block on network I/O, so the call runs on [Dispatchers.IO] and the caller's
- * thread (for example the Android main thread) is never blocked.
+ * thread (for example a UI thread) is never blocked.
  */
 public suspend fun ChatModel.chatSuspending(message: String): String = withContext(Dispatchers.IO) { chat(message) }
 

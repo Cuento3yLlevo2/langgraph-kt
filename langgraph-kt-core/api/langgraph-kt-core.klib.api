@@ -250,6 +250,13 @@ final class org.langgraphkt/CheckpointNotFoundException : org.langgraphkt/LangGr
         final fun <get-threadId>(): kotlin/String // org.langgraphkt/CheckpointNotFoundException.threadId.<get-threadId>|<get-threadId>(){}[0]
 }
 
+final class org.langgraphkt/EdgeConditionException : org.langgraphkt/LangGraphException { // org.langgraphkt/EdgeConditionException|null[0]
+    constructor <init>(kotlin/String, kotlin/Throwable) // org.langgraphkt/EdgeConditionException.<init>|<init>(kotlin.String;kotlin.Throwable){}[0]
+
+    final val from // org.langgraphkt/EdgeConditionException.from|{}from[0]
+        final fun <get-from>(): kotlin/String // org.langgraphkt/EdgeConditionException.from.<get-from>|<get-from>(){}[0]
+}
+
 final class org.langgraphkt/GraphAlreadyCompletedException : org.langgraphkt/LangGraphException { // org.langgraphkt/GraphAlreadyCompletedException|null[0]
     constructor <init>(kotlin/String) // org.langgraphkt/GraphAlreadyCompletedException.<init>|<init>(kotlin.String){}[0]
 
@@ -328,6 +335,13 @@ final class org.langgraphkt/NodeRef { // org.langgraphkt/NodeRef|null[0]
         final fun <get-name>(): kotlin/String // org.langgraphkt/NodeRef.name.<get-name>|<get-name>(){}[0]
 
     final fun toString(): kotlin/String // org.langgraphkt/NodeRef.toString|toString(){}[0]
+}
+
+final class org.langgraphkt/ReducerException : org.langgraphkt/LangGraphException { // org.langgraphkt/ReducerException|null[0]
+    constructor <init>(kotlin.collections/List<kotlin/String>, kotlin/Throwable) // org.langgraphkt/ReducerException.<init>|<init>(kotlin.collections.List<kotlin.String>;kotlin.Throwable){}[0]
+
+    final val nodes // org.langgraphkt/ReducerException.nodes|{}nodes[0]
+        final fun <get-nodes>(): kotlin.collections/List<kotlin/String> // org.langgraphkt/ReducerException.nodes.<get-nodes>|<get-nodes>(){}[0]
 }
 
 final const val org.langgraphkt/END // org.langgraphkt/END|{}END[0]
