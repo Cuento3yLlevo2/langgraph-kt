@@ -6,9 +6,11 @@ import kotlinx.coroutines.sync.withLock
 /**
  * A saved point in a graph run.
  *
- * @property state the graph state after the last executed step.
+ * @property state the graph state after the last executed step, or the input of the run when no
+ * step has finished yet.
  * @property nextNodes the nodes that run when the thread is resumed. Empty when the run completed.
- * @property step the number of steps the thread has executed so far.
+ * @property step the number of steps the thread has executed so far. `0` for the checkpoint that is
+ * saved when a run starts.
  * @property interruptedBefore `true` when the run paused before [nextNodes] because of
  * [GraphConfig.interruptBefore]. [CompiledGraph.resume] then runs those nodes without pausing before
  * them again. A checkpoint saved for any other reason is `false`, so resuming it still pauses before

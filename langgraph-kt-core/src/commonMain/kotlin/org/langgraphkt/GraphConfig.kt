@@ -5,8 +5,9 @@ package org.langgraphkt
  *
  * @property threadId identifies the conversation or workflow instance whose checkpoints are stored
  * by [checkpointer]. Use one id per independent run.
- * @property checkpointer where checkpoints are stored. When set, a checkpoint is saved after every
- * step. Required for [interruptBefore], [interruptAfter] and [CompiledGraph.resume].
+ * @property checkpointer where checkpoints are stored. When set, a checkpoint is saved when a run
+ * starts and after every step. Required for [interruptBefore], [interruptAfter] and
+ * [CompiledGraph.resume].
  * @property interruptBefore node names to pause before, for human-in-the-loop review.
  * @property interruptAfter node names to pause after.
  * @property maxIterations the maximum number of steps a single [CompiledGraph.invoke] or

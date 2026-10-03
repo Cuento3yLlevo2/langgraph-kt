@@ -70,6 +70,11 @@ class ExecutionTest {
 
             assertEquals(GraphResult.Completed(TestState(-1)), app.invoke(TestState(-1)))
             assertEquals(GraphResult.Completed(TestState(1)), app.invoke(TestState(0)))
+
+            // A run that never enters a node is still saved, as a completed one.
+            val config = GraphConfig(checkpointer = MemoryCheckpointer<TestState>())
+            app.invoke(TestState(-1), config)
+            assertEquals(GraphResult.Completed(TestState(-1)), app.lastResult(config))
         }
 
     @Test

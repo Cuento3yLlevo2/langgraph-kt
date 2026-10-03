@@ -61,7 +61,8 @@ public class CompiledGraph<State> internal constructor(
      * Runs the graph from [START] with [input] until it completes or reaches an interrupt.
      *
      * A call always starts a new run: if [config] has a checkpointer, any earlier checkpoint of the
-     * thread is deleted before the run starts. Use [resume] to continue a paused run.
+     * thread is replaced by one that holds [input], before the first node runs. Use [resume] to
+     * continue a paused run, or to retry one that failed.
      *
      * @throws GraphValidationException if [config] names interrupt nodes that are not in the graph.
      * @throws MaxIterationsExceededException if the run needs more than [GraphConfig.maxIterations] steps.
@@ -90,8 +91,8 @@ public class CompiledGraph<State> internal constructor(
      * conversation from the state the last run ended with.
      *
      * The result is [GraphResult.Completed] when the run finished, and [GraphResult.Interrupted] when
-     * [resume] can continue it: the run paused at an interrupt, or stopped between two steps because
-     * a node failed or the process ended. It is `null` when the thread has no checkpoint.
+     * [resume] can continue it: the run paused at an interrupt, or stopped before or between two
+     * steps because a node failed or the process ended. It is `null` when the thread has no checkpoint.
      *
      * @throws GraphValidationException if [config] has no checkpointer.
      */
@@ -117,7 +118,10 @@ public class CompiledGraph<State> internal constructor(
             validateInterrupts(config)
             // Drop the previous run now, so that a failure before the first save cannot be resumed into it.
             config.checkpointer?.delete(config.threadId)
-            run(config, RunStart(input, resolveNextNodes(listOf(START), input), step = 0, skipInterruptBefore = false))
+            val firstNodes = resolveNextNodes(listOf(START), input)
+            // Save the input before anything runs, so that a failure in the first step can be resumed.
+            config.checkpointer?.save(config.threadId, Checkpoint(input, firstNodes))
+            run(config, RunStart(input, firstNodes, step = 0, skipInterruptBefore = false))
         }
 
     /** Like [resume], but returns a cold [Flow] of [GraphEvent]s. See [stream]. */
@@ -180,7 +184,6 @@ public class CompiledGraph<State> internal constructor(
             activeNodes = nextNodes
         }
 
-        if (executedSteps == 0) checkpoint(emptyList())
         emit(GraphEvent.Completed(state))
     }
 

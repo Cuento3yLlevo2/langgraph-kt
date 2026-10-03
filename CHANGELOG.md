@@ -57,6 +57,8 @@ First public release. Everything below is new compared with the unpublished beta
   `NodeExecutionException`.
 - `resume` ran an `interruptBefore` node without pausing when the run had paused through
   `interruptAfter` or was resumed after a crash. `Checkpoint.interruptedBefore` records the pause.
+- A run that failed in its first step left no checkpoint, so `resume` could not retry it. The
+  run's input is now saved before the first node runs.
 - Different thread ids could map to the same checkpoint file.
 - `START` counted toward `maxIterations`.
 - `FileCheckpointer` did not write the format version into its files.

@@ -332,8 +332,9 @@ when (val result = graph.lastResult(config)) {
 }
 ```
 
-A run that stopped because a node failed is reported as `Interrupted` as well: its last finished
-step is saved, and `resume(config)` retries from there.
+A run that stopped because a node failed is reported as `Interrupted` as well. The run's input is
+saved when it starts and its state after every finished step, so `resume(config)` retries from the
+step that failed, even when that was the first one.
 
 #### Storing checkpoints somewhere else
 
