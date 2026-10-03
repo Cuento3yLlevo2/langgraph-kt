@@ -231,7 +231,9 @@ final class <#A: kotlin/Any?> org.langgraphkt/StateGraph { // org.langgraphkt/St
     final fun (org.langgraphkt/NodeRef).then(org.langgraphkt/NodeRef): org.langgraphkt/NodeRef // org.langgraphkt/StateGraph.then|then@org.langgraphkt.NodeRef(org.langgraphkt.NodeRef){}[0]
     final fun compile(org.langgraphkt/Reducer<#A>? = ...): org.langgraphkt/CompiledGraph<#A> // org.langgraphkt/StateGraph.compile|compile(org.langgraphkt.Reducer<1:0>?){}[0]
     final fun conditionalEdge(kotlin/String, kotlin.collections/Set<kotlin/String>? = ..., kotlin.coroutines/SuspendFunction1<#A, kotlin/String>) // org.langgraphkt/StateGraph.conditionalEdge|conditionalEdge(kotlin.String;kotlin.collections.Set<kotlin.String>?;kotlin.coroutines.SuspendFunction1<1:0,kotlin.String>){}[0]
+    final fun conditionalEdge(kotlin/String, kotlin.collections/Set<org.langgraphkt/NodeRef>, kotlin.coroutines/SuspendFunction1<#A, org.langgraphkt/NodeRef>) // org.langgraphkt/StateGraph.conditionalEdge|conditionalEdge(kotlin.String;kotlin.collections.Set<org.langgraphkt.NodeRef>;kotlin.coroutines.SuspendFunction1<1:0,org.langgraphkt.NodeRef>){}[0]
     final fun conditionalEdge(org.langgraphkt/NodeRef, kotlin.collections/Set<kotlin/String>? = ..., kotlin.coroutines/SuspendFunction1<#A, kotlin/String>) // org.langgraphkt/StateGraph.conditionalEdge|conditionalEdge(org.langgraphkt.NodeRef;kotlin.collections.Set<kotlin.String>?;kotlin.coroutines.SuspendFunction1<1:0,kotlin.String>){}[0]
+    final fun conditionalEdge(org.langgraphkt/NodeRef, kotlin.collections/Set<org.langgraphkt/NodeRef>, kotlin.coroutines/SuspendFunction1<#A, org.langgraphkt/NodeRef>) // org.langgraphkt/StateGraph.conditionalEdge|conditionalEdge(org.langgraphkt.NodeRef;kotlin.collections.Set<org.langgraphkt.NodeRef>;kotlin.coroutines.SuspendFunction1<1:0,org.langgraphkt.NodeRef>){}[0]
     final fun edge(kotlin/String, kotlin/String) // org.langgraphkt/StateGraph.edge|edge(kotlin.String;kotlin.String){}[0]
     final fun node(kotlin/String, kotlin.coroutines/SuspendFunction1<#A, #A>): org.langgraphkt/NodeRef // org.langgraphkt/StateGraph.node|node(kotlin.String;kotlin.coroutines.SuspendFunction1<1:0,1:0>){}[0]
 }
@@ -335,6 +337,11 @@ final class org.langgraphkt/NodeRef { // org.langgraphkt/NodeRef|null[0]
         final fun <get-name>(): kotlin/String // org.langgraphkt/NodeRef.name.<get-name>|<get-name>(){}[0]
 
     final fun toString(): kotlin/String // org.langgraphkt/NodeRef.toString|toString(){}[0]
+
+    final object Companion { // org.langgraphkt/NodeRef.Companion|null[0]
+        final val END // org.langgraphkt/NodeRef.Companion.END|{}END[0]
+            final fun <get-END>(): org.langgraphkt/NodeRef // org.langgraphkt/NodeRef.Companion.END.<get-END>|<get-END>(){}[0]
+    }
 }
 
 final class org.langgraphkt/ReducerException : org.langgraphkt/LangGraphException { // org.langgraphkt/ReducerException|null[0]

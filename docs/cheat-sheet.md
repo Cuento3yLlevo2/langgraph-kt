@@ -40,9 +40,9 @@ val graph = StateGraph<Ticket> {
     START then read
     answer then END
 
-    // An arrow that decides. The router returns the name of the next node, or END.
-    conditionalEdge(read, targets = setOf(answer.name, refund.name)) { ticket ->
-        if (ticket.topic == "refund") refund.name else answer.name
+    // An arrow that decides. The router returns the next node, or NodeRef.END to finish.
+    conditionalEdge(read, targets = setOf(answer, refund)) { ticket ->
+        if (ticket.topic == "refund") refund else answer
     }
 }.compile()
 ```
@@ -50,10 +50,11 @@ val graph = StateGraph<Ticket> {
 | You want | You write |
 |---|---|
 | A line | `START then a then b then END` |
-| A choice | `conditionalEdge(a, targets = setOf(b.name, c.name)) { state -> ... }` |
+| A choice | `conditionalEdge(a, targets = setOf(b, c)) { state -> ... }` |
 | A loop | A conditional edge whose router can return an earlier node, with a limit |
 | Parallel nodes | Several arrows from one place, and `compile(reducer = ...)` |
 | An arrow by name | `edge("a", "b")` |
+| A choice by name | `conditionalEdge("a", targets = setOf("b", END)) { state -> "b" }` |
 
 ## Running a graph
 

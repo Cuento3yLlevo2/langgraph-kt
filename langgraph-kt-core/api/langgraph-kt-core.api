@@ -258,8 +258,13 @@ public final class org/langgraphkt/NodeExecutionException : org/langgraphkt/Lang
 }
 
 public final class org/langgraphkt/NodeRef {
+	public static final field Companion Lorg/langgraphkt/NodeRef$Companion;
 	public final fun getName ()Ljava/lang/String;
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/langgraphkt/NodeRef$Companion {
+	public final fun getEND ()Lorg/langgraphkt/NodeRef;
 }
 
 public abstract interface class org/langgraphkt/Reducer {
@@ -279,6 +284,8 @@ public final class org/langgraphkt/StateGraph {
 	public final fun conditionalEdge (Lorg/langgraphkt/NodeRef;Ljava/util/Set;Lkotlin/jvm/functions/Function2;)V
 	public static synthetic fun conditionalEdge$default (Lorg/langgraphkt/StateGraph;Ljava/lang/String;Ljava/util/Set;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
 	public static synthetic fun conditionalEdge$default (Lorg/langgraphkt/StateGraph;Lorg/langgraphkt/NodeRef;Ljava/util/Set;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
+	public final fun conditionalEdgeToRefs (Ljava/lang/String;Ljava/util/Set;Lkotlin/jvm/functions/Function2;)V
+	public final fun conditionalEdgeToRefs (Lorg/langgraphkt/NodeRef;Ljava/util/Set;Lkotlin/jvm/functions/Function2;)V
 	public final fun edge (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun node (Ljava/lang/String;Lkotlin/jvm/functions/Function2;)Lorg/langgraphkt/NodeRef;
 	public final fun then (Ljava/lang/String;Lorg/langgraphkt/NodeRef;)Lorg/langgraphkt/NodeRef;

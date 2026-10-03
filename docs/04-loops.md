@@ -53,8 +53,8 @@ fun helpDesk(): CompiledGraph<Ticket> =
         val check = node("check") { ticket -> ticket.copy(problem = problemWith(ticket)) }
 
         START then write then check
-        conditionalEdge(check, targets = setOf(write.name, END)) { ticket ->
-            if (ticket.problem.isEmpty() || ticket.attempts >= MAX_ATTEMPTS) END else write.name
+        conditionalEdge(check, targets = setOf(write, NodeRef.END)) { ticket ->
+            if (ticket.problem.isEmpty() || ticket.attempts >= MAX_ATTEMPTS) NodeRef.END else write
         }
     }.compile()
 
@@ -90,7 +90,8 @@ that has already run. Here is the run, step by step:
 | 5 | `write` | Attempt 3: `Sorry Ana, your pizza is late. ...` | `use the customer's name` |
 | 6 | `check` | Nothing wrong | (empty) |
 
-After step 6 the router sees an empty `problem` and returns `END`.
+After step 6 the router sees an empty `problem` and returns `NodeRef.END`. That is `END` as a
+handle: a router returns handles, and plain `END` is a text, so the two cannot be mixed.
 
 Notice what the state is doing: `attempts` and `problem` are the memory of the loop. A node cannot
 remember anything by itself, so whatever one round needs to know about the previous round goes in

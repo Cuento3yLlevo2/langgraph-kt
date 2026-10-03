@@ -97,12 +97,12 @@ val graph = StateGraph<SupportEmail> {
     START then classify
 
     // A conditional edge picks the next node by looking at the state.
-    // `targets` lists every node it may pick, so a wrong name is found by compile(), not during a run.
-    conditionalEdge(classify, targets = setOf(refund.name, technical.name, escalate.name)) { email ->
+    // `targets` lists every node it may pick, so compile() can check that no node is left out.
+    conditionalEdge(classify, targets = setOf(refund, technical, escalate)) { email ->
         when (email.category) {
-            Category.REFUND -> refund.name        // return the name of the node to run next
-            Category.TECHNICAL -> technical.name
-            else -> escalate.name
+            Category.REFUND -> refund        // return the node to run next
+            Category.TECHNICAL -> technical
+            else -> escalate
         }
     }
 
@@ -302,8 +302,8 @@ val graph = StateGraph<AnnouncementState> {
 
     START then draft then review
     // Approved: publish. Not approved: back to "draft", which makes this a loop.
-    conditionalEdge(review, targets = setOf(publish.name, draft.name)) { state ->
-        if (state.approved) publish.name else draft.name
+    conditionalEdge(review, targets = setOf(publish, draft)) { state ->
+        if (state.approved) publish else draft
     }
     publish then END
 }.compile()
@@ -411,11 +411,15 @@ val graph = StateGraph<Draft> {
 
     START then write
     // Good enough, or tried three times: finish. Otherwise run "write" again.
-    conditionalEdge(write, targets = setOf(write.name, END)) { draft ->
-        if (isGood(draft.text) || draft.attempts >= 3) END else write.name
+    conditionalEdge(write, targets = setOf(write, NodeRef.END)) { draft ->
+        if (isGood(draft.text) || draft.attempts >= 3) NodeRef.END else write
     }
 }.compile()
 ```
+
+`NodeRef.END` is `END` as a node reference, which is what a conditional edge returns. A conditional
+edge can also work with node names, for a target that is computed from data:
+`conditionalEdge("write", targets = setOf("write", END)) { ... }`.
 
 As a safety net, a run that takes more than `GraphConfig.maxIterations` steps (25 by default) stops
 with `MaxIterationsExceededException`.

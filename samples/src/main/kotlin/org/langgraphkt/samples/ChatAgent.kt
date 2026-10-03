@@ -8,7 +8,7 @@ import dev.langchain4j.model.chat.ChatModel
 import dev.langchain4j.model.chat.request.ChatRequest
 import dev.langchain4j.model.chat.response.ChatResponse
 import org.langgraphkt.CompiledGraph
-import org.langgraphkt.END
+import org.langgraphkt.NodeRef
 import org.langgraphkt.START
 import org.langgraphkt.StateGraph
 import org.langgraphkt.langchain4j.chatMessagesNode
@@ -37,9 +37,9 @@ fun supportAgent(model: ChatModel): CompiledGraph<ChatState> =
         val escalate = node("escalate") { it.copy(needsEscalation = true) }
 
         START then assistant
-        conditionalEdge(assistant, targets = setOf(escalate.name, END)) { state ->
+        conditionalEdge(assistant, targets = setOf(escalate, NodeRef.END)) { state ->
             val reply = (state.messages.last() as AiMessage).text()
-            if ("human" in reply.lowercase()) escalate.name else END
+            if ("human" in reply.lowercase()) escalate else NodeRef.END
         }
     }.compile()
 
