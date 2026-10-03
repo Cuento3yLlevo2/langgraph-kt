@@ -67,4 +67,4 @@ First public release. Everything below is new compared with the unpublished beta
 - `START` counted toward `maxIterations`.
 - `FileCheckpointer` did not write the format version into its files.
 
-[Unreleased]: https://github.com/Cuento3yLlevo2/langgraph-kt/commits/develop
+[Unreleased]: https://github.com/Cuento3yLlevo2/langgraph-kt/commits/main

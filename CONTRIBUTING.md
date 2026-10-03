@@ -74,7 +74,7 @@ Windows. CI covers all of them, so you do not need every OS locally.
 ## Making a change
 
 1. For anything larger than a small fix, open an issue first so the approach can be discussed.
-2. Branch from `develop` (for example `feature/room-checkpointer` or `fix/resume-after-crash`).
+2. Branch from `main` (for example `feature/room-checkpointer` or `fix/resume-after-crash`).
 3. Write the code and its tests. Core tests go in `commonTest` and use `runTest { }` from
    `kotlinx-coroutines-test`, so they run on every platform. Use `MemoryCheckpointer` unless the
    test is about files.
@@ -85,7 +85,9 @@ Windows. CI covers all of them, so you do not need every OS locally.
    and the output shown there stay the same as the program. `TutorialTest` pins the output.
 7. Add a line to the "Unreleased" section of [CHANGELOG.md](CHANGELOG.md) when users will notice
    the change.
-8. Open a pull request against `develop` and link the issue.
+8. Open a pull request against `main` and link the issue.
+
+`main` is the only long-lived branch. It always holds the next version, and releases are tags on it.
 
 ### Commit messages
 
@@ -125,11 +127,11 @@ One-time setup:
 
 For each release:
 
-1. Move the "Unreleased" entries in `CHANGELOG.md` under the new version and date.
-2. Set `VERSION_NAME` in `gradle.properties` to the release version and merge to `main`.
-3. Tag the commit `vX.Y.Z` and push the tag. The release workflow publishes to Maven Central and
-   creates the GitHub release.
-4. Set `VERSION_NAME` to the next `-SNAPSHOT` on `develop`.
+1. Open a pull request that moves the "Unreleased" entries in `CHANGELOG.md` under the new version
+   and date, and sets `VERSION_NAME` in `gradle.properties` to the release version. Merge it.
+2. Tag that commit on `main` as `vX.Y.Z` and push the tag. The release workflow publishes to Maven
+   Central and creates the GitHub release.
+3. Open a pull request that sets `VERSION_NAME` to the next `-SNAPSHOT`.
 
 ## License
 
