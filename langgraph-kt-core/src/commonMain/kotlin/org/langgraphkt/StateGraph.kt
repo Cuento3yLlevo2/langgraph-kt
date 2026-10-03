@@ -1,5 +1,7 @@
 package org.langgraphkt
 
+import kotlin.jvm.JvmName
+
 /**
  * Builder for a graph of nodes and edges over an immutable [State].
  *
@@ -19,15 +21,19 @@ package org.langgraphkt
  * Execution starts at [START] and ends when every active branch reaches [END]. A node with no
  * outgoing edge routes to [END].
  *
- * [node] returns a [NodeRef]. Using the references with [then] instead of repeating node names lets
- * the compiler catch typos:
+ * [node] returns a [NodeRef]. Using the references with [then] and [conditionalEdge] instead of
+ * repeating node names lets the compiler catch typos:
  *
  * ```kotlin
  * val graph = StateGraph<AgentState> {
  *     val research = node("research") { ... }
  *     val write = node("write") { ... }
  *
- *     START then research then write then END
+ *     START then research
+ *     conditionalEdge(research, targets = setOf(write, NodeRef.END)) { state ->
+ *         if (state.notes.isEmpty()) NodeRef.END else write
+ *     }
+ *     write then END
  * }.compile()
  * ```
  */
@@ -85,6 +91,32 @@ public class StateGraph<State> {
     /** Adds a conditional edge from the node referenced by [from]. See the overload taking a node name. */
     public fun conditionalEdge(from: NodeRef, targets: Set<String>? = null, condition: EdgeCondition<State>) {
         conditionalEdge(from.name, targets, condition)
+    }
+
+    /**
+     * Adds a conditional edge that works with references instead of names: [condition] returns one
+     * of [targets], so a misspelled node is a compiler error.
+     *
+     * ```kotlin
+     * conditionalEdge(check, targets = setOf(write, NodeRef.END)) { draft ->
+     *     if (draft.isGood) NodeRef.END else write
+     * }
+     * ```
+     *
+     * To finish the branch, list [NodeRef.END] in [targets] and return it.
+     */
+    @JvmName("conditionalEdgeToRefs")
+    public fun conditionalEdge(from: NodeRef, targets: Set<NodeRef>, condition: suspend (State) -> NodeRef) {
+        conditionalEdge(from.name, targets, condition)
+    }
+
+    /**
+     * Adds a conditional edge that works with references, from the node named [from], usually
+     * [START]. See the overload taking a node reference.
+     */
+    @JvmName("conditionalEdgeToRefs")
+    public fun conditionalEdge(from: String, targets: Set<NodeRef>, condition: suspend (State) -> NodeRef) {
+        conditionalEdge(from, targets.mapTo(mutableSetOf()) { it.name }) { state -> condition(state).name }
     }
 
     /**

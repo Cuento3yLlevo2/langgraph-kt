@@ -22,6 +22,8 @@ First public release. Everything below is new compared with the unpublished beta
   edge kinds, and fan-out without a reducer.
 - `conditionalEdge(from, targets)` with declared targets, checked at compile time and at run time.
 - `NodeRef` and the infix `then` for type-safe edges: `START then a then b then END`.
+- Conditional edges that route between node references instead of names:
+  `conditionalEdge(a, targets = setOf(b, c)) { b }`, with `NodeRef.END` to finish.
 - `LangGraphException` hierarchy: `GraphValidationException`, `NodeExecutionException`,
   `EdgeConditionException`, `ReducerException`, `InvalidRouteException`,
   `MaxIterationsExceededException`, `CheckpointNotFoundException`,
