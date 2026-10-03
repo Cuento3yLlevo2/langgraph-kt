@@ -18,13 +18,28 @@ import kotlin.test.assertTrue
 /** Keeps the samples (and the README snippets based on them) working. */
 class SamplesTest {
     @Test
-    fun `quick start revises until every note is used`() =
+    fun `quick start answers each email according to its category`() =
         runTest {
-            val state = articleGraph().invoke(ArticleState(topic = "Kotlin")).state
+            val graph = emailSupportGraph()
 
-            assertEquals(2, state.revisions)
-            assertEquals("Kotlin is fast. Kotlin is safe", state.draft)
+            val refund = graph.invoke(SupportEmail("Ana", "I was charged twice, I would like a refund.")).state
+            assertEquals(Category.REFUND, refund.category)
+            assertEquals("Hi Ana, your refund is on its way. It takes 3 to 5 days.", refund.reply)
+
+            val technical = graph.invoke(SupportEmail("Ben", "The app shows an error when I log in.")).state
+            assertEquals(Category.TECHNICAL, technical.category)
+            assertEquals("Hi Ben, please update the app and try again. Here is our guide.", technical.reply)
+
+            val angry = graph.invoke(SupportEmail("Cleo", "This is unacceptable, third time I write to you!!")).state
+            assertEquals(Category.ESCALATION, angry.category)
+            assertEquals("Hi Cleo, a colleague from our team will reply to you personally today.", angry.reply)
         }
+
+    @Test
+    fun `quick start escalates emails that are complex or unclear`() {
+        assertEquals(Category.ESCALATION, categoryOf("The app keeps crashing and I want my money back"))
+        assertEquals(Category.ESCALATION, categoryOf("Do you sell gift cards?"))
+    }
 
     @Test
     fun `refund waits for approval and survives a restart`() =
