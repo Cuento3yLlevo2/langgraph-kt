@@ -1,6 +1,6 @@
 /*
  * Maven Central publishing conventions. Module-specific name and description
- * come from the `POM_NAME` / `POM_DESCRIPTION` Gradle properties.
+ * come from the `POM_NAME` / `POM_DESCRIPTION` properties in the module's `gradle.properties`.
  */
 plugins {
     id("com.vanniktech.maven.publish")
@@ -14,8 +14,10 @@ mavenPublishing {
     }
 
     pom {
-        name.set(providers.gradleProperty("POM_NAME"))
-        description.set(providers.gradleProperty("POM_DESCRIPTION"))
+        // Read with property(): providers.gradleProperty() does not see a module's own gradle.properties,
+        // and Maven Central rejects a POM without a name or a description. property() fails if one is missing.
+        name.set(property("POM_NAME").toString())
+        description.set(property("POM_DESCRIPTION").toString())
         inceptionYear.set("2026")
         url.set("https://github.com/Cuento3yLlevo2/langgraph-kt")
         licenses {
