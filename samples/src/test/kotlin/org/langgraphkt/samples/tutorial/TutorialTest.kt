@@ -2,6 +2,7 @@ package org.langgraphkt.samples.tutorial
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
@@ -11,6 +12,9 @@ import org.langgraphkt.GraphValidationException
 import org.langgraphkt.MaxIterationsExceededException
 import org.langgraphkt.MemoryCheckpointer
 import org.langgraphkt.NodeExecutionException
+import org.langgraphkt.agent.AgentState
+import org.langgraphkt.agent.ChatMessage
+import org.langgraphkt.agent.textDelta
 import org.langgraphkt.samples.tutorial.level10.endlessLoop
 import org.langgraphkt.samples.tutorial.level10.forgottenArrow
 import org.langgraphkt.samples.tutorial.level10.missingReducer
@@ -18,6 +22,8 @@ import org.langgraphkt.samples.tutorial.level10.misspelledNode
 import org.langgraphkt.samples.tutorial.level6.describe
 import org.langgraphkt.samples.tutorial.level7.PAY
 import org.langgraphkt.samples.tutorial.level8.PretendModel
+import org.langgraphkt.samples.tutorial.level9.pretendModel
+import org.langgraphkt.samples.tutorial.level9.ticketDesk
 import org.langgraphkt.states
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -42,6 +48,9 @@ import org.langgraphkt.samples.tutorial.level7.Ticket as Ticket7
 import org.langgraphkt.samples.tutorial.level7.helpDesk as helpDesk7
 import org.langgraphkt.samples.tutorial.level8.Ticket as Ticket8
 import org.langgraphkt.samples.tutorial.level8.helpDesk as helpDesk8
+import org.langgraphkt.samples.tutorial.level9.Ticket as Ticket9
+import org.langgraphkt.samples.tutorial.level9.describe as describe9
+import org.langgraphkt.samples.tutorial.level9.helpDesk as helpDesk9
 
 /** Keeps the code and the output shown in the tutorial in `docs/` true. */
 class TutorialTest {
@@ -169,6 +178,52 @@ class TutorialTest {
             val state = helpDesk8(PretendModel()).invoke(Ticket8("Ana", "Where is my pizza?")).state
 
             assertEquals("Thanks for your patience! Your pizza is on its way.", state.reply)
+        }
+
+    @Test
+    fun `level 9 lets the model look up what the customer asks for`() =
+        runTest {
+            val state = helpDesk9(pretendModel).invoke(AgentState("I'm Ana. Where is my pizza, and how much is a cola?")).state
+
+            assertEquals(
+                listOf(
+                    "customer: I'm Ana. Where is my pizza, and how much is a cola?",
+                    "model asks for: order_status {\"customer\":\"Ana\"}, menu_price {\"item\":\"cola\"}",
+                    "order_status: The pizza for Ana left the oven and the driver is 5 minutes away.",
+                    "menu_price: One cola costs 2 euros.",
+                    "model: The pizza for Ana left the oven and the driver is 5 minutes away. One cola costs 2 euros.",
+                ),
+                state.messages.map { describe9(it) },
+            )
+            assertEquals("The pizza for Ana left the oven and the driver is 5 minutes away. One cola costs 2 euros.", state.answer)
+        }
+
+    @Test
+    fun `level 9 tells the model when a tool fails`() =
+        runTest {
+            val state = helpDesk9(pretendModel).invoke(AgentState("Do you sell tiramisu?")).state
+
+            val result = state.messages.filterIsInstance<ChatMessage.ToolResult>().single()
+            assertEquals(true, result.isError)
+            assertEquals("We do not sell tiramisu.", state.answer)
+        }
+
+    @Test
+    fun `level 9 runs the agent inside a graph with its own state`() =
+        runTest {
+            val state = ticketDesk(pretendModel).invoke(Ticket9(customer = "Ben", message = "Do you sell salad?")).state
+
+            assertEquals("Hi Ben! One salad costs 6 euros.", state.reply)
+            assertEquals("I'm Ben. Do you sell salad?", state.conversation.first().text)
+            assertEquals(4, state.conversation.size)
+        }
+
+    @Test
+    fun `level 9 delivers the answer of the model to a stream`() =
+        runTest {
+            val pieces = helpDesk9(pretendModel).stream(AgentState("How much is a cola?")).mapNotNull { it.textDelta }.toList()
+
+            assertEquals("One cola costs 2 euros.", pieces.joinToString(""))
         }
 
     @Test
