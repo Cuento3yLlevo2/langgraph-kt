@@ -7,6 +7,8 @@ breaking changes.
 
 ## [Unreleased]
 
+## [0.1.0-alpha04] - 2026-10-04
+
 ### Added
 
 - Streaming of a model's answer. A `toolAgent` or `toolLoop` whose run is collected with `stream`
@@ -140,7 +142,8 @@ First public release. Everything below is new compared with the unpublished beta
 - `START` counted toward `maxIterations`.
 - `FileCheckpointer` did not write the format version into its files.
 
-[Unreleased]: https://github.com/Cuento3yLlevo2/langgraph-kt/compare/v0.1.0-alpha03...HEAD
+[Unreleased]: https://github.com/Cuento3yLlevo2/langgraph-kt/compare/v0.1.0-alpha04...HEAD
+[0.1.0-alpha04]: https://github.com/Cuento3yLlevo2/langgraph-kt/compare/v0.1.0-alpha03...v0.1.0-alpha04
 [0.1.0-alpha03]: https://github.com/Cuento3yLlevo2/langgraph-kt/compare/v0.1.0-alpha02...v0.1.0-alpha03
 [0.1.0-alpha02]: https://github.com/Cuento3yLlevo2/langgraph-kt/compare/v0.1.0-alpha01...v0.1.0-alpha02
 [0.1.0-alpha01]: https://github.com/Cuento3yLlevo2/langgraph-kt/releases/tag/v0.1.0-alpha01
