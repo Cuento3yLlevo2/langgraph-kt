@@ -20,6 +20,10 @@ dependencies {
     implementation(project(":langgraph-kt-serialization"))
     implementation(project(":langgraph-kt-checkpoint-file"))
     implementation(project(":langgraph-kt-langchain4j"))
+    implementation(project(":langgraph-kt-agent"))
+    implementation(project(":langgraph-kt-anthropic"))
+    // The Ktor engine that AnthropicChatModel sends its requests with.
+    implementation(libs.ktor.client.cio)
 
     testImplementation(kotlin("test"))
     testImplementation(libs.kotlinx.coroutines.test)
@@ -29,7 +33,7 @@ tasks.test {
     useJUnitPlatform()
 }
 
-listOf("QuickStart", "HumanInTheLoop", "ReviewLoop", "ParallelResearch", "ChatAgent").forEach { sample ->
+listOf("QuickStart", "HumanInTheLoop", "ReviewLoop", "ParallelResearch", "ChatAgent", "ToolAgent").forEach { sample ->
     tasks.register<JavaExec>("run$sample") {
         group = "samples"
         description = "Runs the $sample sample."
