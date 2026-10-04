@@ -7,6 +7,8 @@ breaking changes.
 
 ## [Unreleased]
 
+## [0.1.0-alpha02] - 2026-10-04
+
 ### Added
 
 - `langgraph-kt-agent`, a new module for every target, with what a graph needs to work with a
@@ -93,5 +95,6 @@ First public release. Everything below is new compared with the unpublished beta
 - `START` counted toward `maxIterations`.
 - `FileCheckpointer` did not write the format version into its files.
 
-[Unreleased]: https://github.com/Cuento3yLlevo2/langgraph-kt/compare/v0.1.0-alpha01...HEAD
+[Unreleased]: https://github.com/Cuento3yLlevo2/langgraph-kt/compare/v0.1.0-alpha02...HEAD
+[0.1.0-alpha02]: https://github.com/Cuento3yLlevo2/langgraph-kt/compare/v0.1.0-alpha01...v0.1.0-alpha02
 [0.1.0-alpha01]: https://github.com/Cuento3yLlevo2/langgraph-kt/releases/tag/v0.1.0-alpha01
