@@ -10,6 +10,10 @@ workflows. You describe the work as a **graph**: a few small steps, and arrows t
 comes next. The library runs it, and takes care of loops, steps that run at the same time, live
 progress, and pausing until a person approves.
 
+**[Try it in your browser](https://cuento3yllevo2.github.io/langgraph-kt-demo/):** Pixel Pizza is a
+small game in which every stage runs a langgraph-kt graph, from two nodes in a row to a full agent
+workflow. No account and no API key needed.
+
 > langgraph-kt is an independent project inspired by [LangGraph](https://github.com/langchain-ai/langgraph).
 > It is not affiliated with or endorsed by LangChain, Inc.
 
@@ -562,6 +566,11 @@ Runnable examples live in [`samples/`](samples/src/main/kotlin/org/langgraphkt/s
 ./gradlew :samples:runChatAgent         # a chat agent built on a LangChain4j model
 ./gradlew :samples:runLevel1            # ... runLevel10, the levels of the tutorial
 ```
+
+For a complete app, see [langgraph-kt-demo](https://github.com/Cuento3yLlevo2/langgraph-kt-demo),
+the source of the [Pixel Pizza game](https://cuento3yllevo2.github.io/langgraph-kt-demo/). It is a
+Compose Multiplatform app for the browser (Kotlin/Wasm), the desktop and Android, and it uses this
+library from Maven Central.
 
 ## Contributing
 

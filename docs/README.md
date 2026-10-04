@@ -7,6 +7,10 @@ LangGraph, AI agents or graphs. You need to be able to read a little Kotlin.
 Every level builds the same thing a bit further: the help desk of a pizza shop called Pixel Pizza,
 which reads a customer's message and writes a reply.
 
+Want to see where this leads first? The same help desk is a
+[game you can play in your browser](https://cuento3yllevo2.github.io/langgraph-kt-demo/), with one
+stage for each move of the tutorial.
+
 ## What you need
 
 - JDK 17 or newer.
