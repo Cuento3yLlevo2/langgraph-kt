@@ -3,6 +3,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     id("langgraph.jvm-library")
     id("langgraph.publishing")
+    // The tests declare a @Serializable tool input.
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 // LangChain4j 1.x is compiled for Java 17, so this module cannot run on Java 11 like the others.
@@ -18,6 +20,7 @@ java {
 
 dependencies {
     api(project(":langgraph-kt-core"))
+    api(project(":langgraph-kt-agent"))
     api(libs.langchain4j)
 
     testImplementation(kotlin("test"))
