@@ -1,6 +1,8 @@
 public final class org/langgraphkt/langchain4j/LangChain4jChatModel : org/langgraphkt/agent/ChatModel {
-	public fun <init> (Ldev/langchain4j/model/chat/ChatModel;)V
+	public fun <init> (Ldev/langchain4j/model/chat/ChatModel;Ldev/langchain4j/model/chat/StreamingChatModel;)V
+	public synthetic fun <init> (Ldev/langchain4j/model/chat/ChatModel;Ldev/langchain4j/model/chat/StreamingChatModel;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun chat (Lorg/langgraphkt/agent/ChatRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun stream (Lorg/langgraphkt/agent/ChatRequest;)Lkotlinx/coroutines/flow/Flow;
 }
 
 public final class org/langgraphkt/langchain4j/LangChain4jExtensionsKt {
