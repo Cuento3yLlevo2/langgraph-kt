@@ -8,6 +8,7 @@ import org.langgraphkt.samples.tutorial.level5.helpDesk
 fun describe(event: GraphEvent<Ticket>): String =
     when (event) {
         is GraphEvent.NodeStarted -> "step ${event.step}: ${event.node} started"
+        is GraphEvent.NodeProgress -> "step ${event.step}: ${event.node} reports ${event.value}"
         is GraphEvent.NodeCompleted -> "step ${event.step}: ${event.node} finished"
         is GraphEvent.StepCompleted -> "step ${event.step} done, facts so far: ${event.state.facts.size}"
         is GraphEvent.Completed -> "finished: ${event.state.reply}"

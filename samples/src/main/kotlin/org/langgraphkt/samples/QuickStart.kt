@@ -102,6 +102,7 @@ suspend fun main() {
     graph.stream(emails.first()).collect { event ->
         when (event) {
             is GraphEvent.NodeStarted -> println("${event.node} started")
+            is GraphEvent.NodeProgress -> println("${event.node} reports ${event.value}")
             is GraphEvent.NodeCompleted -> println("${event.node} finished")
             is GraphEvent.StepCompleted -> println("step ${event.step} done, ran ${event.nodes}")
             is GraphEvent.Completed -> println("done: ${event.state.reply}")

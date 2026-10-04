@@ -11,8 +11,6 @@ import kotlinx.coroutines.flow.map
  * [NodeCompleted] as each of them finishes, and then one [StepCompleted]. While a node runs, it can
  * add [NodeProgress] events of its own. A stream always ends with exactly one [Completed] or
  * [Interrupted].
- *
- * More kinds of event may be added, so give a `when` over the events an `else` branch.
  */
 public sealed interface GraphEvent<out State> {
     /** The graph state at the time of the event. */

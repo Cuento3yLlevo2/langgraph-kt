@@ -16,6 +16,7 @@ you run it.
 fun describe(event: GraphEvent<Ticket>): String =
     when (event) {
         is GraphEvent.NodeStarted -> "step ${event.step}: ${event.node} started"
+        is GraphEvent.NodeProgress -> "step ${event.step}: ${event.node} reports ${event.value}"
         is GraphEvent.NodeCompleted -> "step ${event.step}: ${event.node} finished"
         is GraphEvent.StepCompleted -> "step ${event.step} done, facts so far: ${event.state.facts.size}"
         is GraphEvent.Completed -> "finished: ${event.state.reply}"
@@ -56,11 +57,12 @@ places, because the two nodes finish at almost the same moment.
 about everything on the way. It returns a Kotlin `Flow`, which is a sequence of values that arrive
 over time. `collect { ... }` runs your code for each one.
 
-The values are **events**. There are five kinds:
+The values are **events**. There are six kinds:
 
 | Event | When | What it carries |
 |---|---|---|
 | `NodeStarted` | A node is about to run | `step`, `node`, the state the node receives |
+| `NodeProgress` | A running node has something to show | `step`, `node`, the `value` the node reported |
 | `NodeCompleted` | A node finished | `step`, `node`, the state the node returned |
 | `StepCompleted` | All nodes of a step finished | `step`, `nodes`, the state after the step, with the results of all its nodes |
 | `Completed` | The run reached `END` | The final state. Always the last event. |
@@ -71,8 +73,24 @@ Every stream ends with exactly one `Completed` or `Interrupted`.
 In the output you can see level 5 at work: both lookups start before either finishes, and they
 share step 1.
 
-Because `when` covers all five kinds, the Kotlin compiler would complain if you forgot one. That is
-why `describe` handles `Interrupted` even though this graph never pauses.
+Because `when` covers all six kinds, the Kotlin compiler would complain if you forgot one. That is
+why `describe` handles `Interrupted` and `NodeProgress` even though this graph never pauses and its
+nodes report nothing.
+
+### Progress from inside a node
+
+`NodeProgress` is the one event a node sends itself. A node calls `reportProgress(value)` while it
+works, and the value arrives in the stream before the node finishes:
+
+```kotlin
+val kitchen = node("kitchen", work = { ticket ->
+    reportProgress("calling the kitchen")
+    kitchenPhone.ask(ticket.customer)
+}) { ticket, fact -> ticket.copy(facts = ticket.facts + fact) }
+```
+
+This is how an AI model's answer appears word by word: the agent of the library reports each piece
+of text the model writes. With `invoke`, nobody watches, and `reportProgress` does nothing.
 
 ### Only the state, please
 
@@ -101,7 +119,7 @@ twice runs the graph twice.
 You can now:
 
 - follow a run live with `stream`,
-- name the five events and what each one tells you,
+- name the six events and what each one tells you,
 - get just the states with `states()`.
 
 [Back to level 5](05-parallel.md) · [All levels](README.md) · Next: [Level 7, save points](07-save-points.md)
