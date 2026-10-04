@@ -7,6 +7,8 @@ breaking changes.
 
 ## [Unreleased]
 
+## [0.1.0-alpha01] - 2026-10-04
+
 First public release. Everything below is new compared with the unpublished beta.
 
 ### Added
@@ -72,4 +74,5 @@ First public release. Everything below is new compared with the unpublished beta
 - `START` counted toward `maxIterations`.
 - `FileCheckpointer` did not write the format version into its files.
 
-[Unreleased]: https://github.com/Cuento3yLlevo2/langgraph-kt/commits/main
+[Unreleased]: https://github.com/Cuento3yLlevo2/langgraph-kt/compare/v0.1.0-alpha01...HEAD
+[0.1.0-alpha01]: https://github.com/Cuento3yLlevo2/langgraph-kt/releases/tag/v0.1.0-alpha01
