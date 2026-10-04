@@ -230,7 +230,7 @@ class AnthropicChatModelTest {
                 response.message.toolCalls,
             )
             assertNull(response.message.providerContent)
-            assertFalse(response.truncated)
+            assertFalse(response.message.truncated)
             assertEquals(TokenUsage(inputTokens = 115, outputTokens = 7), response.usage)
         }
 
@@ -251,7 +251,7 @@ class AnthropicChatModelTest {
         runTest {
             val response = model("""{"stop_reason": "max_tokens", "content": [{"type": "text", "text": "Once upon a"}]}""").chat(hello)
 
-            assertTrue(response.truncated)
+            assertTrue(response.message.truncated)
             assertEquals("Once upon a", response.message.text)
         }
 

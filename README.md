@@ -555,6 +555,9 @@ What to know:
   not fit, the run goes on: the model gets the error as the result and can try again.
 - **Every round of tools is two steps.** Raise `GraphConfig.maxIterations` (25 by default) for an
   agent that needs more than twelve rounds.
+- **An answer can be cut off.** When the model reaches its output limit in the text of its answer,
+  the run ends with what it wrote, and `state.answerTruncated` is `true` (`truncated` on the
+  `ChatMessage.Assistant`). When it reaches the limit in a tool call, the run fails.
 - **`AgentState` is `@Serializable`**, so `KotlinxStateSerializer` and `FileCheckpointer` can save it.
 
 To let a person approve the tool calls, pause before the node that runs them. It is named `tools`:

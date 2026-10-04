@@ -21,6 +21,9 @@ fun says(text: String): ChatResponse = ChatResponse(ChatMessage.Assistant(text))
 
 fun calls(vararg calls: ToolCall): ChatResponse = ChatResponse(ChatMessage.Assistant(toolCalls = calls.toList()))
 
+/** The same answer, cut off at the model's output limit. */
+fun ChatResponse.cutOff(): ChatResponse = copy(message = message.copy(truncated = true))
+
 fun call(id: String, name: String, vararg input: Pair<String, String>): ToolCall =
     ToolCall(id, name, buildJsonObject { input.forEach { (key, value) -> put(key, value) } })
 

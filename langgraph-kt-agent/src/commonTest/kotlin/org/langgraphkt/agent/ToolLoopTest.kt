@@ -120,7 +120,7 @@ class ToolLoopTest {
     @Test
     fun `an answer that was cut off in a tool call fails the run`() =
         runTest {
-            val model = ScriptedModel(calls(status).copy(truncated = true))
+            val model = ScriptedModel(calls(status).cutOff())
 
             val failure = assertFailsWith<NodeExecutionException> { toolAgent(model, tools).invoke(AgentState("Hi")) }
 
@@ -130,11 +130,34 @@ class ToolLoopTest {
         }
 
     @Test
-    fun `an answer that was cut off in its text is kept`() =
+    fun `an answer that was cut off in its text is kept and marked`() =
         runTest {
-            val model = ScriptedModel(says("Once upon a").copy(truncated = true))
+            val model = ScriptedModel(says("Once upon a").cutOff())
 
-            assertEquals("Once upon a", toolAgent(model).invoke(AgentState("Tell me a story")).state.answer)
+            val state = toolAgent(model).invoke(AgentState("Tell me a story")).state
+
+            assertEquals("Once upon a", state.answer)
+            assertTrue(state.answerTruncated)
+        }
+
+    @Test
+    fun `append sees that an answer was cut off`() =
+        runTest {
+            val graph =
+                StateGraph<Ticket> {
+                    START then
+                        toolLoop(
+                            model = ScriptedModel(says("Once upon a").cutOff()),
+                            tools = tools,
+                            messages = { it.messages },
+                            append = { ticket, new ->
+                                val cutOff = new.any { it is ChatMessage.Assistant && it.truncated }
+                                ticket.copy(messages = ticket.messages + new, log = ticket.log + "cut off: $cutOff")
+                            },
+                        )
+                }.compile()
+
+            assertEquals(listOf("cut off: true"), graph.invoke(Ticket(listOf(ChatMessage.User("Tell me a story")))).state.log)
         }
 
     @Test

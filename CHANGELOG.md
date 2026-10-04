@@ -17,6 +17,10 @@ breaking changes.
 
 ### Changed
 
+- `ChatResponse.truncated` moved to the message: read `ChatMessage.Assistant.truncated`, and set it
+  there in a `ChatModel` of your own. Before, an answer that was cut off at the model's output limit
+  could not be told from a complete one once it was in the state, because `toolLoop` only passes
+  messages to `append`. `AgentState.answerTruncated` reports it for a `toolAgent`.
 - An exception of the library that a node throws is now wrapped in `NodeExecutionException` like any
   other exception. Before, it reached the caller as it was, so a failed model call in a `toolAgent`
   did not say which node failed. Where you caught `ChatModelException` from `invoke`, `resume` or

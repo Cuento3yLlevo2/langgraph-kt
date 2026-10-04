@@ -147,9 +147,10 @@ private fun response(response: LangChain4jResponse): ChatResponse {
                 } else {
                     Json.parseToJsonElement(ChatMessageSerializer.messageToJson(answer))
                 },
+            truncated = response.finishReason() == FinishReason.LENGTH,
         )
     val usage = response.tokenUsage()?.let { TokenUsage(it.inputTokenCount() ?: 0, it.outputTokenCount() ?: 0) }
-    return ChatResponse(message, truncated = response.finishReason() == FinishReason.LENGTH, usage = usage)
+    return ChatResponse(message, usage)
 }
 
 private fun arguments(json: String?): JsonObject =

@@ -5,7 +5,9 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class ChatMessageTest {
     private val status = call("call-1", "order_status", "customer" to "Ana")
@@ -45,7 +47,7 @@ class ChatMessageTest {
                     ChatMessage.User("Where is my pizza?"),
                     ChatMessage.Assistant("Let me check.", listOf(status), providerContent = JsonPrimitive("raw")),
                     ChatMessage.ToolResult("call-1", "order_status", "No such order", isError = true),
-                    ChatMessage.Assistant("I cannot find your order."),
+                    ChatMessage.Assistant("I cannot find your", truncated = true),
                 ),
             )
 
@@ -60,6 +62,20 @@ class ChatMessageTest {
         assertNull(AgentState("Hi").answer)
         assertNull(AgentState(listOf(ChatMessage.Assistant("Let me check.", listOf(status)))).answer)
         assertEquals("Hello!", AgentState("Hi").copy(messages = listOf(ChatMessage.Assistant("Hello!"))).answer)
+    }
+
+    @Test
+    fun `the answer of a state is truncated when its last assistant message is`() {
+        assertFalse(AgentState("Hi").answerTruncated)
+        assertFalse(AgentState(listOf(ChatMessage.Assistant("Hello!"))).answerTruncated)
+        assertTrue(AgentState(listOf(ChatMessage.Assistant("Once upon a", truncated = true))).answerTruncated)
+    }
+
+    @Test
+    fun `a message saved before it could be truncated is read as complete`() {
+        val saved = """{"messages":[{"type":"assistant","text":"Hello!"}]}"""
+
+        assertEquals(AgentState(listOf(ChatMessage.Assistant("Hello!"))), Json.decodeFromString(AgentState.serializer(), saved))
     }
 
     @Test

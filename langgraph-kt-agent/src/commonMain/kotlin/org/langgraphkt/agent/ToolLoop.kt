@@ -54,6 +54,11 @@ import org.langgraphkt.StateGraph
  * )
  * ```
  *
+ * When the model reaches its output limit in the text of its answer, the loop ends with that answer
+ * and its [ChatMessage.Assistant.truncated] is `true`, so [append] and the code that reads the state
+ * can tell. When it reaches the limit in a tool call, the model node fails with a
+ * [ChatModelException], because a part of a call cannot be run.
+ *
  * To approve tool calls by hand, run the graph with `interruptBefore = setOf("tools")`. The calls
  * that wait are `messages.pendingToolCalls()`. Resume the run to let them through, or resume it with
  * a state that has a [ChatMessage.ToolResult] for each call you reject: a call that already has a
@@ -96,7 +101,7 @@ public fun <State> StateGraph<State>.toolLoop(
                 val stored = messages(state)
                 val opening = if (stored.isEmpty() && firstMessage != null) listOf(ChatMessage.User(firstMessage(state))) else emptyList()
                 val response = model.chat(ChatRequest(opening + stored, system, specs))
-                if (response.truncated && response.message.toolCalls.isNotEmpty()) {
+                if (response.message.truncated && response.message.toolCalls.isNotEmpty()) {
                     throw ChatModelException("The model reached its output limit in the middle of a tool call. Raise the limit.")
                 }
                 opening + response.message
@@ -158,9 +163,15 @@ public data class AgentState(
     /**
      * The text of the model's final answer, or `null` while the conversation does not end with one:
      * before the first run, or when the run paused with tool calls waiting.
+     *
+     * The text is incomplete when [answerTruncated] is `true`.
      */
     public val answer: String?
         get() = (messages.lastOrNull() as? ChatMessage.Assistant)?.takeIf { it.toolCalls.isEmpty() }?.text
+
+    /** `true` when the model reached its output limit before it finished its last message, so [answer] is cut off. */
+    public val answerTruncated: Boolean
+        get() = (messages.lastOrNull() as? ChatMessage.Assistant)?.truncated == true
 
     /** Returns this state with [text] added as the user's next message, to continue the conversation. */
     public fun withUserMessage(text: String): AgentState = copy(messages = messages + ChatMessage.User(text))
