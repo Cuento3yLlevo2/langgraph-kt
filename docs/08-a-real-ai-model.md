@@ -123,7 +123,10 @@ val answer = node("answer") { ticket -> ticket.copy(reply = askMyModel(ticket.me
 ```
 
 `langgraph-kt-langchain4j` is for the JVM (Java 17 or newer, which LangChain4j requires). On the
-other platforms, write the node this way with an HTTP client of your choice.
+other platforms, write the node this way with an HTTP client of your choice, or use the `ChatModel`
+of `langgraph-kt-agent`, which works everywhere. The README shows it under
+[AI models](../README.md#ai-models), and under [Agents with tools](../README.md#agents-with-tools)
+how a model calls your functions.
 
 ### What changes when the model is real
 

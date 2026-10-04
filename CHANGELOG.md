@@ -7,6 +7,25 @@ breaking changes.
 
 ## [Unreleased]
 
+### Added
+
+- `langgraph-kt-agent`, a new module for every target, with what a graph needs to work with a
+  language model:
+  - `ChatModel`, a one-function interface to a model provider, with `ChatRequest`, `ChatResponse`
+    and `ChatMessage` (`User`, `Assistant`, `ToolResult`). Messages are `@Serializable`.
+  - `Tool`, a function the model may call. `Tool<Input>(name, description) { input -> ... }` builds
+    the JSON Schema of the tool from a `@Serializable` input class, and `@Description` describes a
+    property to the model.
+  - `toolAgent(model, tools, system)`, a ready-made tool-calling agent graph over `AgentState`, and
+    `toolLoop`, which adds the same loop to a graph with a state of your own.
+  - `pendingToolCalls()`, the tool calls that wait when a run is paused before its tools.
+  - `ChatModelException`.
+- `langgraph-kt-anthropic`, a new module for every target: `AnthropicChatModel` calls Claude through
+  Ktor.
+- `LangChain4jChatModel` in `langgraph-kt-langchain4j`, which makes any LangChain4j model a
+  `ChatModel`.
+- The `ToolAgent` sample.
+
 ## [0.1.0-alpha01] - 2026-10-04
 
 First public release. Everything below is new compared with the unpublished beta.

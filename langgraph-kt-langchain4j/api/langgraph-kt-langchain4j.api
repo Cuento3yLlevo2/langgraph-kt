@@ -1,3 +1,8 @@
+public final class org/langgraphkt/langchain4j/LangChain4jChatModel : org/langgraphkt/agent/ChatModel {
+	public fun <init> (Ldev/langchain4j/model/chat/ChatModel;)V
+	public fun chat (Lorg/langgraphkt/agent/ChatRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
 public final class org/langgraphkt/langchain4j/LangChain4jExtensionsKt {
 	public static final fun chatMessagesNode (Ldev/langchain4j/model/chat/ChatModel;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function2;
 	public static final fun chatNode (Ldev/langchain4j/model/chat/ChatModel;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function2;

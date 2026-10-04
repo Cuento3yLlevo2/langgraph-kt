@@ -8,6 +8,8 @@ import kotlinx.io.files.Path
 import org.langgraphkt.GraphConfig
 import org.langgraphkt.GraphResult
 import org.langgraphkt.MemoryCheckpointer
+import org.langgraphkt.agent.AgentState
+import org.langgraphkt.agent.ChatMessage
 import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -105,6 +107,50 @@ class SamplesTest {
             assertEquals(3, state.findings.size)
             assertEquals("3 sources agree.", state.summary)
             assertEquals(300, currentTime)
+        }
+
+    @Test
+    fun `help desk agent looks up what the customer asks for`() =
+        runTest {
+            val agent = helpDeskAgent(scriptedModel)
+
+            val state = agent.invoke(AgentState("I'm Ana. Where is my pizza, and how much is a cola?")).state
+
+            assertEquals(
+                "The pizza for Ana left the oven and the driver is 5 minutes away. One cola costs 2 euros.",
+                state.answer,
+            )
+            assertEquals(2, state.messages.filterIsInstance<ChatMessage.ToolResult>().size)
+        }
+
+    @Test
+    fun `help desk agent continues a conversation from the last result`() =
+        runTest {
+            val agent = helpDeskAgent(scriptedModel)
+            val config = GraphConfig(threadId = "customer-7", checkpointer = MemoryCheckpointer<AgentState>())
+
+            for (question in listOf("How much is a cola?", "And a salad?")) {
+                val history = agent.lastResult(config)?.state ?: AgentState()
+                agent.invoke(history.withUserMessage(question), config)
+            }
+
+            val state = agent.lastResult(config)?.state
+            assertEquals("One salad costs 6 euros.", state?.answer)
+            assertEquals(8, state?.messages?.size)
+        }
+
+    @Test
+    fun `help desk agent tells the model when a tool fails`() =
+        runTest {
+            val state = helpDeskAgent(scriptedModel).invoke(AgentState("Do you sell tiramisu?")).state
+
+            assertTrue(
+                state.messages
+                    .filterIsInstance<ChatMessage.ToolResult>()
+                    .single()
+                    .isError,
+            )
+            assertEquals("We do not sell tiramisu.", state.answer)
         }
 
     @Test

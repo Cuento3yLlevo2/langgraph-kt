@@ -102,6 +102,33 @@ Pauses need a checkpointer.
 | `GraphEvent.Interrupted` | The run paused. Last event. |
 | `GraphEvent.Completed` | The run reached `END`. Last event. |
 
+## An agent with tools
+
+From `langgraph-kt-agent`. The README explains it under
+[Agents with tools](../README.md#agents-with-tools).
+
+```kotlin
+@Serializable
+data class MenuLookup(@Description("The item, for example \"cola\"") val item: String)
+
+// A tool: a name, a description for the model, and a function that returns text.
+val menuPrice = Tool<MenuLookup>("menu_price", "Returns the price of an item.") { lookup -> priceOf(lookup.item) }
+
+// A graph of two nodes, "model" and "tools", that loops until the model has its answer.
+val agent = toolAgent(model, tools = listOf(menuPrice), system = "You work at a pizzeria.")
+
+val state = agent.invoke(AgentState("How much is a cola?")).state
+state.answer                                 // the model's final text
+agent.invoke(state.withUserMessage("And two?"))  // the next turn of the conversation
+```
+
+| You want | You write |
+|---|---|
+| A model | `AnthropicChatModel(...)`, `LangChain4jChatModel(...)`, or `ChatModel { request -> ... }` |
+| One text from a model, in any node | `model.chat("...")` |
+| The agent inside your own graph | `toolLoop(model, tools, messages = { ... }, append = { state, new -> ... })` |
+| To approve tool calls | `interruptBefore = setOf("tools")`, then `state.messages.pendingToolCalls()` |
+
 ## Rules
 
 1. State is a `data class` with `val` fields. Nodes return `state.copy(...)` and never change the
@@ -129,3 +156,4 @@ All are `LangGraphException`s. [Level 9](09-game-over-screens.md) explains each 
 | `CheckpointNotFoundException` | `resume` found no save |
 | `GraphAlreadyCompletedException` | `resume` found a finished run |
 | `CheckpointCorruptedException` | A save cannot be read |
+| `ChatModelException` | A call to a model failed |
