@@ -73,6 +73,28 @@ sealed interface <#A: out kotlin/Any?> org.langgraphkt/GraphEvent { // org.langg
         final fun toString(): kotlin/String // org.langgraphkt/GraphEvent.NodeCompleted.toString|toString(){}[0]
     }
 
+    final class <#A1: out kotlin/Any?> NodeProgress : org.langgraphkt/GraphEvent<#A1> { // org.langgraphkt/GraphEvent.NodeProgress|null[0]
+        constructor <init>(kotlin/Int, kotlin/String, kotlin/Any, #A1) // org.langgraphkt/GraphEvent.NodeProgress.<init>|<init>(kotlin.Int;kotlin.String;kotlin.Any;1:0){}[0]
+
+        final val node // org.langgraphkt/GraphEvent.NodeProgress.node|{}node[0]
+            final fun <get-node>(): kotlin/String // org.langgraphkt/GraphEvent.NodeProgress.node.<get-node>|<get-node>(){}[0]
+        final val state // org.langgraphkt/GraphEvent.NodeProgress.state|{}state[0]
+            final fun <get-state>(): #A1 // org.langgraphkt/GraphEvent.NodeProgress.state.<get-state>|<get-state>(){}[0]
+        final val step // org.langgraphkt/GraphEvent.NodeProgress.step|{}step[0]
+            final fun <get-step>(): kotlin/Int // org.langgraphkt/GraphEvent.NodeProgress.step.<get-step>|<get-step>(){}[0]
+        final val value // org.langgraphkt/GraphEvent.NodeProgress.value|{}value[0]
+            final fun <get-value>(): kotlin/Any // org.langgraphkt/GraphEvent.NodeProgress.value.<get-value>|<get-value>(){}[0]
+
+        final fun component1(): kotlin/Int // org.langgraphkt/GraphEvent.NodeProgress.component1|component1(){}[0]
+        final fun component2(): kotlin/String // org.langgraphkt/GraphEvent.NodeProgress.component2|component2(){}[0]
+        final fun component3(): kotlin/Any // org.langgraphkt/GraphEvent.NodeProgress.component3|component3(){}[0]
+        final fun component4(): #A1 // org.langgraphkt/GraphEvent.NodeProgress.component4|component4(){}[0]
+        final fun copy(kotlin/Int = ..., kotlin/String = ..., kotlin/Any = ..., #A1 = ...): org.langgraphkt/GraphEvent.NodeProgress<#A1> // org.langgraphkt/GraphEvent.NodeProgress.copy|copy(kotlin.Int;kotlin.String;kotlin.Any;1:0){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // org.langgraphkt/GraphEvent.NodeProgress.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // org.langgraphkt/GraphEvent.NodeProgress.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // org.langgraphkt/GraphEvent.NodeProgress.toString|toString(){}[0]
+    }
+
     final class <#A1: out kotlin/Any?> NodeStarted : org.langgraphkt/GraphEvent<#A1> { // org.langgraphkt/GraphEvent.NodeStarted|null[0]
         constructor <init>(kotlin/Int, kotlin/String, #A1) // org.langgraphkt/GraphEvent.NodeStarted.<init>|<init>(kotlin.Int;kotlin.String;1:0){}[0]
 
@@ -359,3 +381,5 @@ final const val org.langgraphkt/START // org.langgraphkt/START|{}START[0]
 
 final fun <#A: kotlin/Any?> (kotlinx.coroutines.flow/Flow<org.langgraphkt/GraphEvent<#A>>).org.langgraphkt/states(): kotlinx.coroutines.flow/Flow<#A> // org.langgraphkt/states|states@kotlinx.coroutines.flow.Flow<org.langgraphkt.GraphEvent<0:0>>(){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> org.langgraphkt/StateGraph(kotlin/Function1<org.langgraphkt/StateGraph<#A>, kotlin/Unit>): org.langgraphkt/StateGraph<#A> // org.langgraphkt/StateGraph|StateGraph(kotlin.Function1<org.langgraphkt.StateGraph<0:0>,kotlin.Unit>){0§<kotlin.Any?>}[0]
+final suspend fun org.langgraphkt/isProgressCollected(): kotlin/Boolean // org.langgraphkt/isProgressCollected|isProgressCollected(){}[0]
+final suspend fun org.langgraphkt/reportProgress(kotlin/Any) // org.langgraphkt/reportProgress|reportProgress(kotlin.Any){}[0]

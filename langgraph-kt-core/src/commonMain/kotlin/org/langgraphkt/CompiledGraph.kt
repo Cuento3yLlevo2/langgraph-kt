@@ -1,9 +1,11 @@
 package org.langgraphkt
 
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -11,6 +13,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.last
+import kotlin.coroutines.EmptyCoroutineContext
 
 /**
  * An executable graph produced by [StateGraph.compile]. It is immutable and can be shared and run
@@ -85,7 +88,7 @@ public class CompiledGraph<State> internal constructor(
      * @throws InvalidRouteException if a conditional edge returns an invalid target.
      */
     public suspend fun invoke(input: State, config: GraphConfig<State> = GraphConfig()): GraphResult<State> =
-        stream(input, config).last().toResult()
+        events(input, config, progress = false).last().toResult()
 
     /**
      * Continues the run of [GraphConfig.threadId] from its last checkpoint, typically after an
@@ -98,7 +101,7 @@ public class CompiledGraph<State> internal constructor(
      * @throws GraphAlreadyCompletedException if the thread's last run already completed.
      */
     public suspend fun resume(config: GraphConfig<State>, update: suspend (State) -> State = { it }): GraphResult<State> =
-        streamResume(config, update).last().toResult()
+        resumeEvents(config, update, progress = false).last().toResult()
 
     /**
      * Returns where the run of [GraphConfig.threadId] stopped, read from its last checkpoint, without
@@ -125,10 +128,15 @@ public class CompiledGraph<State> internal constructor(
     /**
      * Like [invoke], but returns a cold [Flow] that emits a [GraphEvent] as each node starts and
      * finishes and after every step, and ends with [GraphEvent.Completed] or
-     * [GraphEvent.Interrupted]. Nothing runs until the flow is collected, and each collection is a
+     * [GraphEvent.Interrupted]. What a node passes to [reportProgress] while it runs arrives as a
+     * [GraphEvent.NodeProgress]. Nothing runs until the flow is collected, and each collection is a
      * new run.
      */
     public fun stream(input: State, config: GraphConfig<State> = GraphConfig()): Flow<GraphEvent<State>> =
+        events(input, config, progress = true)
+
+    /** The run of [invoke] and [stream]. Only a stream has a collector for the [progress] of its nodes. */
+    private fun events(input: State, config: GraphConfig<State>, progress: Boolean): Flow<GraphEvent<State>> =
         flow {
             validateInterrupts(config)
             // Drop the previous run now, so that a failure before the first save cannot be resumed into it.
@@ -136,11 +144,14 @@ public class CompiledGraph<State> internal constructor(
             val firstNodes = resolveNextNodes(listOf(START), input)
             // Save the input before anything runs, so that a failure in the first step can be resumed.
             config.checkpointer?.save(config.threadId, Checkpoint(input, firstNodes))
-            run(config, RunStart(input, firstNodes, step = 0, skipInterruptBefore = false))
+            run(config, RunStart(input, firstNodes, step = 0, skipInterruptBefore = false), progress)
         }
 
     /** Like [resume], but returns a cold [Flow] of [GraphEvent]s. See [stream]. */
     public fun streamResume(config: GraphConfig<State>, update: suspend (State) -> State = { it }): Flow<GraphEvent<State>> =
+        resumeEvents(config, update, progress = true)
+
+    private fun resumeEvents(config: GraphConfig<State>, update: suspend (State) -> State, progress: Boolean): Flow<GraphEvent<State>> =
         flow {
             validateInterrupts(config)
             val checkpointer =
@@ -154,7 +165,7 @@ public class CompiledGraph<State> internal constructor(
             }
             // Only a run that paused before its next nodes continues past that pause. After any other
             // checkpoint (an interruptAfter pause, or a crash between steps) the pause is still due.
-            run(config, RunStart(update(checkpoint.state), checkpoint.nextNodes, checkpoint.step, checkpoint.interruptedBefore))
+            run(config, RunStart(update(checkpoint.state), checkpoint.nextNodes, checkpoint.step, checkpoint.interruptedBefore), progress)
         }
 
     private class RunStart<State>(
@@ -164,7 +175,7 @@ public class CompiledGraph<State> internal constructor(
         val skipInterruptBefore: Boolean,
     )
 
-    private suspend fun FlowCollector<GraphEvent<State>>.run(config: GraphConfig<State>, start: RunStart<State>) {
+    private suspend fun FlowCollector<GraphEvent<State>>.run(config: GraphConfig<State>, start: RunStart<State>, progress: Boolean) {
         var state = start.state
         var activeNodes = start.activeNodes
         var step = start.step
@@ -187,7 +198,7 @@ public class CompiledGraph<State> internal constructor(
             executedSteps++
             step++
 
-            state = runStep(step, activeNodes, state)
+            state = runStep(step, activeNodes, state, progress)
             val nextNodes = resolveNextNodes(activeNodes, state)
             checkpoint(nextNodes)
             emit(GraphEvent.StepCompleted(step, activeNodes, state))
@@ -202,29 +213,78 @@ public class CompiledGraph<State> internal constructor(
         emit(GraphEvent.Completed(state))
     }
 
-    private suspend fun FlowCollector<GraphEvent<State>>.runStep(step: Int, activeNodes: List<String>, state: State): State {
+    private suspend fun FlowCollector<GraphEvent<State>>.runStep(
+        step: Int,
+        activeNodes: List<String>,
+        state: State,
+        progress: Boolean,
+    ): State {
         activeNodes.forEach { emit(GraphEvent.NodeStarted(step, it, state)) }
-        if (activeNodes.size == 1) {
+        if (activeNodes.size == 1 && !progress) {
             val name = activeNodes.single()
             return runNode(nodes.getValue(name), state).state.also { emit(GraphEvent.NodeCompleted(step, name, it)) }
         }
 
-        // A flow may only emit from the coroutine that collects it, so the parallel nodes hand their
-        // results over a channel and this coroutine emits them in the order the nodes finish.
+        // A flow may only emit from the coroutine that collects it, so the nodes hand what they
+        // report and their results over a channel, and this coroutine emits them as they arrive.
+        // A node waits until its report is emitted, so it cannot run ahead of the collector, and a
+        // node that fails right after a report does not take the report with it.
+        val signals = Channel<NodeSignal<State>>(Channel.BUFFERED)
         val outputs =
-            coroutineScope {
-                val finished = Channel<Pair<String, State>>(Channel.UNLIMITED)
-                val results =
-                    activeNodes.map { name ->
-                        async { runNode(nodes.getValue(name), state).also { finished.send(name to it.state) } }
+            try {
+                coroutineScope {
+                    val results =
+                        activeNodes.map { name ->
+                            async(if (progress) reporter(name, signals) else EmptyCoroutineContext) {
+                                runNode(nodes.getValue(name), state).also { signals.send(NodeSignal.Finished(name, it.state)) }
+                            }
+                        }
+                    var running = activeNodes.size
+                    while (running > 0) {
+                        when (val signal = signals.receive()) {
+                            is NodeSignal.Progress -> {
+                                emit(GraphEvent.NodeProgress(step, signal.node, signal.value, state))
+                                signal.emitted.complete(Unit)
+                            }
+                            is NodeSignal.Finished -> {
+                                emit(GraphEvent.NodeCompleted(step, signal.node, signal.state))
+                                running--
+                            }
+                        }
                     }
-                repeat(activeNodes.size) {
-                    val (name, result) = finished.receive()
-                    emit(GraphEvent.NodeCompleted(step, name, result))
+                    results.awaitAll()
                 }
-                results.awaitAll()
+            } finally {
+                // A coroutine that outlives its node must not wait for a reader that is gone.
+                signals.close()
+                while (true) {
+                    val unread = signals.tryReceive().getOrNull() ?: break
+                    (unread as? NodeSignal.Progress)?.emitted?.complete(Unit)
+                }
             }
         return combine(state, activeNodes.zip(outputs))
+    }
+
+    /** Sends what the node named [name] reports to [signals], and makes the node wait until it is emitted. */
+    private fun reporter(name: String, signals: SendChannel<NodeSignal<State>>): ProgressReporter =
+        ProgressReporter { value ->
+            val emitted = CompletableDeferred<Unit>()
+            signals.send(NodeSignal.Progress(name, value, emitted))
+            emitted.await()
+        }
+
+    /** What a running node sends to the coroutine that emits the events of its step. */
+    private sealed interface NodeSignal<out State> {
+        class Progress(
+            val node: String,
+            val value: Any,
+            val emitted: CompletableDeferred<Unit>,
+        ) : NodeSignal<Nothing>
+
+        class Finished<State>(
+            val node: String,
+            val state: State,
+        ) : NodeSignal<State>
     }
 
     /**
@@ -308,7 +368,7 @@ public class CompiledGraph<State> internal constructor(
         when (this) {
             is GraphEvent.Completed -> GraphResult.Completed(state)
             is GraphEvent.Interrupted -> GraphResult.Interrupted(state, nextNodes)
-            is GraphEvent.NodeStarted, is GraphEvent.NodeCompleted, is GraphEvent.StepCompleted ->
+            is GraphEvent.NodeStarted, is GraphEvent.NodeProgress, is GraphEvent.NodeCompleted, is GraphEvent.StepCompleted ->
                 error("A graph stream always ends with Completed or Interrupted")
         }
 }

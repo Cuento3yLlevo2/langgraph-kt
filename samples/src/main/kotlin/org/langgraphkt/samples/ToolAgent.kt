@@ -14,6 +14,7 @@ import org.langgraphkt.agent.Description
 import org.langgraphkt.agent.Tool
 import org.langgraphkt.agent.ToolCall
 import org.langgraphkt.agent.pendingToolCalls
+import org.langgraphkt.agent.textDelta
 import org.langgraphkt.agent.toolAgent
 import org.langgraphkt.anthropic.AnthropicChatModel
 
@@ -91,9 +92,17 @@ suspend fun main() {
 
     for (question in listOf("I'm Ana. Where is my pizza, and how much is a cola?", "Do you sell tiramisu?")) {
         println("Customer: $question")
+        var writing = false
         agent.stream(AgentState(question)).collect { event ->
+            // The text of the model node, piece by piece while the model writes it.
+            event.textDelta?.let { piece ->
+                print(if (writing) piece else "Agent: $piece")
+                writing = true
+            }
             when (event) {
-                is GraphEvent.NodeCompleted ->
+                is GraphEvent.NodeCompleted -> {
+                    if (writing) println()
+                    writing = false
                     if (event.node == "model") {
                         event.state.messages
                             .pendingToolCalls()
@@ -103,7 +112,8 @@ suspend fun main() {
                             .takeLastWhile { it is ChatMessage.ToolResult }
                             .forEach { println("  gets  ${it.text}") }
                     }
-                is GraphEvent.Completed -> println("Agent: ${event.state.answer}\n")
+                }
+                is GraphEvent.Completed -> println()
                 else -> Unit
             }
         }
