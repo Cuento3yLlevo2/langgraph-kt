@@ -8,8 +8,11 @@ import kotlinx.coroutines.flow.map
  * A progress event emitted by [CompiledGraph.stream] and [CompiledGraph.streamResume].
  *
  * For every executed step a stream emits a [NodeStarted] for each node of the step, a
- * [NodeCompleted] as each of them finishes, and then one [StepCompleted]. It always ends with
- * exactly one [Completed] or [Interrupted].
+ * [NodeCompleted] as each of them finishes, and then one [StepCompleted]. While a node runs, it can
+ * add [NodeProgress] events of its own. A stream always ends with exactly one [Completed] or
+ * [Interrupted].
+ *
+ * More kinds of event may be added, so give a `when` over the events an `else` branch.
  */
 public sealed interface GraphEvent<out State> {
     /** The graph state at the time of the event. */
@@ -23,6 +26,21 @@ public sealed interface GraphEvent<out State> {
     public data class NodeStarted<out State>(
         val step: Int,
         val node: String,
+        override val state: State,
+    ) : GraphEvent<State>
+
+    /**
+     * [node] reported [value] with [reportProgress] while it ran in [step]. The events of a node
+     * arrive in the order the node reported them, after its [NodeStarted] and before its
+     * [NodeCompleted].
+     *
+     * @property value what the node reported. Its type is up to the node: check it with `is` or `as?`.
+     * @property state the state the node received.
+     */
+    public data class NodeProgress<out State>(
+        val step: Int,
+        val node: String,
+        val value: Any,
         override val state: State,
     ) : GraphEvent<State>
 
