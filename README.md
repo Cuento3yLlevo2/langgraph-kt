@@ -140,12 +140,12 @@ ESCALATION: Hi Cleo, a colleague from our team will reply to you personally toda
 ```kotlin
 dependencies {
     // The graph builder and the engine. This is all the quick start needs.
-    implementation("io.github.cuento3yllevo2:langgraph-kt-core:0.1.0")
+    implementation("io.github.cuento3yllevo2:langgraph-kt-core:0.1.0-alpha01")
 
     // Optional modules. Add only the ones you use.
-    implementation("io.github.cuento3yllevo2:langgraph-kt-serialization:0.1.0")   // save @Serializable states
-    implementation("io.github.cuento3yllevo2:langgraph-kt-checkpoint-file:0.1.0") // save runs as JSON files
-    implementation("io.github.cuento3yllevo2:langgraph-kt-langchain4j:0.1.0")     // call AI models through LangChain4j (JVM)
+    implementation("io.github.cuento3yllevo2:langgraph-kt-serialization:0.1.0-alpha01")   // save @Serializable states
+    implementation("io.github.cuento3yllevo2:langgraph-kt-checkpoint-file:0.1.0-alpha01") // save runs as JSON files
+    implementation("io.github.cuento3yllevo2:langgraph-kt-langchain4j:0.1.0-alpha01")     // call AI models through LangChain4j (JVM)
 }
 ```
 
@@ -161,9 +161,8 @@ Java 17 because LangChain4j does.
 
 ### Status
 
-Pre-release. The API described here is what `0.1.0` will ship, and it may still change before `1.0`.
-Artifacts are not on Maven Central yet; until the first release, build from source with
-`./gradlew publishToMavenLocal`.
+Alpha. `0.1.0-alpha01` is the first release, and it is on Maven Central. The API may still change
+before `1.0`; the [changelog](CHANGELOG.md) lists what changes in each version.
 
 ## Tutorial
 

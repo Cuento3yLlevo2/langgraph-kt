@@ -162,17 +162,17 @@ dependency:
 
 ```kotlin
 dependencies {
-    implementation("io.github.cuento3yllevo2:langgraph-kt-core:0.1.0")
+    implementation("io.github.cuento3yllevo2:langgraph-kt-core:0.1.0-alpha01")
 
     // Only if you need them:
-    implementation("io.github.cuento3yllevo2:langgraph-kt-serialization:0.1.0")   // save @Serializable states
-    implementation("io.github.cuento3yllevo2:langgraph-kt-checkpoint-file:0.1.0") // FileCheckpointer
-    implementation("io.github.cuento3yllevo2:langgraph-kt-langchain4j:0.1.0")     // chatNode (JVM, Java 17+)
+    implementation("io.github.cuento3yllevo2:langgraph-kt-serialization:0.1.0-alpha01")   // save @Serializable states
+    implementation("io.github.cuento3yllevo2:langgraph-kt-checkpoint-file:0.1.0-alpha01") // FileCheckpointer
+    implementation("io.github.cuento3yllevo2:langgraph-kt-langchain4j:0.1.0-alpha01")     // chatNode (JVM, Java 17+)
 }
 ```
 
-The [README](../README.md#status) says whether a release is already on Maven Central and what to do
-until then.
+The artifacts are on Maven Central, so your project needs the `mavenCentral()` repository. The
+[README](../README.md#installation) lists the targets of each module.
 
 ## Your turn: the final quest
 
