@@ -7,6 +7,8 @@ breaking changes.
 
 ## [Unreleased]
 
+## [0.1.0-alpha03] - 2026-10-04
+
 ### Added
 
 - `toolLoop` takes a `firstMessage`: the user message that starts the conversation, built from other
@@ -116,6 +118,7 @@ First public release. Everything below is new compared with the unpublished beta
 - `START` counted toward `maxIterations`.
 - `FileCheckpointer` did not write the format version into its files.
 
-[Unreleased]: https://github.com/Cuento3yLlevo2/langgraph-kt/compare/v0.1.0-alpha02...HEAD
+[Unreleased]: https://github.com/Cuento3yLlevo2/langgraph-kt/compare/v0.1.0-alpha03...HEAD
+[0.1.0-alpha03]: https://github.com/Cuento3yLlevo2/langgraph-kt/compare/v0.1.0-alpha02...v0.1.0-alpha03
 [0.1.0-alpha02]: https://github.com/Cuento3yLlevo2/langgraph-kt/compare/v0.1.0-alpha01...v0.1.0-alpha02
 [0.1.0-alpha01]: https://github.com/Cuento3yLlevo2/langgraph-kt/releases/tag/v0.1.0-alpha01
