@@ -31,6 +31,31 @@ public final class org/langgraphkt/agent/AgentState$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
+public abstract interface class org/langgraphkt/agent/ChatEvent {
+}
+
+public final class org/langgraphkt/agent/ChatEvent$Completed : org/langgraphkt/agent/ChatEvent {
+	public fun <init> (Lorg/langgraphkt/agent/ChatResponse;)V
+	public final fun component1 ()Lorg/langgraphkt/agent/ChatResponse;
+	public final fun copy (Lorg/langgraphkt/agent/ChatResponse;)Lorg/langgraphkt/agent/ChatEvent$Completed;
+	public static synthetic fun copy$default (Lorg/langgraphkt/agent/ChatEvent$Completed;Lorg/langgraphkt/agent/ChatResponse;ILjava/lang/Object;)Lorg/langgraphkt/agent/ChatEvent$Completed;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getResponse ()Lorg/langgraphkt/agent/ChatResponse;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/langgraphkt/agent/ChatEvent$TextDelta : org/langgraphkt/agent/ChatEvent {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lorg/langgraphkt/agent/ChatEvent$TextDelta;
+	public static synthetic fun copy$default (Lorg/langgraphkt/agent/ChatEvent$TextDelta;Ljava/lang/String;ILjava/lang/Object;)Lorg/langgraphkt/agent/ChatEvent$TextDelta;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract interface class org/langgraphkt/agent/ChatMessage {
 	public static final field Companion Lorg/langgraphkt/agent/ChatMessage$Companion;
 	public abstract fun getText ()Ljava/lang/String;
@@ -142,6 +167,11 @@ public final class org/langgraphkt/agent/ChatMessageKt {
 
 public abstract interface class org/langgraphkt/agent/ChatModel {
 	public abstract fun chat (Lorg/langgraphkt/agent/ChatRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun stream (Lorg/langgraphkt/agent/ChatRequest;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class org/langgraphkt/agent/ChatModel$DefaultImpls {
+	public static fun stream (Lorg/langgraphkt/agent/ChatModel;Lorg/langgraphkt/agent/ChatRequest;)Lkotlinx/coroutines/flow/Flow;
 }
 
 public final class org/langgraphkt/agent/ChatModelException : org/langgraphkt/LangGraphException {
@@ -152,6 +182,8 @@ public final class org/langgraphkt/agent/ChatModelException : org/langgraphkt/La
 public final class org/langgraphkt/agent/ChatModelKt {
 	public static final fun chat (Lorg/langgraphkt/agent/ChatModel;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun chat$default (Lorg/langgraphkt/agent/ChatModel;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun chatWithProgress (Lorg/langgraphkt/agent/ChatModel;Lorg/langgraphkt/agent/ChatRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun getTextDelta (Lorg/langgraphkt/GraphEvent;)Ljava/lang/String;
 }
 
 public final class org/langgraphkt/agent/ChatRequest {

@@ -54,6 +54,10 @@ import org.langgraphkt.StateGraph
  * )
  * ```
  *
+ * When the run is collected with `stream`, the model node streams: each piece of text the model
+ * writes arrives as a `GraphEvent.NodeProgress` of the model node, and [textDelta] reads it. With
+ * `invoke`, the model is asked for the whole answer at once.
+ *
  * When the model reaches its output limit in the text of its answer, the loop ends with that answer
  * and its [ChatMessage.Assistant.truncated] is `true`, so [append] and the code that reads the state
  * can tell. When it reaches the limit in a tool call, the model node fails with a
@@ -100,7 +104,7 @@ public fun <State> StateGraph<State>.toolLoop(
             work = { state ->
                 val stored = messages(state)
                 val opening = if (stored.isEmpty() && firstMessage != null) listOf(ChatMessage.User(firstMessage(state))) else emptyList()
-                val response = model.chat(ChatRequest(opening + stored, system, specs))
+                val response = model.chatWithProgress(ChatRequest(opening + stored, system, specs))
                 if (response.message.truncated && response.message.toolCalls.isNotEmpty()) {
                     throw ChatModelException("The model reached its output limit in the middle of a tool call. Raise the limit.")
                 }
@@ -129,6 +133,9 @@ public fun <State> StateGraph<State>.toolLoop(
  * val first = agent.invoke(AgentState("What is the weather in Madrid?")).state
  * println(first.answer)
  * val second = agent.invoke(first.withUserMessage("And in Lisbon?")).state
+ *
+ * // Or show the answer while the model writes it.
+ * agent.stream(AgentState("What is the weather in Madrid?")).collect { event -> event.textDelta?.let(::print) }
  * ```
  *
  * The graph is a [toolLoop] with its default node names. Use [toolLoop] directly to put the agent
