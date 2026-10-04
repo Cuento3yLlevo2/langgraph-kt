@@ -21,9 +21,11 @@ private class PiecewiseModel(
 ) : ChatModel {
     private val answers = ArrayDeque(answers.toList())
     val asked = mutableListOf<String>()
+    val requests = mutableListOf<ChatRequest>()
 
     override suspend fun chat(request: ChatRequest): ChatResponse {
         asked += "chat"
+        requests += request
         val (pieces, calls) = answers.removeFirst()
         return ChatResponse(ChatMessage.Assistant(pieces.joinToString(""), calls))
     }
@@ -31,6 +33,7 @@ private class PiecewiseModel(
     override fun stream(request: ChatRequest): Flow<ChatEvent> =
         flow {
             asked += "stream"
+            requests += request
             val (pieces, calls) = answers.removeFirst()
             pieces.forEach { emit(ChatEvent.TextDelta(it)) }
             if (completes) emit(ChatEvent.Completed(ChatResponse(ChatMessage.Assistant(pieces.joinToString(""), calls))))
@@ -109,6 +112,32 @@ class ChatStreamTest {
 
             assertEquals(listOf("Dear ", "Ana"), events.mapNotNull { it.textDelta })
             assertEquals("write", events.filterIsInstance<GraphEvent.NodeProgress<AgentState>>().first().node)
+        }
+
+    @Test
+    fun `chatWithProgress with a prompt sends one user message and reports the text`() =
+        runTest {
+            val model = PiecewiseModel(pieces("Dear ", "Ana"))
+            val graph =
+                StateGraph<AgentState> {
+                    START then
+                        node("write", work = { model.chatWithProgress("Write to Ana", system = "Be brief") }) { state, text ->
+                            state.withUserMessage(text)
+                        }
+                }.compile()
+
+            val events = graph.stream(AgentState()).toList()
+
+            assertEquals(listOf("Dear ", "Ana"), events.mapNotNull { it.textDelta })
+            assertEquals(
+                "Dear Ana",
+                events
+                    .last()
+                    .state.messages
+                    .single()
+                    .text,
+            )
+            assertEquals(ChatRequest(listOf(ChatMessage.User("Write to Ana")), "Be brief"), model.requests.single())
         }
 
     @Test

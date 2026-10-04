@@ -130,7 +130,7 @@ agent.invoke(state.withUserMessage("And two?"))  // the next turn of the convers
 | The agent inside your own graph | `toolLoop(model, tools, messages = { ... }, append = { state, new -> ... })` |
 | A conversation that starts from other fields of the state | `toolLoop(..., firstMessage = { state -> "..." })` |
 | The answer while the model writes it | `agent.stream(input).collect { event -> event.textDelta?.let(::print) }` |
-| The same in a node of your own | `model.chatWithProgress(ChatRequest(messages))` in place of `model.chat(...)` |
+| The same in a node of your own | `model.chatWithProgress("...")` in place of `model.chat("...")` |
 | To approve tool calls | `interruptBefore = setOf("tools")`, then `state.messages.pendingToolCalls()` |
 
 ## Rules
