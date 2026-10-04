@@ -269,7 +269,7 @@ class LangChain4jChatModelTest {
                     .map { it.input },
             )
             assertNull(response.message.providerContent)
-            assertFalse(response.truncated)
+            assertFalse(response.message.truncated)
             assertEquals(TokenUsage(inputTokens = 10, outputTokens = 7), response.usage)
         }
 
@@ -278,7 +278,7 @@ class LangChain4jChatModelTest {
         runTest {
             val response = LangChain4jChatModel(RecordingModel(reply(AiMessage.from("Once upon a"), FinishReason.LENGTH))).chat(hello)
 
-            assertTrue(response.truncated)
+            assertTrue(response.message.truncated)
             assertNull(response.usage)
         }
 

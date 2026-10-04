@@ -56,6 +56,33 @@ class NodeFailureTest {
         }
 
     @Test
+    fun `an exception of the library is wrapped like any other`() =
+        runTest {
+            val failure = GraphValidationException("not a valid order")
+
+            val exception = assertFailsWith<NodeExecutionException> { graphWith { throw failure }.invoke(TestState()) }
+
+            assertEquals("boom", exception.nodeName)
+            assertSame(failure, exception.cause)
+        }
+
+    @Test
+    fun `the failure of a graph that a node runs names both nodes`() =
+        runTest {
+            val inner = graphWith { error("out of dough") }
+            val outer =
+                StateGraph<TestState> {
+                    START then node("kitchen") { inner.invoke(it).state } then END
+                }.compile()
+
+            val exception = assertFailsWith<NodeExecutionException> { outer.invoke(TestState()) }
+
+            assertEquals("kitchen", exception.nodeName)
+            assertEquals("boom", assertIs<NodeExecutionException>(exception.cause).nodeName)
+            assertEquals("Node 'kitchen' failed: Node 'boom' failed: out of dough", exception.message)
+        }
+
+    @Test
     fun `cancelling the run is not wrapped`() =
         runTest {
             val nodeStarted = CompletableDeferred<Unit>()

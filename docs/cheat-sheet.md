@@ -127,6 +127,7 @@ agent.invoke(state.withUserMessage("And two?"))  // the next turn of the convers
 | A model | `AnthropicChatModel(...)`, `LangChain4jChatModel(...)`, or `ChatModel { request -> ... }` |
 | One text from a model, in any node | `model.chat("...")` |
 | The agent inside your own graph | `toolLoop(model, tools, messages = { ... }, append = { state, new -> ... })` |
+| A conversation that starts from other fields of the state | `toolLoop(..., firstMessage = { state -> "..." })` |
 | To approve tool calls | `interruptBefore = setOf("tools")`, then `state.messages.pendingToolCalls()` |
 
 ## Rules
@@ -156,4 +157,4 @@ All are `LangGraphException`s. [Level 9](09-game-over-screens.md) explains each 
 | `CheckpointNotFoundException` | `resume` found no save |
 | `GraphAlreadyCompletedException` | `resume` found a finished run |
 | `CheckpointCorruptedException` | A save cannot be read |
-| `ChatModelException` | A call to a model failed |
+| `ChatModelException` | A call to a model failed. In a run, it is the `cause` of a `NodeExecutionException` |

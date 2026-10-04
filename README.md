@@ -496,7 +496,8 @@ val answer = node(
 ```
 
 `ChatModel` has one function, `chat(ChatRequest): ChatResponse`, so a model of your own is a few
-lines. A failed call throws `ChatModelException`.
+lines. A failed call throws `ChatModelException`. When the call is made in a node, the run fails
+with a `NodeExecutionException` that names the node and has the `ChatModelException` as its `cause`.
 
 On the JVM, `langgraph-kt-langchain4j` also builds a node straight from a
 [LangChain4j](https://docs.langchain4j.dev) model with `chatNode` (one text in, one text out) and
@@ -554,6 +555,9 @@ What to know:
   not fit, the run goes on: the model gets the error as the result and can try again.
 - **Every round of tools is two steps.** Raise `GraphConfig.maxIterations` (25 by default) for an
   agent that needs more than twelve rounds.
+- **An answer can be cut off.** When the model reaches its output limit in the text of its answer,
+  the run ends with what it wrote, and `state.answerTruncated` is `true` (`truncated` on the
+  `ChatMessage.Assistant`). When it reaches the limit in a tool call, the run fails.
 - **`AgentState` is `@Serializable`**, so `KotlinxStateSerializer` and `FileCheckpointer` can save it.
 
 To let a person approve the tool calls, pause before the node that runs them. It is named `tools`:
@@ -596,6 +600,22 @@ val graph = StateGraph<Ticket> {
 }.compile()
 ```
 
+`messages` must return what `append` stored. When the conversation starts from other fields of your
+state, give the first message to `firstMessage` instead of building it in `messages`. The loop uses
+it while the conversation is empty and stores it with the model's first answer:
+
+```kotlin
+data class Order(val customer: String, val question: String, val messages: List<ChatMessage> = emptyList())
+
+toolLoop(
+    model = model,
+    tools = listOf(menuPrice, orderStatus),
+    messages = { it.messages },
+    append = { order, new -> order.copy(messages = order.messages + new) },
+    firstMessage = { "${it.customer} writes: ${it.question}" },
+)
+```
+
 Runnable version: [`ToolAgent`](samples/src/main/kotlin/org/langgraphkt/samples/ToolAgent.kt). It
 runs without an API key, and with Claude when `ANTHROPIC_API_KEY` is set.
 
@@ -621,14 +641,14 @@ extends `LangGraphException`:
 | Exception | When |
 |---|---|
 | `GraphValidationException` | The graph or `GraphConfig` is invalid. Thrown by `compile()` or when a run starts. |
-| `NodeExecutionException` | A node threw, or a `withTimeout` inside it expired. `nodeName` and the original `cause` are available. |
+| `NodeExecutionException` | A node threw, or a `withTimeout` inside it expired. `nodeName` and the original `cause` are available. Every exception is wrapped, also one of this table that a graph inside the node threw. |
 | `EdgeConditionException` | The function of a conditional edge threw. `from` and the original `cause` are available. |
 | `ReducerException` | The reducer threw. `nodes` (the nodes whose states it was merging) and the original `cause` are available. |
 | `InvalidRouteException` | A conditional edge returned a node that does not exist or is not a declared target. |
 | `MaxIterationsExceededException` | The run took more steps than `GraphConfig.maxIterations` (default 25). |
 | `CheckpointNotFoundException`, `GraphAlreadyCompletedException` | `resume` had nothing to continue. |
 | `CheckpointCorruptedException` | A stored checkpoint could not be read. |
-| `ChatModelException` | A call to a `ChatModel` failed, or the model declined to answer. From `langgraph-kt-agent`. |
+| `ChatModelException` | A call to a `ChatModel` failed, or the model declined to answer. From `langgraph-kt-agent`. A run reports it as the `cause` of a `NodeExecutionException`. |
 
 ## Design
 

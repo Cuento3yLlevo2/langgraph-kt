@@ -31,6 +31,8 @@ public sealed interface ChatMessage {
      * @property providerContent the message as the model's API returned it, when the [ChatModel]
      * needs it back unchanged in later requests (Claude's thinking blocks, for example). The model
      * that produced the message reads it; leave it out of messages you build yourself.
+     * @property truncated `true` when the model reached its output limit before it finished, so
+     * [text] is incomplete. Raise the limit of the model, or ask it to continue.
      */
     @Serializable
     @SerialName("assistant")
@@ -38,6 +40,7 @@ public sealed interface ChatMessage {
         override val text: String = "",
         val toolCalls: List<ToolCall> = emptyList(),
         val providerContent: JsonElement? = null,
+        val truncated: Boolean = false,
     ) : ChatMessage
 
     /**

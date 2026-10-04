@@ -39,6 +39,9 @@ public class InvalidRouteException(
 /**
  * A node's action threw an exception. The original exception is available as [cause].
  *
+ * Every exception is wrapped, also a [LangGraphException]: when a node runs another graph or calls a
+ * model of an integration module, [cause] is the exception of that graph or model.
+ *
  * Cancellation of the run itself is never wrapped: it propagates as a `CancellationException`. A
  * `CancellationException` that a node raises while the run is still active, such as an expired
  * `withTimeout` inside the node, is a failure of that node and is wrapped like any other.

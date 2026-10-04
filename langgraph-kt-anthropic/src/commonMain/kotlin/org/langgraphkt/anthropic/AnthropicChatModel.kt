@@ -56,7 +56,7 @@ import org.langgraphkt.agent.ToolCall
  * @param apiKey the Anthropic API key.
  * @param model the id of the model, for example `claude-opus-5-5`.
  * @param maxTokens the most tokens the model may write in one answer. An answer that reaches the
- * limit comes back with [ChatResponse.truncated] set.
+ * limit comes back with [ChatMessage.Assistant.truncated] set.
  * @param parameters more fields for the body of every request, such as `temperature`, `thinking`
  * or `tool_choice`. A field given here replaces the one this class would send.
  * @param headers more headers for every request, such as `anthropic-beta`.
@@ -153,13 +153,14 @@ public class AnthropicChatModel(
                 // Text and tool calls can be rebuilt from the message. Everything else, such as a
                 // thinking block, must go back to the API exactly as it came.
                 providerContent = JsonArray(content).takeIf { blocks -> blocks.any { (it as JsonObject).string("type") !in rebuilt } },
+                truncated = stopReason in truncating,
             )
         val usage =
             (body["usage"] as? JsonObject)?.let { usage ->
                 val input = inputCounters.sumOf { usage.int(it) }
                 TokenUsage(inputTokens = input, outputTokens = usage.int("output_tokens"))
             }
-        return ChatResponse(message, truncated = stopReason in truncating, usage = usage)
+        return ChatResponse(message, usage)
     }
 
     public companion object {

@@ -22,7 +22,7 @@ sealed interface org.langgraphkt.agent/ChatMessage { // org.langgraphkt.agent/Ch
         abstract fun <get-text>(): kotlin/String // org.langgraphkt.agent/ChatMessage.text.<get-text>|<get-text>(){}[0]
 
     final class Assistant : org.langgraphkt.agent/ChatMessage { // org.langgraphkt.agent/ChatMessage.Assistant|null[0]
-        constructor <init>(kotlin/String = ..., kotlin.collections/List<org.langgraphkt.agent/ToolCall> = ..., kotlinx.serialization.json/JsonElement? = ...) // org.langgraphkt.agent/ChatMessage.Assistant.<init>|<init>(kotlin.String;kotlin.collections.List<org.langgraphkt.agent.ToolCall>;kotlinx.serialization.json.JsonElement?){}[0]
+        constructor <init>(kotlin/String = ..., kotlin.collections/List<org.langgraphkt.agent/ToolCall> = ..., kotlinx.serialization.json/JsonElement? = ..., kotlin/Boolean = ...) // org.langgraphkt.agent/ChatMessage.Assistant.<init>|<init>(kotlin.String;kotlin.collections.List<org.langgraphkt.agent.ToolCall>;kotlinx.serialization.json.JsonElement?;kotlin.Boolean){}[0]
 
         final val providerContent // org.langgraphkt.agent/ChatMessage.Assistant.providerContent|{}providerContent[0]
             final fun <get-providerContent>(): kotlinx.serialization.json/JsonElement? // org.langgraphkt.agent/ChatMessage.Assistant.providerContent.<get-providerContent>|<get-providerContent>(){}[0]
@@ -30,11 +30,14 @@ sealed interface org.langgraphkt.agent/ChatMessage { // org.langgraphkt.agent/Ch
             final fun <get-text>(): kotlin/String // org.langgraphkt.agent/ChatMessage.Assistant.text.<get-text>|<get-text>(){}[0]
         final val toolCalls // org.langgraphkt.agent/ChatMessage.Assistant.toolCalls|{}toolCalls[0]
             final fun <get-toolCalls>(): kotlin.collections/List<org.langgraphkt.agent/ToolCall> // org.langgraphkt.agent/ChatMessage.Assistant.toolCalls.<get-toolCalls>|<get-toolCalls>(){}[0]
+        final val truncated // org.langgraphkt.agent/ChatMessage.Assistant.truncated|{}truncated[0]
+            final fun <get-truncated>(): kotlin/Boolean // org.langgraphkt.agent/ChatMessage.Assistant.truncated.<get-truncated>|<get-truncated>(){}[0]
 
         final fun component1(): kotlin/String // org.langgraphkt.agent/ChatMessage.Assistant.component1|component1(){}[0]
         final fun component2(): kotlin.collections/List<org.langgraphkt.agent/ToolCall> // org.langgraphkt.agent/ChatMessage.Assistant.component2|component2(){}[0]
         final fun component3(): kotlinx.serialization.json/JsonElement? // org.langgraphkt.agent/ChatMessage.Assistant.component3|component3(){}[0]
-        final fun copy(kotlin/String = ..., kotlin.collections/List<org.langgraphkt.agent/ToolCall> = ..., kotlinx.serialization.json/JsonElement? = ...): org.langgraphkt.agent/ChatMessage.Assistant // org.langgraphkt.agent/ChatMessage.Assistant.copy|copy(kotlin.String;kotlin.collections.List<org.langgraphkt.agent.ToolCall>;kotlinx.serialization.json.JsonElement?){}[0]
+        final fun component4(): kotlin/Boolean // org.langgraphkt.agent/ChatMessage.Assistant.component4|component4(){}[0]
+        final fun copy(kotlin/String = ..., kotlin.collections/List<org.langgraphkt.agent/ToolCall> = ..., kotlinx.serialization.json/JsonElement? = ..., kotlin/Boolean = ...): org.langgraphkt.agent/ChatMessage.Assistant // org.langgraphkt.agent/ChatMessage.Assistant.copy|copy(kotlin.String;kotlin.collections.List<org.langgraphkt.agent.ToolCall>;kotlinx.serialization.json.JsonElement?;kotlin.Boolean){}[0]
         final fun equals(kotlin/Any?): kotlin/Boolean // org.langgraphkt.agent/ChatMessage.Assistant.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // org.langgraphkt.agent/ChatMessage.Assistant.hashCode|hashCode(){}[0]
         final fun toString(): kotlin/String // org.langgraphkt.agent/ChatMessage.Assistant.toString|toString(){}[0]
@@ -128,6 +131,8 @@ final class org.langgraphkt.agent/AgentState { // org.langgraphkt.agent/AgentSta
 
     final val answer // org.langgraphkt.agent/AgentState.answer|{}answer[0]
         final fun <get-answer>(): kotlin/String? // org.langgraphkt.agent/AgentState.answer.<get-answer>|<get-answer>(){}[0]
+    final val answerTruncated // org.langgraphkt.agent/AgentState.answerTruncated|{}answerTruncated[0]
+        final fun <get-answerTruncated>(): kotlin/Boolean // org.langgraphkt.agent/AgentState.answerTruncated.<get-answerTruncated>|<get-answerTruncated>(){}[0]
     final val messages // org.langgraphkt.agent/AgentState.messages|{}messages[0]
         final fun <get-messages>(): kotlin.collections/List<org.langgraphkt.agent/ChatMessage> // org.langgraphkt.agent/AgentState.messages.<get-messages>|<get-messages>(){}[0]
 
@@ -178,19 +183,16 @@ final class org.langgraphkt.agent/ChatRequest { // org.langgraphkt.agent/ChatReq
 }
 
 final class org.langgraphkt.agent/ChatResponse { // org.langgraphkt.agent/ChatResponse|null[0]
-    constructor <init>(org.langgraphkt.agent/ChatMessage.Assistant, kotlin/Boolean = ..., org.langgraphkt.agent/TokenUsage? = ...) // org.langgraphkt.agent/ChatResponse.<init>|<init>(org.langgraphkt.agent.ChatMessage.Assistant;kotlin.Boolean;org.langgraphkt.agent.TokenUsage?){}[0]
+    constructor <init>(org.langgraphkt.agent/ChatMessage.Assistant, org.langgraphkt.agent/TokenUsage? = ...) // org.langgraphkt.agent/ChatResponse.<init>|<init>(org.langgraphkt.agent.ChatMessage.Assistant;org.langgraphkt.agent.TokenUsage?){}[0]
 
     final val message // org.langgraphkt.agent/ChatResponse.message|{}message[0]
         final fun <get-message>(): org.langgraphkt.agent/ChatMessage.Assistant // org.langgraphkt.agent/ChatResponse.message.<get-message>|<get-message>(){}[0]
-    final val truncated // org.langgraphkt.agent/ChatResponse.truncated|{}truncated[0]
-        final fun <get-truncated>(): kotlin/Boolean // org.langgraphkt.agent/ChatResponse.truncated.<get-truncated>|<get-truncated>(){}[0]
     final val usage // org.langgraphkt.agent/ChatResponse.usage|{}usage[0]
         final fun <get-usage>(): org.langgraphkt.agent/TokenUsage? // org.langgraphkt.agent/ChatResponse.usage.<get-usage>|<get-usage>(){}[0]
 
     final fun component1(): org.langgraphkt.agent/ChatMessage.Assistant // org.langgraphkt.agent/ChatResponse.component1|component1(){}[0]
-    final fun component2(): kotlin/Boolean // org.langgraphkt.agent/ChatResponse.component2|component2(){}[0]
-    final fun component3(): org.langgraphkt.agent/TokenUsage? // org.langgraphkt.agent/ChatResponse.component3|component3(){}[0]
-    final fun copy(org.langgraphkt.agent/ChatMessage.Assistant = ..., kotlin/Boolean = ..., org.langgraphkt.agent/TokenUsage? = ...): org.langgraphkt.agent/ChatResponse // org.langgraphkt.agent/ChatResponse.copy|copy(org.langgraphkt.agent.ChatMessage.Assistant;kotlin.Boolean;org.langgraphkt.agent.TokenUsage?){}[0]
+    final fun component2(): org.langgraphkt.agent/TokenUsage? // org.langgraphkt.agent/ChatResponse.component2|component2(){}[0]
+    final fun copy(org.langgraphkt.agent/ChatMessage.Assistant = ..., org.langgraphkt.agent/TokenUsage? = ...): org.langgraphkt.agent/ChatResponse // org.langgraphkt.agent/ChatResponse.copy|copy(org.langgraphkt.agent.ChatMessage.Assistant;org.langgraphkt.agent.TokenUsage?){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // org.langgraphkt.agent/ChatResponse.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // org.langgraphkt.agent/ChatResponse.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // org.langgraphkt.agent/ChatResponse.toString|toString(){}[0]
@@ -273,7 +275,7 @@ final class org.langgraphkt.agent/ToolSpec { // org.langgraphkt.agent/ToolSpec|n
 }
 
 final fun (kotlin.collections/List<org.langgraphkt.agent/ChatMessage>).org.langgraphkt.agent/pendingToolCalls(): kotlin.collections/List<org.langgraphkt.agent/ToolCall> // org.langgraphkt.agent/pendingToolCalls|pendingToolCalls@kotlin.collections.List<org.langgraphkt.agent.ChatMessage>(){}[0]
-final fun <#A: kotlin/Any?> (org.langgraphkt/StateGraph<#A>).org.langgraphkt.agent/toolLoop(org.langgraphkt.agent/ChatModel, kotlin.collections/List<org.langgraphkt.agent/Tool>, kotlin/Function1<#A, kotlin.collections/List<org.langgraphkt.agent/ChatMessage>>, kotlin/Function2<#A, kotlin.collections/List<org.langgraphkt.agent/ChatMessage>, #A>, kotlin/String? = ..., org.langgraphkt/NodeRef = ..., kotlin/String = ..., kotlin/String = ...): org.langgraphkt/NodeRef // org.langgraphkt.agent/toolLoop|toolLoop@org.langgraphkt.StateGraph<0:0>(org.langgraphkt.agent.ChatModel;kotlin.collections.List<org.langgraphkt.agent.Tool>;kotlin.Function1<0:0,kotlin.collections.List<org.langgraphkt.agent.ChatMessage>>;kotlin.Function2<0:0,kotlin.collections.List<org.langgraphkt.agent.ChatMessage>,0:0>;kotlin.String?;org.langgraphkt.NodeRef;kotlin.String;kotlin.String){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> (org.langgraphkt/StateGraph<#A>).org.langgraphkt.agent/toolLoop(org.langgraphkt.agent/ChatModel, kotlin.collections/List<org.langgraphkt.agent/Tool>, kotlin/Function1<#A, kotlin.collections/List<org.langgraphkt.agent/ChatMessage>>, kotlin/Function2<#A, kotlin.collections/List<org.langgraphkt.agent/ChatMessage>, #A>, kotlin/Function1<#A, kotlin/String>? = ..., kotlin/String? = ..., org.langgraphkt/NodeRef = ..., kotlin/String = ..., kotlin/String = ...): org.langgraphkt/NodeRef // org.langgraphkt.agent/toolLoop|toolLoop@org.langgraphkt.StateGraph<0:0>(org.langgraphkt.agent.ChatModel;kotlin.collections.List<org.langgraphkt.agent.Tool>;kotlin.Function1<0:0,kotlin.collections.List<org.langgraphkt.agent.ChatMessage>>;kotlin.Function2<0:0,kotlin.collections.List<org.langgraphkt.agent.ChatMessage>,0:0>;kotlin.Function1<0:0,kotlin.String>?;kotlin.String?;org.langgraphkt.NodeRef;kotlin.String;kotlin.String){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> org.langgraphkt.agent/Tool(kotlin/String, kotlin/String, kotlinx.serialization/KSerializer<#A>, kotlin.coroutines/SuspendFunction1<#A, kotlin/String>): org.langgraphkt.agent/Tool // org.langgraphkt.agent/Tool|Tool(kotlin.String;kotlin.String;kotlinx.serialization.KSerializer<0:0>;kotlin.coroutines.SuspendFunction1<0:0,kotlin.String>){0§<kotlin.Any?>}[0]
 final fun org.langgraphkt.agent/toolAgent(org.langgraphkt.agent/ChatModel, kotlin.collections/List<org.langgraphkt.agent/Tool> = ..., kotlin/String? = ...): org.langgraphkt/CompiledGraph<org.langgraphkt.agent/AgentState> // org.langgraphkt.agent/toolAgent|toolAgent(org.langgraphkt.agent.ChatModel;kotlin.collections.List<org.langgraphkt.agent.Tool>;kotlin.String?){}[0]
 final inline fun <#A: reified kotlin/Any?> org.langgraphkt.agent/Tool(kotlin/String, kotlin/String, noinline kotlin.coroutines/SuspendFunction1<#A, kotlin/String>): org.langgraphkt.agent/Tool // org.langgraphkt.agent/Tool|Tool(kotlin.String;kotlin.String;kotlin.coroutines.SuspendFunction1<0:0,kotlin.String>){0§<kotlin.Any?>}[0]

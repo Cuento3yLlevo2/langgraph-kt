@@ -25,7 +25,8 @@ public fun interface ChatModel {
 
 /**
  * Sends [prompt] as a single user message and returns the text of the answer, for a node that only
- * needs a piece of text from the model.
+ * needs a piece of text from the model. Call [ChatModel.chat] with a [ChatRequest] when you need to
+ * know whether the answer was cut off.
  *
  * ```kotlin
  * node("summarize", work = { model.chat("Summarize: ${it.notes}") }) { state, summary ->
@@ -52,14 +53,12 @@ public data class ChatRequest(
 /**
  * What a [ChatModel] answered.
  *
- * @property message the model's message. Add it to the conversation before the next request.
- * @property truncated `true` when the model reached its output limit before it finished, so [message]
- * is incomplete.
+ * @property message the model's message. Add it to the conversation before the next request. Its
+ * [ChatMessage.Assistant.truncated] tells whether the model reached its output limit.
  * @property usage the tokens the call used, when the provider reports them.
  */
 public data class ChatResponse(
     val message: ChatMessage.Assistant,
-    val truncated: Boolean = false,
     val usage: TokenUsage? = null,
 )
 

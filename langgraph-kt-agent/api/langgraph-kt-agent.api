@@ -9,6 +9,7 @@ public final class org/langgraphkt/agent/AgentState {
 	public static synthetic fun copy$default (Lorg/langgraphkt/agent/AgentState;Ljava/util/List;ILjava/lang/Object;)Lorg/langgraphkt/agent/AgentState;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAnswer ()Ljava/lang/String;
+	public final fun getAnswerTruncated ()Z
 	public final fun getMessages ()Ljava/util/List;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -38,17 +39,19 @@ public abstract interface class org/langgraphkt/agent/ChatMessage {
 public final class org/langgraphkt/agent/ChatMessage$Assistant : org/langgraphkt/agent/ChatMessage {
 	public static final field Companion Lorg/langgraphkt/agent/ChatMessage$Assistant$Companion;
 	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;Ljava/util/List;Lkotlinx/serialization/json/JsonElement;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;Lkotlinx/serialization/json/JsonElement;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/util/List;Lkotlinx/serialization/json/JsonElement;Z)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;Lkotlinx/serialization/json/JsonElement;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/util/List;
 	public final fun component3 ()Lkotlinx/serialization/json/JsonElement;
-	public final fun copy (Ljava/lang/String;Ljava/util/List;Lkotlinx/serialization/json/JsonElement;)Lorg/langgraphkt/agent/ChatMessage$Assistant;
-	public static synthetic fun copy$default (Lorg/langgraphkt/agent/ChatMessage$Assistant;Ljava/lang/String;Ljava/util/List;Lkotlinx/serialization/json/JsonElement;ILjava/lang/Object;)Lorg/langgraphkt/agent/ChatMessage$Assistant;
+	public final fun component4 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/util/List;Lkotlinx/serialization/json/JsonElement;Z)Lorg/langgraphkt/agent/ChatMessage$Assistant;
+	public static synthetic fun copy$default (Lorg/langgraphkt/agent/ChatMessage$Assistant;Ljava/lang/String;Ljava/util/List;Lkotlinx/serialization/json/JsonElement;ZILjava/lang/Object;)Lorg/langgraphkt/agent/ChatMessage$Assistant;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getProviderContent ()Lkotlinx/serialization/json/JsonElement;
 	public fun getText ()Ljava/lang/String;
 	public final fun getToolCalls ()Ljava/util/List;
+	public final fun getTruncated ()Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -168,16 +171,14 @@ public final class org/langgraphkt/agent/ChatRequest {
 }
 
 public final class org/langgraphkt/agent/ChatResponse {
-	public fun <init> (Lorg/langgraphkt/agent/ChatMessage$Assistant;ZLorg/langgraphkt/agent/TokenUsage;)V
-	public synthetic fun <init> (Lorg/langgraphkt/agent/ChatMessage$Assistant;ZLorg/langgraphkt/agent/TokenUsage;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lorg/langgraphkt/agent/ChatMessage$Assistant;Lorg/langgraphkt/agent/TokenUsage;)V
+	public synthetic fun <init> (Lorg/langgraphkt/agent/ChatMessage$Assistant;Lorg/langgraphkt/agent/TokenUsage;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lorg/langgraphkt/agent/ChatMessage$Assistant;
-	public final fun component2 ()Z
-	public final fun component3 ()Lorg/langgraphkt/agent/TokenUsage;
-	public final fun copy (Lorg/langgraphkt/agent/ChatMessage$Assistant;ZLorg/langgraphkt/agent/TokenUsage;)Lorg/langgraphkt/agent/ChatResponse;
-	public static synthetic fun copy$default (Lorg/langgraphkt/agent/ChatResponse;Lorg/langgraphkt/agent/ChatMessage$Assistant;ZLorg/langgraphkt/agent/TokenUsage;ILjava/lang/Object;)Lorg/langgraphkt/agent/ChatResponse;
+	public final fun component2 ()Lorg/langgraphkt/agent/TokenUsage;
+	public final fun copy (Lorg/langgraphkt/agent/ChatMessage$Assistant;Lorg/langgraphkt/agent/TokenUsage;)Lorg/langgraphkt/agent/ChatResponse;
+	public static synthetic fun copy$default (Lorg/langgraphkt/agent/ChatResponse;Lorg/langgraphkt/agent/ChatMessage$Assistant;Lorg/langgraphkt/agent/TokenUsage;ILjava/lang/Object;)Lorg/langgraphkt/agent/ChatResponse;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getMessage ()Lorg/langgraphkt/agent/ChatMessage$Assistant;
-	public final fun getTruncated ()Z
 	public final fun getUsage ()Lorg/langgraphkt/agent/TokenUsage;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -250,8 +251,8 @@ public final class org/langgraphkt/agent/ToolKt {
 public final class org/langgraphkt/agent/ToolLoopKt {
 	public static final fun toolAgent (Lorg/langgraphkt/agent/ChatModel;Ljava/util/List;Ljava/lang/String;)Lorg/langgraphkt/CompiledGraph;
 	public static synthetic fun toolAgent$default (Lorg/langgraphkt/agent/ChatModel;Ljava/util/List;Ljava/lang/String;ILjava/lang/Object;)Lorg/langgraphkt/CompiledGraph;
-	public static final fun toolLoop (Lorg/langgraphkt/StateGraph;Lorg/langgraphkt/agent/ChatModel;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Ljava/lang/String;Lorg/langgraphkt/NodeRef;Ljava/lang/String;Ljava/lang/String;)Lorg/langgraphkt/NodeRef;
-	public static synthetic fun toolLoop$default (Lorg/langgraphkt/StateGraph;Lorg/langgraphkt/agent/ChatModel;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Ljava/lang/String;Lorg/langgraphkt/NodeRef;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lorg/langgraphkt/NodeRef;
+	public static final fun toolLoop (Lorg/langgraphkt/StateGraph;Lorg/langgraphkt/agent/ChatModel;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;Ljava/lang/String;Lorg/langgraphkt/NodeRef;Ljava/lang/String;Ljava/lang/String;)Lorg/langgraphkt/NodeRef;
+	public static synthetic fun toolLoop$default (Lorg/langgraphkt/StateGraph;Lorg/langgraphkt/agent/ChatModel;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;Ljava/lang/String;Lorg/langgraphkt/NodeRef;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lorg/langgraphkt/NodeRef;
 }
 
 public final class org/langgraphkt/agent/ToolSpec {

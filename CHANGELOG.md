@@ -7,6 +7,27 @@ breaking changes.
 
 ## [Unreleased]
 
+### Added
+
+- `toolLoop` takes a `firstMessage`: the user message that starts the conversation, built from other
+  fields of the state. The loop stores it with the model's first answer, so `messages` and `append`
+  only read and write one list. Before, the first message had to be built in `messages`, and an
+  `append` that added to the stored list lost it without an error. The parameter comes before
+  `system`, so pass `system` by name.
+
+### Changed
+
+- `ChatResponse.truncated` moved to the message: read `ChatMessage.Assistant.truncated`, and set it
+  there in a `ChatModel` of your own. Before, an answer that was cut off at the model's output limit
+  could not be told from a complete one once it was in the state, because `toolLoop` only passes
+  messages to `append`. `AgentState.answerTruncated` reports it for a `toolAgent`.
+- An exception of the library that a node throws is now wrapped in `NodeExecutionException` like any
+  other exception. Before, it reached the caller as it was, so a failed model call in a `toolAgent`
+  did not say which node failed. Where you caught `ChatModelException` from `invoke`, `resume` or
+  `stream`, catch `NodeExecutionException` and read its `cause`. The same holds for the function of a
+  conditional edge (`EdgeConditionException`) and for the reducer (`ReducerException`), and for a
+  node that runs another graph: the failure of the inner graph is the `cause`.
+
 ## [0.1.0-alpha02] - 2026-10-04
 
 ### Added
