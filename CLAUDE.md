@@ -61,9 +61,11 @@ is a directed graph: nodes transform an immutable state and edges decide what ru
 2. **Compile** with `.compile()`, which validates the graph and returns a `CompiledGraph<State>`. It
    needs a `reducer` only when two nodes that return a whole state can run in the same step.
 3. **Execute** with `invoke(input, config)` (returns `GraphResult.Completed` or `.Interrupted`) or
-   `stream(input, config)` (a `Flow<GraphEvent<State>>`). Continue a paused run with
-   `resume(config) { state -> ... }` / `streamResume`. `lastResult(config)` reads where a thread
-   stopped without running it.
+   `stream(input, config)` (a `Flow<GraphEvent<State>>`). A node calls `reportProgress(value)` to
+   send a `GraphEvent.NodeProgress` to a stream while it runs; `toolLoop` reports the model's text
+   that way (`ChatModel.stream`, `chatWithProgress`, `GraphEvent.textDelta`). Continue a paused run
+   with `resume(config) { state -> ... }` / `streamResume`. `lastResult(config)` reads where a
+   thread stopped without running it.
 
 The engine (`CompiledGraph.kt`) runs in steps: all active nodes run in parallel on the same input
 state, their results are combined (the `Reducer` merges whole states, then the updates of

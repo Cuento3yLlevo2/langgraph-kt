@@ -205,6 +205,8 @@ graph.stream(SupportEmail(sender = "Ana", body = "I would like a refund.")).coll
     when (event) {
         // A node is about to run. A UI can show a spinner next to it.
         is GraphEvent.NodeStarted -> println("${event.node} started")
+        // A running node reported something with reportProgress(). See below.
+        is GraphEvent.NodeProgress -> println("${event.node} reports ${event.value}")
         // A node has returned its updated state.
         is GraphEvent.NodeCompleted -> println("${event.node} finished")
         // A step is over: every node that ran at the same time has finished.
@@ -229,6 +231,26 @@ done: Hi Ana, your refund is on its way. It takes 3 to 5 days.
 
 For a UI that only renders the latest state, `graph.stream(input).states()` is a `Flow` with just
 the state after each step.
+
+A node can report what it is doing while it runs. `reportProgress(value)` sends any value to the
+stream, where it arrives as a `GraphEvent.NodeProgress` before the node finishes:
+
+```kotlin
+val download = node("download", work = { order ->
+    order.files.forEachIndexed { index, file ->
+        fetch(file)
+        reportProgress("${index + 1} of ${order.files.size}") // event.value in the stream
+    }
+}) { order, _ -> order.copy(downloaded = true) }
+```
+
+- The call returns when the collector has handled the event, so a node cannot run ahead of a slow
+  screen.
+- With `invoke()` and `resume()` nobody collects, and the call does nothing.
+- Progress is not part of the state and is not saved in a checkpoint.
+
+The agent of `langgraph-kt-agent` uses this to show a model's answer while the model writes it; see
+[Agents with tools](#agents-with-tools).
 
 ### Human-in-the-loop
 
@@ -499,6 +521,26 @@ val answer = node(
 lines. A failed call throws `ChatModelException`. When the call is made in a node, the run fails
 with a `NodeExecutionException` that names the node and has the `ChatModelException` as its `cause`.
 
+To show an answer while the model writes it, `model.stream(request)` returns a `Flow` with a
+`ChatEvent.TextDelta` for each piece of text and a final `ChatEvent.Completed` with the whole
+answer. In a node, call `chatWithProgress` in place of `chat`, and the pieces arrive in the stream
+of the run:
+
+```kotlin
+val answer = node(
+    "answer",
+    work = { email -> model.chatWithProgress(ChatRequest(listOf(ChatMessage.User(email.body)))).message.text },
+) { email, reply -> email.copy(reply = reply) }
+
+graph.stream(email).collect { event ->
+    event.textDelta?.let { piece -> print(piece) } // null for every other event
+}
+```
+
+`AnthropicChatModel` streams on every platform. `LangChain4jChatModel` streams when you give it a
+LangChain4j streaming model as well: `LangChain4jChatModel(openAi, streamingModel)`. A model that
+cannot stream delivers its text in one piece, so the same code works with every model.
+
 On the JVM, `langgraph-kt-langchain4j` also builds a node straight from a
 [LangChain4j](https://docs.langchain4j.dev) model with `chatNode` (one text in, one text out) and
 `chatMessagesNode` (a list of LangChain4j messages). Both run the blocking call on `Dispatchers.IO`.
@@ -549,8 +591,22 @@ suspend fun send(question: String): AgentState {
 }
 ```
 
+To show the answer while the model writes it, collect the run with `stream`. The model node
+reports each piece of text, and `textDelta` reads it from the event:
+
+```kotlin
+agent.stream(AgentState("How much is a margherita?")).collect { event ->
+    event.textDelta?.let { piece -> print(piece) }                // A, margherita, costs, ...
+    if (event is GraphEvent.Completed) println()                  // event.state.answer is the whole text
+}
+```
+
 What to know:
 
+- **The model streams only when someone watches.** A run started with `stream` asks the model with
+  `ChatModel.stream`; a run started with `invoke` asks for the whole answer at once.
+- **Text before a failure is not an answer.** When a model call fails or the model declines in the
+  middle of its answer, the run fails after the pieces that already arrived. Clear them.
 - **Tools of one answer run at the same time.** If a tool throws, or the model sends input that does
   not fit, the run goes on: the model gets the error as the result and can try again.
 - **Every round of tools is two steps.** Raise `GraphConfig.maxIterations` (25 by default) for an

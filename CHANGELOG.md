@@ -7,6 +7,27 @@ breaking changes.
 
 ## [Unreleased]
 
+### Added
+
+- Streaming of a model's answer. A `toolAgent` or `toolLoop` whose run is collected with `stream`
+  delivers the text while the model writes it, and `event.textDelta` reads each piece.
+  - `ChatModel.stream(request)` returns a `Flow` of `ChatEvent.TextDelta` and a final
+    `ChatEvent.Completed`. A model that only has `chat` delivers its text in one piece.
+  - `chatWithProgress` does the same for a model call in a node of your own.
+  - `AnthropicChatModel` streams on every target, over server-sent events.
+  - `LangChain4jChatModel` takes a LangChain4j `StreamingChatModel` as a second argument and streams
+    through it.
+- `reportProgress(value)` in `langgraph-kt-core`: a node reports what it is doing while it runs, and
+  the value arrives in the stream of the run as the new `GraphEvent.NodeProgress`.
+  `isProgressCollected()` tells a node whether anyone collects it.
+- `AnthropicChatModel` keeps only the text of the first model when another model took over an answer
+  through the `fallbacks` parameter, as the API requires for the next request.
+
+### Changed
+
+- `GraphEvent` has a sixth kind, `NodeProgress`. A `when` over the events without an `else` branch
+  needs a branch for it.
+
 ## [0.1.0-alpha03] - 2026-10-04
 
 ### Added
