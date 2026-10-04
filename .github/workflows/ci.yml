@@ -28,6 +28,14 @@ jobs:
       # The docs and release workflows only run on main and on a tag, so build what they build here too.
       - name: Build the API docs and the publications
         run: ./gradlew dokkaGenerate publishToMavenLocal
+      # Maven Central rejects a POM without these elements, and nothing else fails before the release.
+      - name: Check that every POM has what Maven Central requires
+        run: |
+          for pom in */build/publications/*/pom-default.xml; do
+            for tag in name description url licenses developers scm; do
+              grep -q "^  <$tag>" "$pom" || { echo "::error file=$pom::<$tag> is missing"; exit 1; }
+            done
+          done
       - name: Upload test reports
         if: failure()
         uses: actions/upload-artifact@v7
