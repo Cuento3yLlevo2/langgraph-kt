@@ -156,4 +156,4 @@ All are `LangGraphException`s. [Level 9](09-game-over-screens.md) explains each 
 | `CheckpointNotFoundException` | `resume` found no save |
 | `GraphAlreadyCompletedException` | `resume` found a finished run |
 | `CheckpointCorruptedException` | A save cannot be read |
-| `ChatModelException` | A call to a model failed |
+| `ChatModelException` | A call to a model failed. In a run, it is the `cause` of a `NodeExecutionException` |

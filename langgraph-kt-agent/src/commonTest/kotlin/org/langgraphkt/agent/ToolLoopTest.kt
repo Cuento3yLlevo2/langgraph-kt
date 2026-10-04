@@ -6,6 +6,7 @@ import org.langgraphkt.GraphConfig
 import org.langgraphkt.GraphResult
 import org.langgraphkt.GraphValidationException
 import org.langgraphkt.MemoryCheckpointer
+import org.langgraphkt.NodeExecutionException
 import org.langgraphkt.START
 import org.langgraphkt.StateGraph
 import kotlin.test.Test
@@ -120,8 +121,10 @@ class ToolLoopTest {
         runTest {
             val model = ScriptedModel(calls(status).copy(truncated = true))
 
-            // The engine does not wrap an exception of the library in a NodeExecutionException.
-            assertFailsWith<ChatModelException> { toolAgent(model, tools).invoke(AgentState("Hi")) }
+            val failure = assertFailsWith<NodeExecutionException> { toolAgent(model, tools).invoke(AgentState("Hi")) }
+
+            assertEquals("model", failure.nodeName)
+            assertIs<ChatModelException>(failure.cause)
             assertEquals(emptyList(), ran)
         }
 

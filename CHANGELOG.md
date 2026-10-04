@@ -7,6 +7,15 @@ breaking changes.
 
 ## [Unreleased]
 
+### Changed
+
+- An exception of the library that a node throws is now wrapped in `NodeExecutionException` like any
+  other exception. Before, it reached the caller as it was, so a failed model call in a `toolAgent`
+  did not say which node failed. Where you caught `ChatModelException` from `invoke`, `resume` or
+  `stream`, catch `NodeExecutionException` and read its `cause`. The same holds for the function of a
+  conditional edge (`EdgeConditionException`) and for the reducer (`ReducerException`), and for a
+  node that runs another graph: the failure of the inner graph is the `cause`.
+
 ## [0.1.0-alpha02] - 2026-10-04
 
 ### Added
