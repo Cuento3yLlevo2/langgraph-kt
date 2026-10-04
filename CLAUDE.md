@@ -11,6 +11,8 @@ Read CONTRIBUTING.md as well; its design rules apply to every change.
 ./gradlew :langgraph-kt-core:jvmTest         # Fast loop: core tests on the JVM only
 ./gradlew :langgraph-kt-core:allTests        # Core tests on every target this OS can run (jvm, js, wasmJs, native)
 ./gradlew :langgraph-kt-langchain4j:test     # LangChain4j module (JVM-only module, so the task is `test`)
+./gradlew :langgraph-kt-agent:jvmTest        # Agent module on the JVM (`allTests` for every target)
+./gradlew kotlinUpgradeYarnLock kotlinWasmUpgradeYarnLock  # After a dependency change that touches JS or Wasm
 ./gradlew ktlintFormat                       # Fix formatting
 ./gradlew apiDump                            # Update */api/*.api after an intentional public API change
 ./gradlew :samples:runQuickStart             # Run a sample
@@ -37,7 +39,14 @@ is a directed graph: nodes transform an immutable state and edges decide what ru
 - **`langgraph-kt-serialization`** (KMP): `KotlinxStateSerializer` for `@Serializable` states,
   `CheckpointCodec` (the shared checkpoint format, also used by `FileCheckpointer`)
 - **`langgraph-kt-checkpoint-file`** (KMP): `FileCheckpointer` on kotlinx-io
-- **`langgraph-kt-langchain4j`** (JVM): `chatNode` / `chatMessagesNode` for LangChain4j 1.x `ChatModel`
+- **`langgraph-kt-agent`** (KMP): `ChatModel` (the provider-neutral model interface), `ChatMessage`,
+  `Tool` (JSON Schema built from a `@Serializable` input class in `ToolSchema.kt`), and the
+  tool-calling loop: `toolLoop` adds a model node and a tools node to any graph, `toolAgent` is that
+  loop as a graph over `AgentState`
+- **`langgraph-kt-anthropic`** (KMP): `AnthropicChatModel`, the Claude Messages API on Ktor client
+  core. The app supplies the `HttpClient` and its engine
+- **`langgraph-kt-langchain4j`** (JVM): `LangChain4jChatModel` adapts a LangChain4j 1.x model to
+  `ChatModel`; `chatNode` / `chatMessagesNode` build a node straight from a LangChain4j model
 - **`samples`**: runnable examples with tests; not published. `samples/.../tutorial/levelN` is the
   code of the tutorial in `docs/`; a page shows its level's code and output, so change both together
 - **`build-logic`**: convention plugins `langgraph.kmp-library`, `langgraph.jvm-library`,

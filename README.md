@@ -8,7 +8,8 @@
 langgraph-kt is a Kotlin Multiplatform library for building AI agents and other multi-step
 workflows. You describe the work as a **graph**: a few small steps, and arrows that say which step
 comes next. The library runs it, and takes care of loops, steps that run at the same time, live
-progress, and pausing until a person approves.
+progress, and pausing until a person approves. A model that calls your functions as tools is one
+such graph, and it comes [ready-made](#agents-with-tools) for every platform.
 
 **[Try it in your browser](https://cuento3yllevo2.github.io/langgraph-kt-demo/):** Pixel Pizza is a
 small game in which every stage runs a langgraph-kt graph, from two nodes in a row to a full agent
@@ -159,7 +160,12 @@ dependencies {
 | `langgraph-kt-core` | JVM/Android, iOS, macOS, Linux, Windows, JS, Wasm | Graph builder, execution engine, checkpointing interfaces |
 | `langgraph-kt-serialization` | same as core | `KotlinxStateSerializer` for `@Serializable` states, `CheckpointCodec` for custom checkpointers |
 | `langgraph-kt-checkpoint-file` | same as core (Node.js only for JS/Wasm) | `FileCheckpointer`, one JSON file per thread |
-| `langgraph-kt-langchain4j` | JVM (Java 17+) | `chatNode` / `chatMessagesNode` for LangChain4j 1.x `ChatModel` |
+| `langgraph-kt-agent` | same as core | `ChatModel`, `Tool`, and the tool-calling agent: `toolAgent` / `toolLoop` |
+| `langgraph-kt-anthropic` | same as core | `AnthropicChatModel`, Claude through Ktor |
+| `langgraph-kt-langchain4j` | JVM (Java 17+) | `LangChain4jChatModel` and `chatNode` / `chatMessagesNode` for LangChain4j 1.x models |
+
+`langgraph-kt-agent` and `langgraph-kt-anthropic` are new and not part of `0.1.0-alpha01`. They
+arrive with the next release.
 
 Requires Kotlin 2.x. JVM artifacts target Java 11, except `langgraph-kt-langchain4j`, which needs
 Java 17 because LangChain4j does.
@@ -187,6 +193,7 @@ Each guide is the short version of one feature. The tutorial explains the same f
 | Run several steps at the same time | [Parallel branches](#parallel-branches) |
 | Repeat a step until the result is good | [Loops](#loops) |
 | Let an AI model do the work of a node | [AI models](#ai-models) |
+| Let an AI model call my functions | [Agents with tools](#agents-with-tools) |
 | Draw a graph or test its shape | [Inspecting a graph](#inspecting-a-graph) |
 
 ### Streaming
@@ -465,50 +472,133 @@ A node is a `suspend` function, so it can call any AI model with any client libr
 val classify = node("classify") { email -> email.copy(category = askMyModel(email.body)) }
 ```
 
-On the JVM, `langgraph-kt-langchain4j` builds such a node from any
-[LangChain4j](https://docs.langchain4j.dev) `ChatModel`, which covers most model providers:
+`langgraph-kt-agent` has a small interface for the model, `ChatModel`, so that the same graph works
+with any provider and on every platform. Pick an implementation:
 
 ```kotlin
-val answer = node("answer", chatNode(
-    // Any LangChain4j ChatModel: Anthropic, OpenAI, Ollama, ...
-    model = model,
-    // Turns the state into the text sent to the model.
-    prompt = { email -> "Write a short, friendly reply to this support email: ${email.body}" },
-    // Puts the model's answer into the state.
-    update = { email, reply -> email.copy(reply = reply) },
-))
+// Claude, on every platform (langgraph-kt-anthropic). HttpClient is the Ktor client.
+val model: ChatModel = AnthropicChatModel(HttpClient(), apiKey = key, model = "claude-opus-5-5")
+
+// Any LangChain4j model, on the JVM (langgraph-kt-langchain4j): OpenAI, Gemini, Ollama, ...
+val model: ChatModel = LangChain4jChatModel(OpenAiChatModel.builder().apiKey(key).modelName("gpt-5").build())
+
+// In a test, a lambda.
+val model = ChatModel { request -> ChatResponse(ChatMessage.Assistant("Thanks for your email!")) }
 ```
 
-`chatNode` sends one text and gets one text back. For a conversation, `chatMessagesNode` sends a
-list of messages:
+A node that needs one piece of text from the model asks for it with `chat`:
 
 ```kotlin
-data class ChatState(val messages: List<ChatMessage>)
-
-val assistant = node("assistant", chatMessagesNode(
-    model = model,
-    // The whole conversation so far goes to the model.
-    messages = { state -> state.messages },
-    // The model's reply is added to the end of the conversation.
-    update = { state, response -> state.copy(messages = state.messages + response.aiMessage()) },
-))
+val answer = node(
+    "answer",
+    // The slow call. It can run next to other nodes, see "Parallel branches".
+    work = { email -> model.chat("Write a short, friendly reply to this support email: ${email.body}") },
+) { email, reply -> email.copy(reply = reply) } // Puts the model's answer into the state.
 ```
 
-Both run the blocking model call on `Dispatchers.IO`.
+`ChatModel` has one function, `chat(ChatRequest): ChatResponse`, so a model of your own is a few
+lines. A failed call throws `ChatModelException`.
 
-`invoke` starts a new run each time, so a chat passes the conversation so far as its input.
-`lastResult` gives the state the previous turn ended with:
+On the JVM, `langgraph-kt-langchain4j` also builds a node straight from a
+[LangChain4j](https://docs.langchain4j.dev) model with `chatNode` (one text in, one text out) and
+`chatMessagesNode` (a list of LangChain4j messages). Both run the blocking call on `Dispatchers.IO`.
+The [`ChatAgent`](samples/src/main/kotlin/org/langgraphkt/samples/ChatAgent.kt) sample uses them.
+
+### Agents with tools
+
+An agent is a model that decides by itself which of your functions to call, and how often, before
+it answers. In a graph that is a loop of two nodes: the model answers or asks for tools, the tools
+run, and their results go back to the model. `langgraph-kt-agent` has this loop ready-made.
+
+A **tool** is a function with a name and a description that the model reads. Its input is a
+`@Serializable` class, from which the library builds the schema the model needs:
 
 ```kotlin
-suspend fun send(question: String): ChatState {
-    // The messages of the previous turns, or an empty list on the first turn.
-    val history = agent.lastResult(config)?.state?.messages.orEmpty()
-    // Run the graph on the history plus the new question.
-    return agent.invoke(ChatState(history + UserMessage.from(question)), config).state
+@Serializable
+data class MenuLookup(
+    @Description("The item, for example \"margherita\"") val item: String,
+)
+
+val menuPrice = Tool<MenuLookup>("menu_price", "Returns the price of one item on the menu.") { lookup ->
+    // Whatever your app does: a database, an HTTP call, a calculation. The model gets the text you return.
+    val price = menu[lookup.item] ?: throw IllegalArgumentException("We do not sell ${lookup.item}.")
+    "One ${lookup.item} costs $price euros."
 }
 ```
 
-Runnable version: [`ChatAgent`](samples/src/main/kotlin/org/langgraphkt/samples/ChatAgent.kt).
+`toolAgent` returns a graph like any other, so `invoke`, `stream`, checkpoints and pauses all work:
+
+```kotlin
+val agent = toolAgent(model, tools = listOf(menuPrice, orderStatus), system = "You work at the help desk of a pizzeria.")
+
+val first = agent.invoke(AgentState("How much is a margherita?")).state
+println(first.answer) // A margherita costs 9 euros.
+
+// The state holds the conversation. Add the next message to continue it.
+val second = agent.invoke(first.withUserMessage("And a cola?")).state
+```
+
+`invoke` starts a new run each time, so a chat passes the conversation so far as its input. With a
+checkpointer, `lastResult` gives the state the previous turn ended with:
+
+```kotlin
+suspend fun send(question: String): AgentState {
+    // The conversation of the previous turns, or an empty one on the first turn.
+    val history = agent.lastResult(config)?.state ?: AgentState()
+    return agent.invoke(history.withUserMessage(question), config).state
+}
+```
+
+What to know:
+
+- **Tools of one answer run at the same time.** If a tool throws, or the model sends input that does
+  not fit, the run goes on: the model gets the error as the result and can try again.
+- **Every round of tools is two steps.** Raise `GraphConfig.maxIterations` (25 by default) for an
+  agent that needs more than twelve rounds.
+- **`AgentState` is `@Serializable`**, so `KotlinxStateSerializer` and `FileCheckpointer` can save it.
+
+To let a person approve the tool calls, pause before the node that runs them. It is named `tools`:
+
+```kotlin
+val config = GraphConfig(threadId = "ticket-42", checkpointer = MemoryCheckpointer<AgentState>(), interruptBefore = setOf("tools"))
+
+val paused = agent.invoke(AgentState("Refund my last order"), config)
+// The calls that wait for a yes: their names and inputs.
+val waiting = paused.state.messages.pendingToolCalls()
+
+// Yes: run them.
+agent.resume(config)
+// No: answer the call yourself. A call that already has a result is not run.
+agent.resume(config) { state ->
+    state.copy(messages = state.messages + waiting.map { ChatMessage.ToolResult(it.id, it.name, "The reviewer said no.", isError = true) })
+}
+```
+
+`toolAgent` is a whole graph. To make the agent one part of a larger graph, with the conversation
+in a state of your own, add the same loop with `toolLoop`:
+
+```kotlin
+data class Ticket(val messages: List<ChatMessage>, val reply: String = "")
+
+val graph = StateGraph<Ticket> {
+    val send = node("send") { it.copy(reply = it.messages.last().text) }
+    val agent = toolLoop(
+        model = model,
+        tools = listOf(menuPrice, orderStatus),
+        // Where the conversation is in your state, and how to add messages to it.
+        messages = { it.messages },
+        append = { ticket, new -> ticket.copy(messages = ticket.messages + new) },
+        // Where the graph goes when the model has its answer. The default is END.
+        then = send,
+    )
+
+    START then agent
+    send then END
+}.compile()
+```
+
+Runnable version: [`ToolAgent`](samples/src/main/kotlin/org/langgraphkt/samples/ToolAgent.kt). It
+runs without an API key, and with Claude when `ANTHROPIC_API_KEY` is set.
 
 ### Inspecting a graph
 
@@ -539,6 +629,7 @@ extends `LangGraphException`:
 | `MaxIterationsExceededException` | The run took more steps than `GraphConfig.maxIterations` (default 25). |
 | `CheckpointNotFoundException`, `GraphAlreadyCompletedException` | `resume` had nothing to continue. |
 | `CheckpointCorruptedException` | A stored checkpoint could not be read. |
+| `ChatModelException` | A call to a `ChatModel` failed, or the model declined to answer. From `langgraph-kt-agent`. |
 
 ## Design
 
@@ -564,6 +655,7 @@ Runnable examples live in [`samples/`](samples/src/main/kotlin/org/langgraphkt/s
 ./gradlew :samples:runReviewLoop        # a reviewer approves a draft or sends it back
 ./gradlew :samples:runParallelResearch  # three lookups at the same time
 ./gradlew :samples:runChatAgent         # a chat agent built on a LangChain4j model
+./gradlew :samples:runToolAgent         # an agent that calls tools, with or without an API key
 ./gradlew :samples:runLevel1            # ... runLevel10, the levels of the tutorial
 ```
 

@@ -38,6 +38,8 @@ Windows. CI covers all of them, so you do not need every OS locally.
 | `langgraph-kt-core` | Graph builder, execution engine, checkpoint interfaces (multiplatform, depends only on kotlinx-coroutines) |
 | `langgraph-kt-serialization` | `KotlinxStateSerializer` (multiplatform) |
 | `langgraph-kt-checkpoint-file` | `FileCheckpointer` on kotlinx-io (multiplatform) |
+| `langgraph-kt-agent` | `ChatModel`, tools and the tool-calling agent loop (multiplatform) |
+| `langgraph-kt-anthropic` | `AnthropicChatModel`, Claude through Ktor (multiplatform) |
 | `langgraph-kt-langchain4j` | LangChain4j integration (JVM) |
 | `samples` | Runnable examples, not published. `samples/.../tutorial` holds the code of the tutorial |
 | `docs` | The tutorial, one Markdown page per level |
