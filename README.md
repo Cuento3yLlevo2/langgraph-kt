@@ -529,7 +529,7 @@ of the run:
 ```kotlin
 val answer = node(
     "answer",
-    work = { email -> model.chatWithProgress(ChatRequest(listOf(ChatMessage.User(email.body)))).message.text },
+    work = { email -> model.chatWithProgress("Write a short, friendly reply to this support email: ${email.body}") },
 ) { email, reply -> email.copy(reply = reply) }
 
 graph.stream(email).collect { event ->

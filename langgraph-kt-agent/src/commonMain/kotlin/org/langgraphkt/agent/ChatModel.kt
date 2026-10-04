@@ -105,6 +105,19 @@ public suspend fun ChatModel.chatWithProgress(request: ChatRequest): ChatRespons
 }
 
 /**
+ * Sends [prompt] as a single user message and returns the text of the answer, like [chat] with a
+ * prompt, and lets a streamed run watch the model write it. See the overload with a [ChatRequest].
+ *
+ * ```kotlin
+ * node("summarize", work = { model.chatWithProgress("Summarize: ${it.notes}") }) { state, summary ->
+ *     state.copy(summary = summary)
+ * }
+ * ```
+ */
+public suspend fun ChatModel.chatWithProgress(prompt: String, system: String? = null): String =
+    chatWithProgress(ChatRequest(listOf(ChatMessage.User(prompt)), system)).message.text
+
+/**
  * The piece of text a model wrote, when this event is a node's report of one, and `null` for every
  * other event. [toolLoop] and [chatWithProgress] report these.
  *

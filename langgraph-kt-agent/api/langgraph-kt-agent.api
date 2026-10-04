@@ -182,7 +182,9 @@ public final class org/langgraphkt/agent/ChatModelException : org/langgraphkt/La
 public final class org/langgraphkt/agent/ChatModelKt {
 	public static final fun chat (Lorg/langgraphkt/agent/ChatModel;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun chat$default (Lorg/langgraphkt/agent/ChatModel;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun chatWithProgress (Lorg/langgraphkt/agent/ChatModel;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final fun chatWithProgress (Lorg/langgraphkt/agent/ChatModel;Lorg/langgraphkt/agent/ChatRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun chatWithProgress$default (Lorg/langgraphkt/agent/ChatModel;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun getTextDelta (Lorg/langgraphkt/GraphEvent;)Ljava/lang/String;
 }
 

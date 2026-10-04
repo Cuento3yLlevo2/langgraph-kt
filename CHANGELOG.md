@@ -13,7 +13,8 @@ breaking changes.
   delivers the text while the model writes it, and `event.textDelta` reads each piece.
   - `ChatModel.stream(request)` returns a `Flow` of `ChatEvent.TextDelta` and a final
     `ChatEvent.Completed`. A model that only has `chat` delivers its text in one piece.
-  - `chatWithProgress` does the same for a model call in a node of your own.
+  - `chatWithProgress` does the same for a model call in a node of your own. It takes a
+    `ChatRequest` or a prompt, like `chat`.
   - `AnthropicChatModel` streams on every target, over server-sent events.
   - `LangChain4jChatModel` takes a LangChain4j `StreamingChatModel` as a second argument and streams
     through it.
