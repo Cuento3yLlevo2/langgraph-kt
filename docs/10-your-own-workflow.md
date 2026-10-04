@@ -162,12 +162,14 @@ dependency:
 
 ```kotlin
 dependencies {
-    implementation("io.github.cuento3yllevo2:langgraph-kt-core:0.1.0-alpha01")
+    implementation("io.github.cuento3yllevo2:langgraph-kt-core:0.1.0-alpha02")
 
     // Only if you need them:
-    implementation("io.github.cuento3yllevo2:langgraph-kt-serialization:0.1.0-alpha01")   // save @Serializable states
-    implementation("io.github.cuento3yllevo2:langgraph-kt-checkpoint-file:0.1.0-alpha01") // FileCheckpointer
-    implementation("io.github.cuento3yllevo2:langgraph-kt-langchain4j:0.1.0-alpha01")     // chatNode (JVM, Java 17+)
+    implementation("io.github.cuento3yllevo2:langgraph-kt-serialization:0.1.0-alpha02")   // save @Serializable states
+    implementation("io.github.cuento3yllevo2:langgraph-kt-checkpoint-file:0.1.0-alpha02") // FileCheckpointer
+    implementation("io.github.cuento3yllevo2:langgraph-kt-agent:0.1.0-alpha02")           // ChatModel, tools, toolAgent
+    implementation("io.github.cuento3yllevo2:langgraph-kt-anthropic:0.1.0-alpha02")       // AnthropicChatModel
+    implementation("io.github.cuento3yllevo2:langgraph-kt-langchain4j:0.1.0-alpha02")     // chatNode (JVM, Java 17+)
 }
 ```
 
