@@ -146,12 +146,14 @@ ESCALATION: Hi Cleo, a colleague from our team will reply to you personally toda
 ```kotlin
 dependencies {
     // The graph builder and the engine. This is all the quick start needs.
-    implementation("io.github.cuento3yllevo2:langgraph-kt-core:0.1.0-alpha01")
+    implementation("io.github.cuento3yllevo2:langgraph-kt-core:0.1.0-alpha02")
 
     // Optional modules. Add only the ones you use.
-    implementation("io.github.cuento3yllevo2:langgraph-kt-serialization:0.1.0-alpha01")   // save @Serializable states
-    implementation("io.github.cuento3yllevo2:langgraph-kt-checkpoint-file:0.1.0-alpha01") // save runs as JSON files
-    implementation("io.github.cuento3yllevo2:langgraph-kt-langchain4j:0.1.0-alpha01")     // call AI models through LangChain4j (JVM)
+    implementation("io.github.cuento3yllevo2:langgraph-kt-serialization:0.1.0-alpha02")   // save @Serializable states
+    implementation("io.github.cuento3yllevo2:langgraph-kt-checkpoint-file:0.1.0-alpha02") // save runs as JSON files
+    implementation("io.github.cuento3yllevo2:langgraph-kt-agent:0.1.0-alpha02")           // chat models, tools and the tool-calling agent
+    implementation("io.github.cuento3yllevo2:langgraph-kt-anthropic:0.1.0-alpha02")       // call Claude, on every platform
+    implementation("io.github.cuento3yllevo2:langgraph-kt-langchain4j:0.1.0-alpha02")     // call AI models through LangChain4j (JVM)
 }
 ```
 
@@ -164,15 +166,12 @@ dependencies {
 | `langgraph-kt-anthropic` | same as core | `AnthropicChatModel`, Claude through Ktor |
 | `langgraph-kt-langchain4j` | JVM (Java 17+) | `LangChain4jChatModel` and `chatNode` / `chatMessagesNode` for LangChain4j 1.x models |
 
-`langgraph-kt-agent` and `langgraph-kt-anthropic` are new and not part of `0.1.0-alpha01`. They
-arrive with the next release.
-
 Requires Kotlin 2.x. JVM artifacts target Java 11, except `langgraph-kt-langchain4j`, which needs
 Java 17 because LangChain4j does.
 
 ### Status
 
-Alpha. `0.1.0-alpha01` is the first release, and it is on Maven Central. The API may still change
+Alpha. `0.1.0-alpha02` is the latest release, and it is on Maven Central. The API may still change
 before `1.0`; the [changelog](CHANGELOG.md) lists what changes in each version.
 
 ## Tutorial

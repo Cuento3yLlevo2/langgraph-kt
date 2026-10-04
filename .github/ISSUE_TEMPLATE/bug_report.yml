@@ -21,7 +21,7 @@ body:
     id: version
     attributes:
       label: langgraph-kt version
-      placeholder: 0.1.0-alpha01
+      placeholder: 0.1.0-alpha02
     validations:
       required: true
   - type: dropdown
