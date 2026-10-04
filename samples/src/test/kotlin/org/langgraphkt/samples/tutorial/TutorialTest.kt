@@ -11,13 +11,13 @@ import org.langgraphkt.GraphValidationException
 import org.langgraphkt.MaxIterationsExceededException
 import org.langgraphkt.MemoryCheckpointer
 import org.langgraphkt.NodeExecutionException
+import org.langgraphkt.samples.tutorial.level10.endlessLoop
+import org.langgraphkt.samples.tutorial.level10.forgottenArrow
+import org.langgraphkt.samples.tutorial.level10.missingReducer
+import org.langgraphkt.samples.tutorial.level10.misspelledNode
 import org.langgraphkt.samples.tutorial.level6.describe
 import org.langgraphkt.samples.tutorial.level7.PAY
 import org.langgraphkt.samples.tutorial.level8.PretendModel
-import org.langgraphkt.samples.tutorial.level9.endlessLoop
-import org.langgraphkt.samples.tutorial.level9.forgottenArrow
-import org.langgraphkt.samples.tutorial.level9.missingReducer
-import org.langgraphkt.samples.tutorial.level9.misspelledNode
 import org.langgraphkt.states
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -25,9 +25,11 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 import org.langgraphkt.samples.tutorial.level1.Ticket as Ticket1
 import org.langgraphkt.samples.tutorial.level1.helpDesk as helpDesk1
-import org.langgraphkt.samples.tutorial.level10.PAY as PAY10
 import org.langgraphkt.samples.tutorial.level10.Ticket as Ticket10
 import org.langgraphkt.samples.tutorial.level10.helpDesk as helpDesk10
+import org.langgraphkt.samples.tutorial.level11.PAY as PAY11
+import org.langgraphkt.samples.tutorial.level11.Ticket as Ticket11
+import org.langgraphkt.samples.tutorial.level11.helpDesk as helpDesk11
 import org.langgraphkt.samples.tutorial.level2.Ticket as Ticket2
 import org.langgraphkt.samples.tutorial.level2.helpDesk as helpDesk2
 import org.langgraphkt.samples.tutorial.level3.Ticket as Ticket3
@@ -40,8 +42,6 @@ import org.langgraphkt.samples.tutorial.level7.Ticket as Ticket7
 import org.langgraphkt.samples.tutorial.level7.helpDesk as helpDesk7
 import org.langgraphkt.samples.tutorial.level8.Ticket as Ticket8
 import org.langgraphkt.samples.tutorial.level8.helpDesk as helpDesk8
-import org.langgraphkt.samples.tutorial.level9.Ticket as Ticket9
-import org.langgraphkt.samples.tutorial.level9.helpDesk as helpDesk9
 
 /** Keeps the code and the output shown in the tutorial in `docs/` true. */
 class TutorialTest {
@@ -172,7 +172,7 @@ class TutorialTest {
         }
 
     @Test
-    fun `level 9 mistakes are reported with the messages shown in the tutorial`() =
+    fun `level 10 mistakes are reported with the messages shown in the tutorial`() =
         runTest {
             assertEquals(
                 "Edge references unknown to-node: anwser",
@@ -188,18 +188,18 @@ class TutorialTest {
             )
             assertEquals(
                 "Graph execution exceeded max iterations (25). Possible infinite loop.",
-                assertFailsWith<MaxIterationsExceededException> { endlessLoop().invoke(Ticket9("Ana", "Hello")) }.message,
+                assertFailsWith<MaxIterationsExceededException> { endlessLoop().invoke(Ticket10("Ana", "Hello")) }.message,
             )
         }
 
     @Test
-    fun `level 9 retries a failed node with resume`() =
+    fun `level 10 retries a failed node with resume`() =
         runTest {
             var calls = 0
-            val graph = helpDesk9 { if (++calls == 1) error("the kitchen phone is busy") else "Your pizza is in the oven." }
-            val config = GraphConfig(threadId = "ticket-42", checkpointer = MemoryCheckpointer<Ticket9>())
+            val graph = helpDesk10 { if (++calls == 1) error("the kitchen phone is busy") else "Your pizza is in the oven." }
+            val config = GraphConfig(threadId = "ticket-42", checkpointer = MemoryCheckpointer<Ticket10>())
 
-            val failure = assertFailsWith<NodeExecutionException> { graph.invoke(Ticket9("Ana", "Where is my pizza?"), config) }
+            val failure = assertFailsWith<NodeExecutionException> { graph.invoke(Ticket10("Ana", "Where is my pizza?"), config) }
             assertEquals("Node 'kitchen' failed: the kitchen phone is busy", failure.message)
             assertEquals("kitchen", failure.nodeName)
 
@@ -207,22 +207,22 @@ class TutorialTest {
         }
 
     @Test
-    fun `level 10 handles a delivery question, a refund and anything else`() =
+    fun `level 11 handles a delivery question, a refund and anything else`() =
         runTest {
-            val graph = helpDesk10()
-            val checkpointer = MemoryCheckpointer<Ticket10>()
+            val graph = helpDesk11()
+            val checkpointer = MemoryCheckpointer<Ticket11>()
 
-            fun config(threadId: String) = GraphConfig(threadId = threadId, checkpointer = checkpointer, interruptBefore = setOf(PAY10))
+            fun config(threadId: String) = GraphConfig(threadId = threadId, checkpointer = checkpointer, interruptBefore = setOf(PAY11))
 
-            val delivery = graph.invoke(Ticket10("Ana", "Where is my pizza?"), config("ticket-1"))
+            val delivery = graph.invoke(Ticket11("Ana", "Where is my pizza?"), config("ticket-1"))
             assertEquals("Hi Ana, your pizza left the oven and the driver is 5 minutes away.", delivery.state.reply)
             assertEquals(2, delivery.state.attempts)
 
-            val refund = graph.invoke(Ticket10("Ana", "My pizza arrived cold. I want a refund."), config("ticket-2"))
-            assertIs<GraphResult.Interrupted<Ticket10>>(refund)
+            val refund = graph.invoke(Ticket11("Ana", "My pizza arrived cold. I want a refund."), config("ticket-2"))
+            assertIs<GraphResult.Interrupted<Ticket11>>(refund)
             assertEquals("Sorry Ana! We sent you 12 euros.", graph.resume(config("ticket-2")) { it.copy(approved = true) }.state.reply)
 
-            val other = graph.invoke(Ticket10("Ana", "Do you sell salad?"), config("ticket-3"))
+            val other = graph.invoke(Ticket11("Ana", "Do you sell salad?"), config("ticket-3"))
             assertEquals("Hi Ana, a colleague will reply soon.", other.state.reply)
         }
 }

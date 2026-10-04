@@ -1,4 +1,4 @@
-# Level 10: Your own workflow
+# Level 11: Your own workflow
 
 **Goal:** put every move together, then design a graph for a problem of your own.
 
@@ -6,7 +6,7 @@
 
 ## The complete help desk
 
-Levels 1 to 9 each showed one move on a small graph. Here they are in one:
+Levels 1 to 10 each showed one move on a small graph. Here they are in one:
 
 ```mermaid
 flowchart LR
@@ -22,7 +22,7 @@ flowchart LR
     prepare --> P{{pause}} --> pay --> E
 ```
 
-[`level10/Level10.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level10/Level10.kt)
+[`level11/Level11.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level11/Level11.kt)
 has the whole program. This is the part that draws the map:
 
 ```kotlin
@@ -46,7 +46,7 @@ prepare then pay then END
 ```
 
 ```bash
-./gradlew :samples:runLevel10
+./gradlew :samples:runLevel11
 ```
 
 ```
@@ -202,4 +202,4 @@ you know where an AI model goes. From here:
   user interface, in the browser and on the desktop.
 - The [API reference](https://cuento3yllevo2.github.io/langgraph-kt/) describes every function.
 
-[Back to level 9](09-game-over-screens.md) · [All levels](README.md)
+[Back to level 10](10-game-over-screens.md) · [All levels](README.md)

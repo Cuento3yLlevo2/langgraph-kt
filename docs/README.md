@@ -42,8 +42,8 @@ plugs in.
 | [6. Watching a run](06-watching-a-run.md) | See what the graph is doing while it runs | `stream`, `GraphEvent`, `states` |
 | [7. Save points](07-save-points.md) | Pause for a human and continue later | `GraphConfig`, checkpointer, `resume`, `lastResult` |
 | [8. A real AI model](08-a-real-ai-model.md) | Let a model write the reply | `chatNode` |
-| [9. Game over screens](09-game-over-screens.md) | Understand and recover from errors | exceptions, retry with `resume` |
-| [10. Your own workflow](10-your-own-workflow.md) | Combine every move and design a graph for your own problem | the complete help desk, a recipe, testing |
+| [10. Game over screens](10-game-over-screens.md) | Understand and recover from errors | exceptions, retry with `resume` |
+| [11. Your own workflow](11-your-own-workflow.md) | Combine every move and design a graph for your own problem | the complete help desk, a recipe, testing |
 
 Take them in order; each one takes 5 to 10 minutes. The [cheat sheet](cheat-sheet.md) has every
 word and every move on one page.

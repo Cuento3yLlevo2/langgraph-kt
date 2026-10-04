@@ -133,7 +133,7 @@ how a model calls your functions.
 - **It is slow.** A call takes seconds. Level 6 lets you show progress, and level 5 lets you make
   several calls at once.
 - **It is not always right.** That is what the loop of level 4 is for, and the pause of level 7.
-- **It can fail.** The network drops, the provider is busy. That is the next level.
+- **It can fail.** The network drops, the provider is busy. That is level 10.
 - **It costs money.** Every call does, so limit your loops.
 
 ## Your turn
@@ -152,4 +152,4 @@ You can now:
 - swap a pretend model for a real one without touching the graph,
 - write a model call by hand when you are not on the JVM.
 
-[Back to level 7](07-save-points.md) · [All levels](README.md) · Next: [Level 9, game over screens](09-game-over-screens.md)
+[Back to level 7](07-save-points.md) · [All levels](README.md) · Next: [Level 10, game over screens](10-game-over-screens.md)

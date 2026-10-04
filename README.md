@@ -731,7 +731,7 @@ Runnable examples live in [`samples/`](samples/src/main/kotlin/org/langgraphkt/s
 ./gradlew :samples:runParallelResearch  # three lookups at the same time
 ./gradlew :samples:runChatAgent         # a chat agent built on a LangChain4j model
 ./gradlew :samples:runToolAgent         # an agent that calls tools, with or without an API key
-./gradlew :samples:runLevel1            # ... runLevel10, the levels of the tutorial
+./gradlew :samples:runLevel1            # ... runLevel11, the levels of the tutorial
 ```
 
 For a complete app, see [langgraph-kt-demo](https://github.com/Cuento3yLlevo2/langgraph-kt-demo),

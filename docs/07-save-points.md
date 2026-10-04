@@ -120,7 +120,7 @@ into the run: `ticket.copy(approved = approved)`. Then `pay` runs with the updat
 
 - **`invoke` is "new game", `resume` is "continue".** `invoke` always starts from `START` and
   replaces the save in that slot.
-- **A save is written after every step**, not only at a pause. Level 9 uses this to retry after a
+- **A save is written after every step**, not only at a pause. Level 10 uses this to retry after a
   failure.
 - **`interruptAfter`** also exists. It stops after a node has run instead of before.
 
