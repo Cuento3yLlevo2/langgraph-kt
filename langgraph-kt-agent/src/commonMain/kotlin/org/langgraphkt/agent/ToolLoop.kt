@@ -37,6 +37,23 @@ import org.langgraphkt.StateGraph
  * `Reducer`. Every round of tools takes two steps of the run, so raise `GraphConfig.maxIterations`
  * for an agent that needs many rounds.
  *
+ * [messages] and [append] read and write the same list: [messages] must return what [append] stored.
+ * When the conversation starts from other fields of the state, do not build the first message in
+ * [messages], because an [append] that adds to the stored list would then lose it. Give it to
+ * [firstMessage] instead, and the loop stores it with the model's first answer:
+ *
+ * ```kotlin
+ * data class Order(val customer: String, val question: String, val messages: List<ChatMessage> = emptyList())
+ *
+ * toolLoop(
+ *     model = model,
+ *     tools = tools,
+ *     messages = { it.messages },
+ *     append = { order, new -> order.copy(messages = order.messages + new) },
+ *     firstMessage = { "${it.customer} writes: ${it.question}" },
+ * )
+ * ```
+ *
  * To approve tool calls by hand, run the graph with `interruptBefore = setOf("tools")`. The calls
  * that wait are `messages.pendingToolCalls()`. Resume the run to let them through, or resume it with
  * a state that has a [ChatMessage.ToolResult] for each call you reject: a call that already has a
@@ -47,6 +64,9 @@ import org.langgraphkt.StateGraph
  * @param messages reads the conversation from the state.
  * @param append returns the state with the given messages added to its conversation. It is called
  * with the model's answer, and with the results of the tools.
+ * @param firstMessage returns the user message that starts the conversation. It is used only while
+ * [messages] returns an empty list, and [append] receives it together with the model's first answer.
+ * Leave it out when the state already holds the first message.
  * @param system instructions for the model.
  * @param then where the graph continues when the model is done. The default ends the branch.
  * @param modelNode the name of the model node.
@@ -58,6 +78,7 @@ public fun <State> StateGraph<State>.toolLoop(
     tools: List<Tool>,
     messages: (State) -> List<ChatMessage>,
     append: (State, List<ChatMessage>) -> State,
+    firstMessage: ((State) -> String)? = null,
     system: String? = null,
     then: NodeRef = NodeRef.END,
     modelNode: String = "model",
@@ -72,13 +93,15 @@ public fun <State> StateGraph<State>.toolLoop(
         node(
             modelNode,
             work = { state ->
-                val response = model.chat(ChatRequest(messages(state), system, specs))
+                val stored = messages(state)
+                val opening = if (stored.isEmpty() && firstMessage != null) listOf(ChatMessage.User(firstMessage(state))) else emptyList()
+                val response = model.chat(ChatRequest(opening + stored, system, specs))
                 if (response.truncated && response.message.toolCalls.isNotEmpty()) {
                     throw ChatModelException("The model reached its output limit in the middle of a tool call. Raise the limit.")
                 }
-                response.message
+                opening + response.message
             },
-        ) { state, answer -> append(state, listOf(answer)) }
+        ) { state, new -> append(state, new) }
     val runTools =
         node(toolsNode, work = { state -> tools.execute(messages(state).pendingToolCalls()) }) { state, results ->
             append(state, results)

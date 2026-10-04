@@ -7,6 +7,14 @@ breaking changes.
 
 ## [Unreleased]
 
+### Added
+
+- `toolLoop` takes a `firstMessage`: the user message that starts the conversation, built from other
+  fields of the state. The loop stores it with the model's first answer, so `messages` and `append`
+  only read and write one list. Before, the first message had to be built in `messages`, and an
+  `append` that added to the stored list lost it without an error. The parameter comes before
+  `system`, so pass `system` by name.
+
 ### Changed
 
 - An exception of the library that a node throws is now wrapped in `NodeExecutionException` like any

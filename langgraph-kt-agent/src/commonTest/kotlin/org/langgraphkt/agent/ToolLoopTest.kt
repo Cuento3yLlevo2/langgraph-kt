@@ -19,6 +19,7 @@ data class Ticket(
     val messages: List<ChatMessage>,
     val reply: String = "",
     val log: List<String> = emptyList(),
+    val question: String = "",
 )
 
 class ToolLoopTest {
@@ -204,5 +205,63 @@ class ToolLoopTest {
             assertEquals("A cola is 2 euros.", state.reply)
             assertEquals(listOf("greet", "append", "append", "append", "send"), state.log)
             assertEquals(setOf("greet", "send", "assistant", "desk"), graph.topology.nodes.toSet())
+        }
+
+    private fun ticketGraph(model: ChatModel) =
+        StateGraph<Ticket> {
+            START then
+                toolLoop(
+                    model = model,
+                    tools = tools,
+                    messages = { it.messages },
+                    append = { ticket, new -> ticket.copy(messages = ticket.messages + new) },
+                    firstMessage = { "Ana writes: ${it.question}" },
+                )
+        }.compile()
+
+    @Test
+    fun `the first message starts an empty conversation and is stored with the answer`() =
+        runTest {
+            val model = ScriptedModel(calls(price), says("A cola is 2 euros."))
+            val first = ChatMessage.User("Ana writes: How much is a cola?")
+
+            val state = ticketGraph(model).invoke(Ticket(emptyList(), question = "How much is a cola?")).state
+
+            assertEquals(listOf(first), model.requests[0].messages)
+            assertEquals(first, model.requests[1].messages.first())
+            assertEquals(first, state.messages.first())
+            assertEquals(4, state.messages.size)
+        }
+
+    @Test
+    fun `the first message is not added to a conversation that has messages`() =
+        runTest {
+            val model = ScriptedModel(says("Hello!"))
+            val stored = listOf(ChatMessage.User("Hi"))
+
+            val state = ticketGraph(model).invoke(Ticket(stored, question = "How much is a cola?")).state
+
+            assertEquals(stored, model.requests.single().messages)
+            assertEquals(stored + ChatMessage.Assistant("Hello!"), state.messages)
+        }
+
+    @Test
+    fun `a model call that is retried gets the first message once`() =
+        runTest {
+            var failed = false
+            val graph =
+                ticketGraph { request ->
+                    if (!failed) {
+                        failed = true
+                        throw ChatModelException("overloaded")
+                    }
+                    says("Hello ${request.messages.size}!")
+                }
+            val config = GraphConfig(checkpointer = MemoryCheckpointer<Ticket>())
+
+            assertFailsWith<NodeExecutionException> { graph.invoke(Ticket(emptyList(), question = "Hi"), config) }
+            val state = graph.resume(config).state
+
+            assertEquals(listOf(ChatMessage.User("Ana writes: Hi"), ChatMessage.Assistant("Hello 1!")), state.messages)
         }
 }

@@ -250,8 +250,8 @@ public final class org/langgraphkt/agent/ToolKt {
 public final class org/langgraphkt/agent/ToolLoopKt {
 	public static final fun toolAgent (Lorg/langgraphkt/agent/ChatModel;Ljava/util/List;Ljava/lang/String;)Lorg/langgraphkt/CompiledGraph;
 	public static synthetic fun toolAgent$default (Lorg/langgraphkt/agent/ChatModel;Ljava/util/List;Ljava/lang/String;ILjava/lang/Object;)Lorg/langgraphkt/CompiledGraph;
-	public static final fun toolLoop (Lorg/langgraphkt/StateGraph;Lorg/langgraphkt/agent/ChatModel;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Ljava/lang/String;Lorg/langgraphkt/NodeRef;Ljava/lang/String;Ljava/lang/String;)Lorg/langgraphkt/NodeRef;
-	public static synthetic fun toolLoop$default (Lorg/langgraphkt/StateGraph;Lorg/langgraphkt/agent/ChatModel;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Ljava/lang/String;Lorg/langgraphkt/NodeRef;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lorg/langgraphkt/NodeRef;
+	public static final fun toolLoop (Lorg/langgraphkt/StateGraph;Lorg/langgraphkt/agent/ChatModel;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;Ljava/lang/String;Lorg/langgraphkt/NodeRef;Ljava/lang/String;Ljava/lang/String;)Lorg/langgraphkt/NodeRef;
+	public static synthetic fun toolLoop$default (Lorg/langgraphkt/StateGraph;Lorg/langgraphkt/agent/ChatModel;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;Ljava/lang/String;Lorg/langgraphkt/NodeRef;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lorg/langgraphkt/NodeRef;
 }
 
 public final class org/langgraphkt/agent/ToolSpec {

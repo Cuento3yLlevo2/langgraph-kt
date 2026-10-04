@@ -597,6 +597,22 @@ val graph = StateGraph<Ticket> {
 }.compile()
 ```
 
+`messages` must return what `append` stored. When the conversation starts from other fields of your
+state, give the first message to `firstMessage` instead of building it in `messages`. The loop uses
+it while the conversation is empty and stores it with the model's first answer:
+
+```kotlin
+data class Order(val customer: String, val question: String, val messages: List<ChatMessage> = emptyList())
+
+toolLoop(
+    model = model,
+    tools = listOf(menuPrice, orderStatus),
+    messages = { it.messages },
+    append = { order, new -> order.copy(messages = order.messages + new) },
+    firstMessage = { "${it.customer} writes: ${it.question}" },
+)
+```
+
 Runnable version: [`ToolAgent`](samples/src/main/kotlin/org/langgraphkt/samples/ToolAgent.kt). It
 runs without an API key, and with Claude when `ANTHROPIC_API_KEY` is set.
 
