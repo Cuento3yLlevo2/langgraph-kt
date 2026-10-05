@@ -174,7 +174,8 @@ Java 17 because LangChain4j does.
 ### Status
 
 Alpha. `0.1.0-alpha05` is the latest release, and it is on Maven Central. The API may still change
-before `1.0`; the [changelog](CHANGELOG.md) lists what changes in each version.
+before `1.0`; the [changelog](CHANGELOG.md) lists what changes in each version, and the
+[roadmap](ROADMAP.md) lists what is planned.
 
 ## Tutorial
 
