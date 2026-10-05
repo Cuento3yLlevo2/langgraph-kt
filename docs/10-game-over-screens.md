@@ -1,4 +1,4 @@
-# Level 9: Game over screens
+# Level 10: Game over screens
 
 **Goal:** recognize what the library tells you when something is wrong, and continue a run after a
 node has failed.
@@ -10,10 +10,10 @@ This level makes five mistakes on purpose.
 
 ## Run it
 
-[`level9/Level9.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level9/Level9.kt)
+[`level10/Level10.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level10/Level10.kt)
 
 ```bash
-./gradlew :samples:runLevel9
+./gradlew :samples:runLevel10
 ```
 
 ```
@@ -170,7 +170,7 @@ Every exception the library throws is a `LangGraphException`, so one `catch` can
 
 ## Your turn
 
-1. Fix mistakes 1 to 4 in `Level9.kt` one at a time and watch the lines disappear from the output.
+1. Fix mistakes 1 to 4 in `Level10.kt` one at a time and watch the lines disappear from the output.
    For number 4, the smallest fix is a conditional edge that returns `END` once the reply has three
    exclamation marks.
 2. In mistake 5, remove `checkpointer` from the `GraphConfig`. What does `resume` say now?
@@ -183,4 +183,4 @@ You can now:
 - tell mistakes found by `compile()` from failures during a run,
 - continue a failed run from its last save.
 
-[Back to level 8](08-a-real-ai-model.md) · [All levels](README.md) · Next: [Level 10, your own workflow](10-your-own-workflow.md)
+[Back to level 9](09-an-agent-with-tools.md) · [All levels](README.md) · Next: [Level 11, your own workflow](11-your-own-workflow.md)

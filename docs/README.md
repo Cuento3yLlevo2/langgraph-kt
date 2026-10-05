@@ -26,8 +26,8 @@ The first run downloads Gradle and Kotlin and takes a few minutes. When it print
 `Hi Ana, thanks for writing to Pixel Pizza!`, you are ready.
 
 You do not need an AI account or an API key. The "AI" in this tutorial is ordinary Kotlin code that
-pretends, so that you can concentrate on how a workflow is built. Level 8 shows where a real model
-plugs in.
+pretends, so that you can concentrate on how a workflow is built. Levels 8 and 9 show where a real
+model plugs in.
 
 ## The levels
 
@@ -42,8 +42,9 @@ plugs in.
 | [6. Watching a run](06-watching-a-run.md) | See what the graph is doing while it runs | `stream`, `GraphEvent`, `states` |
 | [7. Save points](07-save-points.md) | Pause for a human and continue later | `GraphConfig`, checkpointer, `resume`, `lastResult` |
 | [8. A real AI model](08-a-real-ai-model.md) | Let a model write the reply | `chatNode` |
-| [9. Game over screens](09-game-over-screens.md) | Understand and recover from errors | exceptions, retry with `resume` |
-| [10. Your own workflow](10-your-own-workflow.md) | Combine every move and design a graph for your own problem | the complete help desk, a recipe, testing |
+| [9. An agent with tools](09-an-agent-with-tools.md) | Let a model decide which of your functions to call | `Tool`, `toolAgent`, `toolLoop` |
+| [10. Game over screens](10-game-over-screens.md) | Understand and recover from errors | exceptions, retry with `resume` |
+| [11. Your own workflow](11-your-own-workflow.md) | Combine every move and design a graph for your own problem | the complete help desk, a recipe, testing |
 
 Take them in order; each one takes 5 to 10 minutes. The [cheat sheet](cheat-sheet.md) has every
 word and every move on one page.
