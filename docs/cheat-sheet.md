@@ -22,7 +22,7 @@ Every word and every move of the [tutorial](README.md) on one page.
 | Reducer | A function that merges whole states. Only needed when two nodes that each return a whole state run at the same time. | [7](07-game-over-screens.md) |
 | Event | A message about a run in progress: a node started, a step finished, ... | [4](04-two-things-at-once.md) |
 | Checkpoint | A save: the state, and which nodes come next | [5](05-save-points.md) |
-| Checkpointer | Where checkpoints are stored (memory, files, your own storage) | [5](05-save-points.md) |
+| Checkpointer | Where checkpoints are stored (memory, files, a browser, your own storage) | [5](05-save-points.md) |
 | Thread | One job with its own saves, named by a `threadId` | [5](05-save-points.md) |
 | Interrupt | A pause before or after a node, usually to wait for a human | [5](05-save-points.md) |
 | Human-in-the-loop | A workflow in which a person decides something before it continues | [5](05-save-points.md) |

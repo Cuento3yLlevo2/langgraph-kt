@@ -152,9 +152,12 @@ val checkpointer = FileCheckpointer(Path("checkpoints"), KotlinxStateSerializer<
 
 `@Serializable` tells Kotlin how to turn the ticket into text for the file. The
 [HumanInTheLoop sample](../samples/src/main/kotlin/org/langgraphkt/samples/HumanInTheLoop.kt) is a
-complete program that does this. To keep saves somewhere else (a database, the browser), you
-implement `Checkpointer`, which has three functions: `save`, `load` and `delete`. The
-[README](../README.md#human-in-the-loop) shows one.
+complete program that does this.
+
+A web app has no files. There, `LocalStorageCheckpointer` keeps the saves in the browser, so a
+paused run is still waiting after the page is reloaded. To keep saves somewhere else, such as a
+database, you implement `Checkpointer`, which has three functions: `save`, `load` and `delete`. The
+[README](../README.md#human-in-the-loop) shows both.
 
 ## Your turn
 

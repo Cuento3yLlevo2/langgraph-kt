@@ -12,6 +12,7 @@ Read CONTRIBUTING.md as well; its design rules apply to every change.
 ./gradlew :langgraph-kt-core:allTests        # Core tests on every target this OS can run (jvm, js, wasmJs, native)
 ./gradlew :langgraph-kt-langchain4j:test     # LangChain4j module (JVM-only module, so the task is `test`)
 ./gradlew :langgraph-kt-agent:jvmTest        # Agent module on the JVM (`allTests` for every target)
+./gradlew :langgraph-kt-checkpoint-browser:allTests  # Browser module, in headless Chrome
 ./gradlew kotlinUpgradeYarnLock kotlinWasmUpgradeYarnLock  # After a dependency change that touches JS or Wasm
 ./gradlew ktlintFormat                       # Fix formatting
 ./gradlew apiDump                            # Update */api/*.api after an intentional public API change
@@ -39,6 +40,8 @@ is a directed graph: nodes transform an immutable state and edges decide what ru
 - **`langgraph-kt-serialization`** (KMP): `KotlinxStateSerializer` for `@Serializable` states,
   `CheckpointCodec` (the shared checkpoint format, also used by `FileCheckpointer`)
 - **`langgraph-kt-checkpoint-file`** (KMP): `FileCheckpointer` on kotlinx-io
+- **`langgraph-kt-checkpoint-browser`** (JS and Wasm, browser only, code in `webMain`):
+  `LocalStorageCheckpointer` on `localStorage`. Its tests run in headless Chrome
 - **`langgraph-kt-agent`** (KMP): `ChatModel` (the provider-neutral model interface), `ChatMessage`,
   `Tool` (JSON Schema built from a `@Serializable` input class in `ToolSchema.kt`), and the
   tool-calling loop: `toolLoop` adds a model node and a tools node to any graph, `toolAgent` is that
@@ -49,8 +52,9 @@ is a directed graph: nodes transform an immutable state and edges decide what ru
   `ChatModel`; `chatNode` / `chatMessagesNode` build a node straight from a LangChain4j model
 - **`samples`**: runnable examples with tests; not published. `samples/.../tutorial/levelN` is the
   code of the tutorial in `docs/`; a page shows its level's code and output, so change both together
-- **`build-logic`**: convention plugins `langgraph.kmp-library`, `langgraph.jvm-library`,
-  `langgraph.quality` (ktlint, Kover, Dokka), `langgraph.publishing`, `langgraph.root`
+- **`build-logic`**: convention plugins `langgraph.kmp-library`, `langgraph.web-library`,
+  `langgraph.jvm-library`, `langgraph.quality` (ktlint, Kover, Dokka), `langgraph.publishing`,
+  `langgraph.root`
 
 ### Execution Flow
 
@@ -101,5 +105,6 @@ next active nodes. A checkpoint is saved after every step when a checkpointer is
 
 - Core tests live in `commonTest` and use `runTest { ... }`, so they run on every target.
 - Use `MemoryCheckpointer` unless the test is about files.
-- `check` enforces 90% line coverage per module (Kover).
+- `check` enforces 90% line coverage per module (Kover). Kover measures the JVM only, so the
+  browser-only module has no gate: cover its behavior with tests in `webTest`.
 - After an intentional public API change, run `./gradlew apiDump` and commit `*/api/*`.
