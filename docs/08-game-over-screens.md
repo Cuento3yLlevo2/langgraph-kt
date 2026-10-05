@@ -1,4 +1,4 @@
-# Level 9: Game over screens
+# Level 8: Game over screens
 
 **Goal:** recognize what the library tells you when something is wrong, and continue a run after a
 node has failed.
@@ -10,10 +10,10 @@ This level makes five mistakes on purpose.
 
 ## Run it
 
-[`level9/Level9.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level9/Level9.kt)
+[`level8/Level8.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level8/Level8.kt)
 
 ```bash
-./gradlew :samples:runLevel9
+./gradlew :samples:runLevel8
 ```
 
 ```
@@ -145,7 +145,7 @@ The phone call fails the first time and works the second time, like a network ca
 fails. When a node throws an exception, the run stops and you get a `NodeExecutionException`. It
 tells you which node failed (`e.nodeName`) and why (`e.cause` is the original exception).
 
-Now the save points of level 7 pay off. The run had a checkpointer, and a save is written after
+Now the save points of level 6 pay off. The run had a checkpointer, and a save is written after
 every step, so the result of `greet` was already saved when `kitchen` failed. `resume(config)`
 continues from that save: it runs `kitchen` again and does **not** run `greet` again. In a real
 workflow, that means the three model calls that already succeeded are not paid for twice.
@@ -170,7 +170,7 @@ Every exception the library throws is a `LangGraphException`, so one `catch` can
 
 ## Your turn
 
-1. Fix mistakes 1 to 4 in `Level9.kt` one at a time and watch the lines disappear from the output.
+1. Fix mistakes 1 to 4 in `Level8.kt` one at a time and watch the lines disappear from the output.
    For number 4, the smallest fix is a conditional edge that returns `END` once the reply has three
    exclamation marks.
 2. In mistake 5, remove `checkpointer` from the `GraphConfig`. What does `resume` say now?
@@ -183,4 +183,4 @@ You can now:
 - tell mistakes found by `compile()` from failures during a run,
 - continue a failed run from its last save.
 
-[Back to level 8](08-the-agent.md) · [All levels](README.md) · Next: [Level 10, your own workflow](10-your-own-workflow.md)
+[Back to level 7](07-the-agent.md) · [All levels](README.md) · Next: [Level 9, your own workflow](09-your-own-workflow.md)

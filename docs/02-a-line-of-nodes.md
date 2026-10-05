@@ -47,7 +47,7 @@ suspend fun main() {
 ```
 
 `topicOf` stands in for an AI model. A real help desk would ask a model "what is this message
-about?". Here it looks for a keyword, which is enough to learn how graphs work. Level 8 shows a
+about?". Here it looks for a keyword, which is enough to learn how graphs work. Level 7 shows a
 node that asks a model.
 
 ## Run it
@@ -83,7 +83,7 @@ reason for this rule:
 
 - When two nodes run at the same time (level 5), each gets its own untouched ticket, so they cannot
   spoil each other's work.
-- The engine can save the state after every step (level 7) and be sure nobody changes it afterwards.
+- The engine can save the state after every step (level 6) and be sure nobody changes it afterwards.
 
 So declare every field of your state with `val`, and use read-only collections such as `List`.
 

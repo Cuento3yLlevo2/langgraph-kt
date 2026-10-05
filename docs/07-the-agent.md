@@ -1,4 +1,4 @@
-# Level 8: The agent
+# Level 7: The agent
 
 **Goal:** an AI model writes the reply, and looks up the order and the price by itself first.
 
@@ -22,7 +22,7 @@ flowchart LR
 
 The model is not on the map. It is outside, and the `answer` node talks to it.
 
-[`level8/Level8.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level8/Level8.kt)
+[`level7/Level7.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level7/Level7.kt)
 
 ```kotlin
 fun replyDesk(model: ChatModel): CompiledGraph<Ticket> =
@@ -113,7 +113,7 @@ and answers with what the tools returned, and `describe`, which turns one messag
 ## Run it
 
 ```bash
-./gradlew :samples:runLevel8
+./gradlew :samples:runLevel7
 ```
 
 ```
@@ -251,7 +251,7 @@ Hi Ben! One salad costs 6 euros.
 ### Watching the answer arrive
 
 A real model writes its answer word by word, and a person would rather read along than wait. Run
-the agent with `stream` from level 6, and each event that carries a piece of the answer has it in
+the agent with `stream` from level 5, and each event that carries a piece of the answer has it in
 `textDelta`:
 
 ```kotlin
@@ -285,14 +285,14 @@ is not. The README has more under [AI models](../README.md#ai-models).
 
 ### What changes when the model is real
 
-- **It is slow.** A call takes seconds. Level 6 lets you show progress, and level 5 lets you make
-  several calls at once.
-- **It is not always right.** That is what the loop of level 4 is for, and the pause of level 7.
+- **It is slow.** A call takes seconds. Level 5 lets you show progress and make several calls at
+  once.
+- **It is not always right.** That is what the loop of level 4 is for, and the pause of level 6.
 - **It can fail.** The network drops, the provider is busy. That is the next level.
 - **It costs money.** Every call does. Asking for tools and getting the results is one round of the
   agent, and it takes two steps, so the default `maxIterations` of 25 allows twelve rounds.
 - **Its tools act for you.** Ask a person before a tool does something that cannot be undone. The
-  node that runs the tools is named `tools`, so `interruptBefore = setOf("tools")` from level 7
+  node that runs the tools is named `tools`, so `interruptBefore = setOf("tools")` from level 6
   pauses the run before any tool runs. The README shows how to read the calls that wait and how to
   say no, under [Agents with tools](../README.md#agents-with-tools).
 
@@ -315,4 +315,4 @@ You can now:
 - write a tool and build an agent with `toolAgent`,
 - put the agent inside a graph of your own with `toolLoop`.
 
-[Back to level 7](07-save-points.md) · [All levels](README.md) · Next: [Level 9, game over screens](09-game-over-screens.md)
+[Back to level 6](06-save-points.md) · [All levels](README.md) · Next: [Level 8, game over screens](08-game-over-screens.md)

@@ -17,18 +17,18 @@ Every word and every move of the [tutorial](README.md) on one page.
 | Conditional edge | An arrow that picks the next node by looking at the state | [3](03-choices.md) |
 | Router | The function of a conditional edge. It returns the name of the next node, or `END`. | [3](03-choices.md) |
 | Step | One round of the engine: run the current nodes, then follow their arrows | [4](04-loops.md) |
-| Fan-out | Several ordinary arrows from one place. Their nodes run at the same time, in one step. | [5](05-parallel.md) |
-| `work` and `update` | The two parts of a node that can run next to others: `work` returns a result, `update` writes it into the state | [5](05-parallel.md) |
-| Reducer | A function that merges whole states. Only needed when two nodes that each return a whole state run at the same time. | [9](09-game-over-screens.md) |
-| Event | A message about a run in progress: a node started, a step finished, ... | [6](06-watching-a-run.md) |
-| Checkpoint | A save: the state, and which nodes come next | [7](07-save-points.md) |
-| Checkpointer | Where checkpoints are stored (memory, files, your own storage) | [7](07-save-points.md) |
-| Thread | One job with its own saves, named by a `threadId` | [7](07-save-points.md) |
-| Interrupt | A pause before or after a node, usually to wait for a human | [7](07-save-points.md) |
-| Human-in-the-loop | A workflow in which a person decides something before it continues | [7](07-save-points.md) |
-| Prompt | The text sent to an AI model | [8](08-the-agent.md) |
-| Tool | A function the model may ask your program to run: a name, a description and an input class | [8](08-the-agent.md) |
-| Agent | A model that decides by itself which tools to call, and how often, before it answers | [8](08-the-agent.md) |
+| Fan-out | Several ordinary arrows from one place. Their nodes run at the same time, in one step. | [5](05-two-things-at-once.md) |
+| `work` and `update` | The two parts of a node that can run next to others: `work` returns a result, `update` writes it into the state | [5](05-two-things-at-once.md) |
+| Reducer | A function that merges whole states. Only needed when two nodes that each return a whole state run at the same time. | [8](08-game-over-screens.md) |
+| Event | A message about a run in progress: a node started, a step finished, ... | [5](05-two-things-at-once.md) |
+| Checkpoint | A save: the state, and which nodes come next | [6](06-save-points.md) |
+| Checkpointer | Where checkpoints are stored (memory, files, your own storage) | [6](06-save-points.md) |
+| Thread | One job with its own saves, named by a `threadId` | [6](06-save-points.md) |
+| Interrupt | A pause before or after a node, usually to wait for a human | [6](06-save-points.md) |
+| Human-in-the-loop | A workflow in which a person decides something before it continues | [6](06-save-points.md) |
+| Prompt | The text sent to an AI model | [7](07-the-agent.md) |
+| Tool | A function the model may ask your program to run: a name, a description and an input class | [7](07-the-agent.md) |
+| Agent | A model that decides by itself which tools to call, and how often, before it answers | [7](07-the-agent.md) |
 
 ## Building a graph
 
@@ -107,7 +107,7 @@ Pauses need a checkpointer.
 
 ## An agent with tools
 
-From `langgraph-kt-agent`. [Level 8](08-the-agent.md) teaches it, and the README has the
+From `langgraph-kt-agent`. [Level 7](07-the-agent.md) teaches it, and the README has the
 short version under [Agents with tools](../README.md#agents-with-tools).
 
 ```kotlin
@@ -149,7 +149,7 @@ agent.invoke(state.withUserMessage("And two?"))  // the next turn of the convers
 
 ## Errors
 
-All are `LangGraphException`s. [Level 9](09-game-over-screens.md) explains each one.
+All are `LangGraphException`s. [Level 8](08-game-over-screens.md) explains each one.
 
 | Exception | Meaning |
 |---|---|

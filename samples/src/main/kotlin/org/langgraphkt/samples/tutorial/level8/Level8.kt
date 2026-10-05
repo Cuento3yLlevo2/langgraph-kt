@@ -1,140 +1,88 @@
 package org.langgraphkt.samples.tutorial.level8
 
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
 import org.langgraphkt.CompiledGraph
 import org.langgraphkt.END
+import org.langgraphkt.GraphConfig
+import org.langgraphkt.LangGraphException
+import org.langgraphkt.MemoryCheckpointer
+import org.langgraphkt.NodeExecutionException
 import org.langgraphkt.START
 import org.langgraphkt.StateGraph
-import org.langgraphkt.agent.AgentState
-import org.langgraphkt.agent.ChatMessage
-import org.langgraphkt.agent.ChatModel
-import org.langgraphkt.agent.ChatResponse
-import org.langgraphkt.agent.Description
-import org.langgraphkt.agent.Tool
-import org.langgraphkt.agent.ToolCall
-import org.langgraphkt.agent.chat
-import org.langgraphkt.agent.toolAgent
-import org.langgraphkt.agent.toolLoop
 
 data class Ticket(
     val customer: String,
     val message: String,
-    val conversation: List<ChatMessage> = emptyList(),
     val reply: String = "",
 )
 
-/** A node that asks an AI model. Any [ChatModel] works: the graph takes it as a parameter. */
-fun replyDesk(model: ChatModel): CompiledGraph<Ticket> =
+/** Mistake 1: an arrow points at "anwser", but the node is called "answer". */
+fun misspelledNode(): CompiledGraph<Ticket> =
     StateGraph<Ticket> {
-        val answer =
-            node(
-                "answer",
-                work = { ticket ->
-                    model.chat("Reply in one friendly sentence to ${ticket.customer}, who wrote: ${ticket.message}", system = HELP_DESK)
-                },
-            ) { ticket, reply -> ticket.copy(reply = reply) }
+        node("answer") { ticket -> ticket.copy(reply = "Hello!") }
+
+        edge(START, "anwser")
+    }.compile()
+
+/** Mistake 2: no arrow leads to "check", so it could never run. */
+fun forgottenArrow(): CompiledGraph<Ticket> =
+    StateGraph<Ticket> {
+        val answer = node("answer") { ticket -> ticket.copy(reply = "Hello!") }
+        node("check") { ticket -> ticket }
 
         START then answer then END
     }.compile()
 
-@Serializable
-data class OrderLookup(
-    @Description("The customer's name, for example \"Ana\"") val customer: String,
-)
-
-@Serializable
-data class MenuLookup(
-    @Description("The item, for example \"cola\"") val item: String,
-)
-
-val menu = mapOf("margherita" to 9, "salad" to 6, "cola" to 2)
-
-/** A tool: a name, a description that the model reads, and a function that returns text. */
-val orderStatus: Tool =
-    Tool<OrderLookup>("order_status", "Returns where a customer's order is right now.") { lookup ->
-        "The pizza for ${lookup.customer} left the oven and the driver is 5 minutes away."
-    }
-
-/** A tool that throws does not stop the run: the model gets the message of the exception as the result. */
-val menuPrice: Tool =
-    Tool<MenuLookup>("menu_price", "Returns the price of one item on the menu.") { lookup ->
-        val price = menu[lookup.item] ?: throw IllegalArgumentException("We do not sell ${lookup.item}.")
-        "One ${lookup.item} costs $price euros."
-    }
-
-const val HELP_DESK = "You work at the help desk of Pixel Pizza. Never guess where an order is or what something costs."
-
-/** Level 8 of the tutorial in `docs/`: a model that decides by itself which tools to call. */
-fun helpDesk(model: ChatModel): CompiledGraph<AgentState> = toolAgent(model, tools = listOf(orderStatus, menuPrice), system = HELP_DESK)
-
-/** The same agent as one part of a graph of your own, with the conversation in your own state. */
-fun ticketDesk(model: ChatModel): CompiledGraph<Ticket> =
+/** Mistake 3: "read" starts two nodes at once, but nothing says how to merge their results. */
+fun missingReducer(): CompiledGraph<Ticket> =
     StateGraph<Ticket> {
-        val send = node("send") { ticket -> ticket.copy(reply = "Hi ${ticket.customer}! ${ticket.conversation.last().text}") }
-        val agent =
-            toolLoop(
-                model = model,
-                tools = listOf(orderStatus, menuPrice),
-                messages = { ticket -> ticket.conversation },
-                append = { ticket, new -> ticket.copy(conversation = ticket.conversation + new) },
-                firstMessage = { ticket -> "I'm ${ticket.customer}. ${ticket.message}" },
-                system = HELP_DESK,
-                then = send,
-            )
+        val read = node("read") { ticket -> ticket }
+        val kitchen = node("kitchen") { ticket -> ticket }
+        val driver = node("driver") { ticket -> ticket }
 
-        START then agent
-        send then END
+        START then read
+        read then kitchen then END
+        read then driver then END
     }.compile()
 
-/**
- * Stands in for a real model, so the level runs without an account or an API key. It asks for a
- * tool it was given when the question has a word it knows, and answers with what the tools returned.
- */
-val pretendModel: ChatModel =
-    ChatModel { request ->
-        val results = request.messages.takeLastWhile { it is ChatMessage.ToolResult }
-        val question = request.messages.last { it is ChatMessage.User }.text
-        val customer = Regex("I'm (\\w+)").find(question)?.groupValues?.get(1) ?: "the customer"
-        val wanted =
-            buildList {
-                if ("where" in question.lowercase()) add(ToolCall("call-1", "order_status", buildJsonObject { put("customer", customer) }))
-                (menu.keys + "tiramisu").filter { it in question.lowercase() }.forEach { item ->
-                    add(ToolCall("call-$item", "menu_price", buildJsonObject { put("item", item) }))
-                }
-            }
-        val calls = wanted.filter { call -> request.tools.any { it.name == call.name } }
-        ChatResponse(
-            when {
-                results.isNotEmpty() -> ChatMessage.Assistant(results.joinToString(" ") { it.text })
-                calls.isNotEmpty() -> ChatMessage.Assistant(toolCalls = calls)
-                else -> ChatMessage.Assistant("Thanks for your message! We are looking into it.")
-            },
-        )
-    }
+/** Mistake 4: the loop has no way out. This one compiles; it fails when it runs. */
+fun endlessLoop(): CompiledGraph<Ticket> =
+    StateGraph<Ticket> {
+        val write = node("write") { ticket -> ticket.copy(reply = ticket.reply + "!") }
 
-fun describe(message: ChatMessage): String =
-    when (message) {
-        is ChatMessage.User -> "customer: ${message.text}"
-        is ChatMessage.Assistant ->
-            if (message.toolCalls.isEmpty()) {
-                "model: ${message.text}"
-            } else {
-                "model asks for: " + message.toolCalls.joinToString { call -> "${call.name} ${call.input}" }
-            }
-        is ChatMessage.ToolResult -> "${message.toolName}: ${message.text}"
-    }
+        START then write then write
+    }.compile()
 
+/** A help desk whose second node depends on something that can fail: a phone call to the kitchen. */
+fun helpDesk(callKitchen: suspend () -> String): CompiledGraph<Ticket> =
+    StateGraph<Ticket> {
+        val greet = node("greet") { ticket -> ticket.copy(reply = "Hi ${ticket.customer}!") }
+        val kitchen = node("kitchen") { ticket -> ticket.copy(reply = "${ticket.reply} ${callKitchen()}") }
+
+        START then greet then kitchen then END
+    }.compile()
+
+/** Level 8 of the tutorial in `docs/`: what the library says when something is wrong. */
 suspend fun main() {
-    val first = replyDesk(pretendModel).invoke(Ticket(customer = "Ana", message = "Where is my pizza?")).state
-    println(first.reply)
-    println()
+    val ticket = Ticket(customer = "Ana", message = "Where is my pizza?")
 
-    val state = helpDesk(pretendModel).invoke(AgentState("I'm Ana. Where is my pizza, and how much is a cola?")).state
-    state.messages.forEach { message -> println(describe(message)) }
-    println()
+    val mistakes: List<suspend () -> Unit> =
+        listOf({ misspelledNode() }, { forgottenArrow() }, { missingReducer() }, { endlessLoop().invoke(ticket) })
+    for (mistake in mistakes) {
+        try {
+            mistake()
+        } catch (e: LangGraphException) {
+            println("${e::class.simpleName}: ${e.message}")
+        }
+    }
 
-    val ticket = ticketDesk(pretendModel).invoke(Ticket(customer = "Ben", message = "Do you sell salad?")).state
-    println(ticket.reply)
+    // A node fails. The steps before it are saved, so resume() retries from there.
+    var calls = 0
+    val graph = helpDesk { if (++calls == 1) error("the kitchen phone is busy") else "Your pizza is in the oven." }
+    val config = GraphConfig(threadId = "ticket-42", checkpointer = MemoryCheckpointer<Ticket>())
+    try {
+        graph.invoke(ticket, config)
+    } catch (e: NodeExecutionException) {
+        println("${e::class.simpleName}: ${e.message}")
+    }
+    println("After a retry: ${graph.resume(config).state.reply}")
 }

@@ -1,9 +1,10 @@
-# Level 5: Doing two things at once
+# Level 5: Two things at once
 
 **Goal:** to answer "Where is my pizza?", the help desk asks the kitchen and the driver at the same
-time instead of one after the other.
+time instead of one after the other. And you watch it happen, instead of waiting for the result.
 
-**New moves:** fan-out (several arrows from one place), a node with a `work` and an `update`.
+**New moves:** fan-out (several arrows from one place), a node with a `work` and an `update`,
+`stream`, `GraphEvent`.
 
 ## The map
 
@@ -60,6 +61,8 @@ suspend fun main() {
 ```
 
 `delay(millis)` makes each lookup wait one second, the way a real call to another system would.
+The file's `main` goes on after these lines; [Watching it happen](#watching-it-happen) shows the
+rest.
 
 ## Run it
 
@@ -70,9 +73,20 @@ suspend fun main() {
 ```
 Hi Ana, your pizza left the oven and the driver is 5 minutes away.
 Two lookups of one second each took 1009 ms.
+
+step 1: kitchen started
+step 1: driver started
+step 1: kitchen finished
+step 1: driver finished
+step 1 done, facts so far: 2
+step 2: answer started
+step 2: answer finished
+step 2 done, facts so far: 2
+finished: Hi Ana, your pizza left the oven and the driver is 5 minutes away.
 ```
 
 The number of milliseconds varies a little. What matters is that it is about one second, not two.
+The lines that start with `step` are the second half of the level.
 
 ## What happened
 
@@ -110,17 +124,88 @@ Three things to know:
   more than once, so it must not send, save or pay anything.
 - **A node that returns the whole ticket still works here.** One of them can share a step with
   nodes like `kitchen`. Two of them cannot: `compile()` refuses that graph, and you will see its
-  message in level 9.
+  message in level 8.
 
 And `answer`? Two arrows lead to it, but they arrive in the same step, so it runs once, with the
 ticket that has both facts.
+
+## Watching it happen
+
+A run with real AI models can take many seconds. A person looking at an app wants to see "asking
+the kitchen...", not a frozen screen. The second half of `main` runs the same graph again and
+changes only how it is run:
+
+```kotlin
+fun describe(event: GraphEvent<Ticket>): String =
+    when (event) {
+        is GraphEvent.NodeStarted -> "step ${event.step}: ${event.node} started"
+        is GraphEvent.NodeProgress -> "step ${event.step}: ${event.node} reports ${event.value}"
+        is GraphEvent.NodeCompleted -> "step ${event.step}: ${event.node} finished"
+        is GraphEvent.StepCompleted -> "step ${event.step} done, facts so far: ${event.state.facts.size}"
+        is GraphEvent.Completed -> "finished: ${event.state.reply}"
+        is GraphEvent.Interrupted -> "paused before ${event.nextNodes}"
+    }
+
+helpDesk().stream(Ticket(customer = "Ana", message = "Where is my pizza?")).collect { event ->
+    println(describe(event))
+}
+```
+
+`invoke` plays the whole run and tells you the result. `stream` plays the same run and tells you
+about everything on the way. It returns a Kotlin `Flow`, which is a sequence of values that arrive
+over time. `collect { ... }` runs your code for each one, so the lines appear one by one as things
+happen.
+
+The values are **events**. There are six kinds:
+
+| Event | When | What it carries |
+|---|---|---|
+| `NodeStarted` | A node is about to run | `step`, `node`, the state the node receives |
+| `NodeProgress` | A running node has something to show | `step`, `node`, the `value` the node reported |
+| `NodeCompleted` | A node finished | `step`, `node`, the state the node returned |
+| `StepCompleted` | All nodes of a step finished | `step`, `nodes`, the state after the step, with the results of all its nodes |
+| `Completed` | The run reached `END` | The final state. Always the last event. |
+| `Interrupted` | The run paused | The state and the nodes that are next. Level 6 explains pausing. |
+
+Every stream ends with exactly one `Completed` or `Interrupted`.
+
+In the output you can see the fan-out at work: both lookups start before either finishes, and they
+share step 1. `kitchen finished` and `driver finished` may swap places, because the two nodes
+finish at almost the same moment.
+
+Because `when` covers all six kinds, the Kotlin compiler would complain if you forgot one. That is
+why `describe` handles `Interrupted` and `NodeProgress` even though this graph never pauses and its
+nodes report nothing.
+
+Three more things to know:
+
+- **A node can report progress itself.** It calls `reportProgress(value)` while it works, and the
+  value arrives in the stream as a `NodeProgress` before the node finishes. This is how an AI
+  model's answer appears word by word in level 7. With `invoke`, nobody watches, and
+  `reportProgress` does nothing.
+
+  ```kotlin
+  val kitchen = node("kitchen", work = { ticket ->
+      reportProgress("calling the kitchen")
+      kitchenPhone.ask(ticket.customer)
+  }) { ticket, fact -> ticket.copy(facts = ticket.facts + fact) }
+  ```
+
+- **`states()` gives only the state.** Often a screen just wants to show the newest state.
+  `helpDesk().stream(ticket).states()` turns the events into the state after each step. It needs
+  `import org.langgraphkt.states`.
+- **Nothing runs until you collect.** Calling `stream(...)` does not start anything. The run starts
+  when you `collect`, and collecting twice runs the graph twice.
 
 ## Your turn
 
 1. Add a third lookup, `weather`, that adds the fact "it is raining". Connect it like the other
    two. The reply now has three facts, and the time is still about one second.
 2. Make `driver` wait three times as long (`askDriver(lookupMillis * 3)`). How long does the run
-   take now? A step is finished when its slowest node is finished.
+   take now? A step is finished when its slowest node is finished. Look at the order of the
+   `finished` lines, too.
+3. Change the second half of `main` to use `states()` and print the ticket's facts after every
+   step. You should see two lines.
 
 ## Level complete
 
@@ -128,6 +213,7 @@ You can now:
 
 - run nodes at the same time by drawing several arrows from one place,
 - write a node as a `work` and an `update`, so that it can run next to other nodes,
-- say in which order the results of parallel nodes are written into the state.
+- say in which order the results of parallel nodes are written into the state,
+- follow a run live with `stream` and name the six events.
 
-[Back to level 4](04-loops.md) · [All levels](README.md) · Next: [Level 6, watching a run](06-watching-a-run.md)
+[Back to level 4](04-loops.md) · [All levels](README.md) · Next: [Level 6, save points](06-save-points.md)

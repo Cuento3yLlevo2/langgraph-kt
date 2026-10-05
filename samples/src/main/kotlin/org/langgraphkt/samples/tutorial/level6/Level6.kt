@@ -1,23 +1,56 @@
 package org.langgraphkt.samples.tutorial.level6
 
-import org.langgraphkt.GraphEvent
-import org.langgraphkt.samples.tutorial.level5.Ticket
-import org.langgraphkt.samples.tutorial.level5.helpDesk
+import org.langgraphkt.CompiledGraph
+import org.langgraphkt.END
+import org.langgraphkt.GraphConfig
+import org.langgraphkt.GraphResult
+import org.langgraphkt.MemoryCheckpointer
+import org.langgraphkt.START
+import org.langgraphkt.StateGraph
 
-/** Turns an event of a run into a line of text. */
-fun describe(event: GraphEvent<Ticket>): String =
-    when (event) {
-        is GraphEvent.NodeStarted -> "step ${event.step}: ${event.node} started"
-        is GraphEvent.NodeProgress -> "step ${event.step}: ${event.node} reports ${event.value}"
-        is GraphEvent.NodeCompleted -> "step ${event.step}: ${event.node} finished"
-        is GraphEvent.StepCompleted -> "step ${event.step} done, facts so far: ${event.state.facts.size}"
-        is GraphEvent.Completed -> "finished: ${event.state.reply}"
-        is GraphEvent.Interrupted -> "paused before ${event.nextNodes}"
-    }
+data class Ticket(
+    val customer: String,
+    val message: String,
+    val refund: Int = 0,
+    val approved: Boolean = false,
+    val reply: String = "",
+)
 
-/** Level 6 of the tutorial in `docs/`: watch the graph of level 5 while it runs. */
+const val PAY = "pay"
+
+/** Level 6 of the tutorial in `docs/`: the run stops before money moves and waits for a human. */
+fun helpDesk(): CompiledGraph<Ticket> =
+    StateGraph<Ticket> {
+        val prepare = node("prepare") { ticket -> ticket.copy(refund = 12) }
+        val pay =
+            node(PAY) { ticket ->
+                if (ticket.approved) {
+                    ticket.copy(reply = "Sorry ${ticket.customer}! We sent you ${ticket.refund} euros.")
+                } else {
+                    ticket.copy(reply = "Sorry ${ticket.customer}, we cannot refund this order.")
+                }
+            }
+
+        START then prepare then pay then END
+    }.compile()
+
 suspend fun main() {
-    helpDesk().stream(Ticket(customer = "Ana", message = "Where is my pizza?")).collect { event ->
-        println(describe(event))
+    val graph = helpDesk()
+    val config =
+        GraphConfig(
+            threadId = "ticket-42",
+            checkpointer = MemoryCheckpointer<Ticket>(),
+            interruptBefore = setOf(PAY),
+        )
+
+    when (val paused = graph.invoke(Ticket(customer = "Ana", message = "My pizza arrived cold. I want a refund."), config)) {
+        is GraphResult.Interrupted -> println("Paused before ${paused.nextNodes}. Refund: ${paused.state.refund} euros.")
+        is GraphResult.Completed -> error("Expected the run to pause before paying")
     }
+
+    print("Approve the refund? [y/N] ")
+    val approved = readlnOrNull()?.trim().equals("y", ignoreCase = true)
+
+    val finished = graph.resume(config) { ticket -> ticket.copy(approved = approved) }
+    println(finished.state.reply)
 }

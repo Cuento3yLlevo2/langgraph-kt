@@ -26,7 +26,7 @@ The first run downloads Gradle and Kotlin and takes a few minutes. When it print
 `Hi Ana, thanks for writing to Pixel Pizza!`, you are ready.
 
 You do not need an AI account or an API key. The "AI" in this tutorial is ordinary Kotlin code that
-pretends, so that you can concentrate on how a workflow is built. Level 8 shows where a real model
+pretends, so that you can concentrate on how a workflow is built. Level 7 shows where a real model
 plugs in.
 
 ## The levels
@@ -38,12 +38,11 @@ plugs in.
 | [2. A line of nodes](02-a-line-of-nodes.md) | Pass work from one node to the next | `copy`, several nodes |
 | [3. Choices](03-choices.md) | Take a different path depending on the state | `conditionalEdge`, `targets` |
 | [4. Loops](04-loops.md) | Repeat a step until the result is good | an edge that goes back, `maxIterations` |
-| [5. Doing two things at once](05-parallel.md) | Run nodes at the same time | fan-out, `work` and `update` |
-| [6. Watching a run](06-watching-a-run.md) | See what the graph is doing while it runs | `stream`, `GraphEvent`, `states` |
-| [7. Save points](07-save-points.md) | Pause for a human and continue later | `GraphConfig`, checkpointer, `resume`, `lastResult` |
-| [8. The agent](08-the-agent.md) | Let a model write the reply, and decide which of your functions to call | `ChatModel`, `Tool`, `toolAgent`, `toolLoop` |
-| [9. Game over screens](09-game-over-screens.md) | Understand and recover from errors | exceptions, retry with `resume` |
-| [10. Your own workflow](10-your-own-workflow.md) | Combine every move and design a graph for your own problem | the complete help desk, a recipe, testing |
+| [5. Two things at once](05-two-things-at-once.md) | Run nodes at the same time, and watch a run while it happens | fan-out, `work` and `update`, `stream`, `GraphEvent` |
+| [6. Save points](06-save-points.md) | Pause for a human and continue later | `GraphConfig`, checkpointer, `resume`, `lastResult` |
+| [7. The agent](07-the-agent.md) | Let a model write the reply, and decide which of your functions to call | `ChatModel`, `Tool`, `toolAgent`, `toolLoop` |
+| [8. Game over screens](08-game-over-screens.md) | Understand and recover from errors | exceptions, retry with `resume` |
+| [9. Your own workflow](09-your-own-workflow.md) | Combine every move and design a graph for your own problem | the complete help desk, a recipe, testing |
 
 Take them in order; each one takes 5 to 10 minutes. The [cheat sheet](cheat-sheet.md) has every
 word and every move on one page.
