@@ -1,49 +1,50 @@
 package org.langgraphkt.samples.tutorial.level3
 
 import org.langgraphkt.CompiledGraph
-import org.langgraphkt.END
+import org.langgraphkt.NodeRef
 import org.langgraphkt.START
 import org.langgraphkt.StateGraph
 
 data class Ticket(
     val customer: String,
     val message: String,
-    val topic: String = "",
     val reply: String = "",
+    val attempts: Int = 0,
+    val problem: String = "",
 )
 
-fun topicOf(message: String): String =
-    when {
-        "refund" in message.lowercase() -> "refund"
-        "where" in message.lowercase() -> "delivery"
-        else -> "other"
+const val MAX_ATTEMPTS = 5
+
+/** Pretends to be an AI writer whose reply gets better with every attempt. */
+fun writeReply(ticket: Ticket): String =
+    when (ticket.attempts) {
+        0 -> "Your pizza is late."
+        1 -> "Sorry, your pizza is late."
+        else -> "Sorry ${ticket.customer}, your pizza is late. It arrives in 10 minutes."
     }
 
-/** Level 3 of the tutorial in `docs/`: a conditional edge picks one of three paths. */
+/** Returns what is wrong with the reply, or an empty string when it is good enough to send. */
+fun problemWith(ticket: Ticket): String =
+    when {
+        "sorry" !in ticket.reply.lowercase() -> "say sorry"
+        ticket.customer !in ticket.reply -> "use the customer's name"
+        else -> ""
+    }
+
+/** Level 3 of the tutorial in `docs/`: an edge that goes back, so the reply is rewritten until it passes. */
 fun helpDesk(): CompiledGraph<Ticket> =
     StateGraph<Ticket> {
-        val read = node("read") { ticket -> ticket.copy(topic = topicOf(ticket.message)) }
-        val track = node("track") { ticket -> ticket.copy(reply = "Your pizza left the oven and is on its way.") }
-        val refund = node("refund") { ticket -> ticket.copy(reply = "We are sorry. Your money is on its way back.") }
-        val answer = node("answer") { ticket -> ticket.copy(reply = "Thanks for your message. A human will reply soon.") }
+        val write = node("write") { ticket -> ticket.copy(reply = writeReply(ticket), attempts = ticket.attempts + 1) }
+        val check = node("check") { ticket -> ticket.copy(problem = problemWith(ticket)) }
 
-        START then read
-        conditionalEdge(read, targets = setOf(track, refund, answer)) { ticket ->
-            when (ticket.topic) {
-                "delivery" -> track
-                "refund" -> refund
-                else -> answer
-            }
+        START then write then check
+        conditionalEdge(check, targets = setOf(write, NodeRef.END)) { ticket ->
+            if (ticket.problem.isEmpty() || ticket.attempts >= MAX_ATTEMPTS) NodeRef.END else write
         }
-        track then END
-        refund then END
-        answer then END
     }.compile()
 
 suspend fun main() {
-    val graph = helpDesk()
-    for (message in listOf("Where is my pizza?", "I want a refund", "Do you sell salad?")) {
-        val result = graph.invoke(Ticket(customer = "Ana", message = message))
-        println("$message -> ${result.state.reply}")
-    }
+    val result = helpDesk().invoke(Ticket(customer = "Ana", message = "My pizza is late!"))
+    println("attempts: ${result.state.attempts}")
+    println("reply: ${result.state.reply}")
 }

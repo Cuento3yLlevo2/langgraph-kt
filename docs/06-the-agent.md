@@ -1,4 +1,4 @@
-# Level 7: The agent
+# Level 6: The agent
 
 **Goal:** an AI model writes the reply, and looks up the order and the price by itself first.
 
@@ -22,7 +22,7 @@ flowchart LR
 
 The model is not on the map. It is outside, and the `answer` node talks to it.
 
-[`level7/Level7.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level7/Level7.kt)
+[`level6/Level6.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level6/Level6.kt)
 
 ```kotlin
 fun replyDesk(model: ChatModel): CompiledGraph<Ticket> =
@@ -44,7 +44,7 @@ fun replyDesk(model: ChatModel): CompiledGraph<Ticket> =
 *prompt*. `system` is a second text with standing instructions, here who the model works for.
 
 The call is slow, so it is the `work` of the node, and the block after it writes the reply into the
-ticket (level 5).
+ticket (level 4).
 
 The graph takes the model as a parameter instead of creating it. This level passes a
 `pretendModel`, ordinary Kotlin code that answers at once, so it runs anywhere and costs nothing.
@@ -54,7 +54,7 @@ Your tests should do the same. Asked "Where is my pizza?", it replies:
 Thanks for your message! We are looking into it.
 ```
 
-That is friendly and useless. The model knows nothing about Ana's order. In level 5 the help desk
+That is friendly and useless. The model knows nothing about Ana's order. In level 4 the help desk
 did know, because *you* decided that every ticket needs a call to the kitchen and a call to the
 driver. Tools let the model make that decision.
 
@@ -68,7 +68,7 @@ flowchart LR
     model -.has its answer.-> E([END])
 ```
 
-You know both moves on this map: a choice (level 3) and an arrow that goes back (level 4). You do
+You know both moves on this map: a choice (level 2) and an arrow that goes back (level 3). You do
 not have to draw it. The library has this graph ready-made.
 
 ## The code
@@ -113,7 +113,7 @@ and answers with what the tools returned, and `describe`, which turns one messag
 ## Run it
 
 ```bash
-./gradlew :samples:runLevel7
+./gradlew :samples:runLevel6
 ```
 
 ```
@@ -158,7 +158,7 @@ Read the conversation in the output again, line by line:
 
 1. The `model` node sends the question to the model, with the list of tools. The model does not
    answer yet. It asks for two tools in one go.
-2. The `tools` node runs both functions, at the same time, as in level 5. Their results are added
+2. The `tools` node runs both functions, at the same time, as in level 4. Their results are added
    to the conversation.
 3. The `model` node sends the conversation again, now with the results. This time the model writes
    its answer and asks for nothing, so the run goes to `END`.
@@ -251,7 +251,7 @@ Hi Ben! One salad costs 6 euros.
 ### Watching the answer arrive
 
 A real model writes its answer word by word, and a person would rather read along than wait. Run
-the agent with `stream` from level 5, and each event that carries a piece of the answer has it in
+the agent with `stream` from level 4, and each event that carries a piece of the answer has it in
 `textDelta`:
 
 ```kotlin
@@ -285,14 +285,14 @@ is not. The README has more under [AI models](../README.md#ai-models).
 
 ### What changes when the model is real
 
-- **It is slow.** A call takes seconds. Level 5 lets you show progress and make several calls at
+- **It is slow.** A call takes seconds. Level 4 lets you show progress and make several calls at
   once.
-- **It is not always right.** That is what the loop of level 4 is for, and the pause of level 6.
+- **It is not always right.** That is what the loop of level 3 is for, and the pause of level 5.
 - **It can fail.** The network drops, the provider is busy. That is the next level.
 - **It costs money.** Every call does. Asking for tools and getting the results is one round of the
   agent, and it takes two steps, so the default `maxIterations` of 25 allows twelve rounds.
 - **Its tools act for you.** Ask a person before a tool does something that cannot be undone. The
-  node that runs the tools is named `tools`, so `interruptBefore = setOf("tools")` from level 6
+  node that runs the tools is named `tools`, so `interruptBefore = setOf("tools")` from level 5
   pauses the run before any tool runs. The README shows how to read the calls that wait and how to
   say no, under [Agents with tools](../README.md#agents-with-tools).
 
@@ -315,4 +315,4 @@ You can now:
 - write a tool and build an agent with `toolAgent`,
 - put the agent inside a graph of your own with `toolLoop`.
 
-[Back to level 6](06-save-points.md) · [All levels](README.md) · Next: [Level 8, game over screens](08-game-over-screens.md)
+[Back to level 5](05-save-points.md) · [All levels](README.md) · Next: [Level 7, game over screens](07-game-over-screens.md)

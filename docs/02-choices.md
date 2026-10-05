@@ -1,4 +1,4 @@
-# Level 3: Choices
+# Level 2: Choices
 
 **Goal:** the help desk handles a delivery question, a refund request and everything else in three
 different ways.
@@ -22,8 +22,8 @@ After `read` the path splits. Only one of the three dotted arrows is taken in a 
 
 ## The code
 
-[`level3/Level3.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level3/Level3.kt)
-(`Ticket` and `topicOf` are the same as in level 2)
+[`level2/Level2.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level2/Level2.kt)
+(`Ticket` and `topicOf` are the same as in level 1)
 
 ```kotlin
 fun helpDesk(): CompiledGraph<Ticket> =
@@ -58,7 +58,7 @@ suspend fun main() {
 ## Run it
 
 ```bash
-./gradlew :samples:runLevel3
+./gradlew :samples:runLevel2
 ```
 
 ```
@@ -82,7 +82,7 @@ conditionalEdge(read, targets = setOf(track, refund, answer)) { ticket -> ... }
 - **The function** runs after `read` has finished. It receives the state and returns the node to
   run next: one of the handles that `node(...)` gave you. This function is often called a *router*.
   Because it returns a handle and not a text, the compiler catches a misspelled node. To finish the
-  run, a router returns `NodeRef.END` (level 4 does that).
+  run, a router returns `NodeRef.END` (level 3 does that).
 - **`targets`** lists every node the router may return. With it, `compile()` checks that every node
   can be reached, and during a run the library stops with a clear error if the router returns
   something that is not on the list.
@@ -109,4 +109,4 @@ You can now:
 - say what a router is and why it returns a name,
 - explain what `targets` protects you from.
 
-[Back to level 2](02-a-line-of-nodes.md) · [All levels](README.md) · Next: [Level 4, loops](04-loops.md)
+[Back to level 1](01-a-line-of-nodes.md) · [All levels](README.md) · Next: [Level 3, loops](03-loops.md)

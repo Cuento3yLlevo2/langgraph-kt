@@ -1,6 +1,7 @@
-# Level 0: The idea
+# The idea
 
-No code to run in this level. You learn the four words everything else is built from.
+Read this before level 1. There is no code to run on this page. You learn the four words everything
+else is built from.
 
 ## The problem
 
@@ -86,12 +87,12 @@ Running a graph is like playing a turn-based game. The library's engine plays it
 
 Each round of "run the nodes, follow the arrows" is called a **step**.
 
-That is the whole idea. The rest of the tutorial adds one ability per level: choosing a path, going
-round in a loop, running nodes at the same time, watching the run, and pausing it.
+That is the whole idea. The tutorial adds one ability per level: choosing a path, going round in a
+loop, running nodes at the same time, pausing a run, and letting an AI model call your functions.
 
-## Level complete
+## The four words
 
-You know the four words:
+You now know them:
 
 | Word | Meaning | In the game |
 |---|---|---|
@@ -100,4 +101,4 @@ You know the four words:
 | Edge | What runs after a node | A path between two places |
 | Graph | All nodes and edges together | The map |
 
-[All levels](README.md) · Next: [Level 1, your first graph](01-first-graph.md)
+[All levels](README.md) · Next: [Level 1, a line of nodes](01-a-line-of-nodes.md)

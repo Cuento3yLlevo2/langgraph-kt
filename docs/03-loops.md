@@ -1,4 +1,4 @@
-# Level 4: Loops
+# Level 3: Loops
 
 **Goal:** the help desk checks its own reply and rewrites it until it is good enough to send.
 
@@ -18,7 +18,7 @@ flowchart LR
 
 ## The code
 
-[`level4/Level4.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level4/Level4.kt)
+[`level3/Level3.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level3/Level3.kt)
 
 ```kotlin
 data class Ticket(
@@ -68,7 +68,7 @@ suspend fun main() {
 ## Run it
 
 ```bash
-./gradlew :samples:runLevel4
+./gradlew :samples:runLevel3
 ```
 
 ```
@@ -128,4 +128,4 @@ You can now:
 - keep the loop's memory in the state,
 - protect a loop with your own limit and know about the library's.
 
-[Back to level 3](03-choices.md) · [All levels](README.md) · Next: [Level 5, two things at once](05-two-things-at-once.md)
+[Back to level 2](02-choices.md) · [All levels](README.md) · Next: [Level 4, two things at once](04-two-things-at-once.md)

@@ -6,29 +6,29 @@ Every word and every move of the [tutorial](README.md) on one page.
 
 | Word | Meaning | Level |
 |---|---|---|
-| Workflow | A job done in several pieces of work, in an order that can depend on the results | [0](00-the-idea.md) |
-| Graph | The map of a workflow: its nodes and edges | [0](00-the-idea.md) |
-| State | The data of one job, a `data class` you design. It is passed from node to node. | [0](00-the-idea.md) |
-| Node | A named function that receives the state and returns an updated copy | [1](01-first-graph.md) |
-| Edge | An arrow that says what runs after a node | [1](01-first-graph.md) |
-| `START`, `END` | Where every run begins and finishes. They are not nodes you write. | [1](01-first-graph.md) |
-| Compile | Check the map and turn it into a graph you can run | [1](01-first-graph.md) |
-| Run | One trip through the graph, from `START` until `END` or a pause | [1](01-first-graph.md) |
-| Conditional edge | An arrow that picks the next node by looking at the state | [3](03-choices.md) |
-| Router | The function of a conditional edge. It returns the name of the next node, or `END`. | [3](03-choices.md) |
-| Step | One round of the engine: run the current nodes, then follow their arrows | [4](04-loops.md) |
-| Fan-out | Several ordinary arrows from one place. Their nodes run at the same time, in one step. | [5](05-two-things-at-once.md) |
-| `work` and `update` | The two parts of a node that can run next to others: `work` returns a result, `update` writes it into the state | [5](05-two-things-at-once.md) |
-| Reducer | A function that merges whole states. Only needed when two nodes that each return a whole state run at the same time. | [8](08-game-over-screens.md) |
-| Event | A message about a run in progress: a node started, a step finished, ... | [5](05-two-things-at-once.md) |
-| Checkpoint | A save: the state, and which nodes come next | [6](06-save-points.md) |
-| Checkpointer | Where checkpoints are stored (memory, files, your own storage) | [6](06-save-points.md) |
-| Thread | One job with its own saves, named by a `threadId` | [6](06-save-points.md) |
-| Interrupt | A pause before or after a node, usually to wait for a human | [6](06-save-points.md) |
-| Human-in-the-loop | A workflow in which a person decides something before it continues | [6](06-save-points.md) |
-| Prompt | The text sent to an AI model | [7](07-the-agent.md) |
-| Tool | A function the model may ask your program to run: a name, a description and an input class | [7](07-the-agent.md) |
-| Agent | A model that decides by itself which tools to call, and how often, before it answers | [7](07-the-agent.md) |
+| Workflow | A job done in several pieces of work, in an order that can depend on the results | [The idea](00-the-idea.md) |
+| Graph | The map of a workflow: its nodes and edges | [The idea](00-the-idea.md) |
+| State | The data of one job, a `data class` you design. It is passed from node to node. | [The idea](00-the-idea.md) |
+| Node | A named function that receives the state and returns an updated copy | [1](01-a-line-of-nodes.md) |
+| Edge | An arrow that says what runs after a node | [1](01-a-line-of-nodes.md) |
+| `START`, `END` | Where every run begins and finishes. They are not nodes you write. | [1](01-a-line-of-nodes.md) |
+| Compile | Check the map and turn it into a graph you can run | [1](01-a-line-of-nodes.md) |
+| Run | One trip through the graph, from `START` until `END` or a pause | [1](01-a-line-of-nodes.md) |
+| Conditional edge | An arrow that picks the next node by looking at the state | [2](02-choices.md) |
+| Router | The function of a conditional edge. It returns the name of the next node, or `END`. | [2](02-choices.md) |
+| Step | One round of the engine: run the current nodes, then follow their arrows | [3](03-loops.md) |
+| Fan-out | Several ordinary arrows from one place. Their nodes run at the same time, in one step. | [4](04-two-things-at-once.md) |
+| `work` and `update` | The two parts of a node that can run next to others: `work` returns a result, `update` writes it into the state | [4](04-two-things-at-once.md) |
+| Reducer | A function that merges whole states. Only needed when two nodes that each return a whole state run at the same time. | [7](07-game-over-screens.md) |
+| Event | A message about a run in progress: a node started, a step finished, ... | [4](04-two-things-at-once.md) |
+| Checkpoint | A save: the state, and which nodes come next | [5](05-save-points.md) |
+| Checkpointer | Where checkpoints are stored (memory, files, your own storage) | [5](05-save-points.md) |
+| Thread | One job with its own saves, named by a `threadId` | [5](05-save-points.md) |
+| Interrupt | A pause before or after a node, usually to wait for a human | [5](05-save-points.md) |
+| Human-in-the-loop | A workflow in which a person decides something before it continues | [5](05-save-points.md) |
+| Prompt | The text sent to an AI model | [6](06-the-agent.md) |
+| Tool | A function the model may ask your program to run: a name, a description and an input class | [6](06-the-agent.md) |
+| Agent | A model that decides by itself which tools to call, and how often, before it answers | [6](06-the-agent.md) |
 
 ## Building a graph
 
@@ -107,7 +107,7 @@ Pauses need a checkpointer.
 
 ## An agent with tools
 
-From `langgraph-kt-agent`. [Level 7](07-the-agent.md) teaches it, and the README has the
+From `langgraph-kt-agent`. [Level 6](06-the-agent.md) teaches it, and the README has the
 short version under [Agents with tools](../README.md#agents-with-tools).
 
 ```kotlin
@@ -149,7 +149,7 @@ agent.invoke(state.withUserMessage("And two?"))  // the next turn of the convers
 
 ## Errors
 
-All are `LangGraphException`s. [Level 8](08-game-over-screens.md) explains each one.
+All are `LangGraphException`s. [Level 7](07-game-over-screens.md) explains each one.
 
 | Exception | Meaning |
 |---|---|

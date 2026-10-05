@@ -1,4 +1,4 @@
-# Level 5: Two things at once
+# Level 4: Two things at once
 
 **Goal:** to answer "Where is my pizza?", the help desk asks the kitchen and the driver at the same
 time instead of one after the other. And you watch it happen, instead of waiting for the result.
@@ -19,7 +19,7 @@ Two arrows leave `START`. Both are ordinary arrows, so both are followed.
 
 ## The code
 
-[`level5/Level5.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level5/Level5.kt)
+[`level4/Level4.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level4/Level4.kt)
 
 ```kotlin
 data class Ticket(
@@ -67,7 +67,7 @@ rest.
 ## Run it
 
 ```bash
-./gradlew :samples:runLevel5
+./gradlew :samples:runLevel4
 ```
 
 ```
@@ -124,7 +124,7 @@ Three things to know:
   more than once, so it must not send, save or pay anything.
 - **A node that returns the whole ticket still works here.** One of them can share a step with
   nodes like `kitchen`. Two of them cannot: `compile()` refuses that graph, and you will see its
-  message in level 8.
+  message in level 7.
 
 And `answer`? Two arrows lead to it, but they arrive in the same step, so it runs once, with the
 ticket that has both facts.
@@ -165,7 +165,7 @@ The values are **events**. There are six kinds:
 | `NodeCompleted` | A node finished | `step`, `node`, the state the node returned |
 | `StepCompleted` | All nodes of a step finished | `step`, `nodes`, the state after the step, with the results of all its nodes |
 | `Completed` | The run reached `END` | The final state. Always the last event. |
-| `Interrupted` | The run paused | The state and the nodes that are next. Level 6 explains pausing. |
+| `Interrupted` | The run paused | The state and the nodes that are next. Level 5 explains pausing. |
 
 Every stream ends with exactly one `Completed` or `Interrupted`.
 
@@ -181,7 +181,7 @@ Three more things to know:
 
 - **A node can report progress itself.** It calls `reportProgress(value)` while it works, and the
   value arrives in the stream as a `NodeProgress` before the node finishes. This is how an AI
-  model's answer appears word by word in level 7. With `invoke`, nobody watches, and
+  model's answer appears word by word in level 6. With `invoke`, nobody watches, and
   `reportProgress` does nothing.
 
   ```kotlin
@@ -216,4 +216,4 @@ You can now:
 - say in which order the results of parallel nodes are written into the state,
 - follow a run live with `stream` and name the six events.
 
-[Back to level 4](04-loops.md) · [All levels](README.md) · Next: [Level 6, save points](06-save-points.md)
+[Back to level 3](03-loops.md) · [All levels](README.md) · Next: [Level 5, save points](05-save-points.md)

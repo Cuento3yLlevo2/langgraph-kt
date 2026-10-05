@@ -1,15 +1,15 @@
 # The langgraph-kt tutorial
 
-This guide teaches langgraph-kt the way a game teaches you to play: one new move per level, a
-small task to try it out, and nothing you have not been shown yet. You do not need to know
-LangGraph, AI agents or graphs. You need to be able to read a little Kotlin.
+This guide teaches langgraph-kt the way a game teaches you to play: eight levels, each with a new
+move and a small task to try it out, and nothing you have not been shown yet. You do not need to
+know LangGraph, AI agents or graphs. You need to be able to read a little Kotlin.
 
 Every level builds the same thing a bit further: the help desk of a pizza shop called Pixel Pizza,
 which reads a customer's message and writes a reply.
 
 Want to see where this leads first? The same help desk is a
-[game you can play in your browser](https://cuento3yllevo2.github.io/langgraph-kt-demo/), with one
-stage for each move of the tutorial.
+[game you can play in your browser](https://cuento3yllevo2.github.io/langgraph-kt-demo/). Its eight
+stages are the eight levels: stage 3 is level 3.
 
 ## What you need
 
@@ -26,25 +26,24 @@ The first run downloads Gradle and Kotlin and takes a few minutes. When it print
 `Hi Ana, thanks for writing to Pixel Pizza!`, you are ready.
 
 You do not need an AI account or an API key. The "AI" in this tutorial is ordinary Kotlin code that
-pretends, so that you can concentrate on how a workflow is built. Level 7 shows where a real model
+pretends, so that you can concentrate on how a workflow is built. Level 6 shows where a real model
 plugs in.
 
 ## The levels
 
 | Level | You learn to | New moves |
 |---|---|---|
-| [0. The idea](00-the-idea.md) | Read the map | state, node, edge, graph |
-| [1. Your first graph](01-first-graph.md) | Build and run a graph with one node | `StateGraph`, `node`, `then`, `compile`, `invoke` |
-| [2. A line of nodes](02-a-line-of-nodes.md) | Pass work from one node to the next | `copy`, several nodes |
-| [3. Choices](03-choices.md) | Take a different path depending on the state | `conditionalEdge`, `targets` |
-| [4. Loops](04-loops.md) | Repeat a step until the result is good | an edge that goes back, `maxIterations` |
-| [5. Two things at once](05-two-things-at-once.md) | Run nodes at the same time, and watch a run while it happens | fan-out, `work` and `update`, `stream`, `GraphEvent` |
-| [6. Save points](06-save-points.md) | Pause for a human and continue later | `GraphConfig`, checkpointer, `resume`, `lastResult` |
-| [7. The agent](07-the-agent.md) | Let a model write the reply, and decide which of your functions to call | `ChatModel`, `Tool`, `toolAgent`, `toolLoop` |
-| [8. Game over screens](08-game-over-screens.md) | Understand and recover from errors | exceptions, retry with `resume` |
-| [9. Your own workflow](09-your-own-workflow.md) | Combine every move and design a graph for your own problem | the complete help desk, a recipe, testing |
+| [The idea](00-the-idea.md) | Read the map. A short page to read first. | state, node, edge, graph |
+| [1. A line of nodes](01-a-line-of-nodes.md) | Build and run a graph, and pass work from one node to the next | `StateGraph`, `node`, `then`, `compile`, `invoke` |
+| [2. Choices](02-choices.md) | Take a different path depending on the state | `conditionalEdge`, `targets` |
+| [3. Loops](03-loops.md) | Repeat a step until the result is good | an edge that goes back, `maxIterations` |
+| [4. Two things at once](04-two-things-at-once.md) | Run nodes at the same time, and watch a run while it happens | fan-out, `work` and `update`, `stream`, `GraphEvent` |
+| [5. Save points](05-save-points.md) | Pause for a human and continue later | `GraphConfig`, checkpointer, `resume`, `lastResult` |
+| [6. The agent](06-the-agent.md) | Let a model write the reply, and decide which of your functions to call | `ChatModel`, `Tool`, `toolAgent`, `toolLoop` |
+| [7. Game over screens](07-game-over-screens.md) | Understand and recover from errors | exceptions, retry with `resume` |
+| [8. Your own workflow](08-your-own-workflow.md) | Combine every move and design a graph for your own problem | the complete help desk, a recipe, testing |
 
-Take them in order; each one takes 5 to 10 minutes. The [cheat sheet](cheat-sheet.md) has every
+Take them in order; each one takes about 10 minutes. The [cheat sheet](cheat-sheet.md) has every
 word and every move on one page.
 
 ## How a level works
@@ -61,4 +60,4 @@ Each level has the same parts:
   skip it. Edit the level's file and run the command again.
 - **Level complete**: what you can do now.
 
-Start with [level 0](00-the-idea.md).
+Start with [the idea](00-the-idea.md).

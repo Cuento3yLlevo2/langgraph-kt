@@ -1,50 +1,64 @@
 package org.langgraphkt.samples.tutorial.level4
 
+import kotlinx.coroutines.delay
 import org.langgraphkt.CompiledGraph
-import org.langgraphkt.NodeRef
+import org.langgraphkt.END
+import org.langgraphkt.GraphEvent
 import org.langgraphkt.START
 import org.langgraphkt.StateGraph
+import kotlin.time.measureTimedValue
 
 data class Ticket(
     val customer: String,
     val message: String,
+    val facts: List<String> = emptyList(),
     val reply: String = "",
-    val attempts: Int = 0,
-    val problem: String = "",
 )
 
-const val MAX_ATTEMPTS = 5
+/** A slow call to the kitchen. `delay` stands in for the time a real call to another system takes. */
+suspend fun askKitchen(millis: Long): String {
+    delay(millis)
+    return "your pizza left the oven"
+}
 
-/** Pretends to be an AI writer whose reply gets better with every attempt. */
-fun writeReply(ticket: Ticket): String =
-    when (ticket.attempts) {
-        0 -> "Your pizza is late."
-        1 -> "Sorry, your pizza is late."
-        else -> "Sorry ${ticket.customer}, your pizza is late. It arrives in 10 minutes."
-    }
+/** A slow call to the driver. */
+suspend fun askDriver(millis: Long): String {
+    delay(millis)
+    return "the driver is 5 minutes away"
+}
 
-/** Returns what is wrong with the reply, or an empty string when it is good enough to send. */
-fun problemWith(ticket: Ticket): String =
-    when {
-        "sorry" !in ticket.reply.lowercase() -> "say sorry"
-        ticket.customer !in ticket.reply -> "use the customer's name"
-        else -> ""
-    }
-
-/** Level 4 of the tutorial in `docs/`: an edge that goes back, so the reply is rewritten until it passes. */
-fun helpDesk(): CompiledGraph<Ticket> =
+/** Level 4 of the tutorial in `docs/`: two slow lookups run at the same time. */
+fun helpDesk(lookupMillis: Long = 1_000): CompiledGraph<Ticket> =
     StateGraph<Ticket> {
-        val write = node("write") { ticket -> ticket.copy(reply = writeReply(ticket), attempts = ticket.attempts + 1) }
-        val check = node("check") { ticket -> ticket.copy(problem = problemWith(ticket)) }
+        // `work` asks and returns what it found. The block after it writes that fact into the ticket.
+        val kitchen = node("kitchen", work = { askKitchen(lookupMillis) }) { ticket, fact -> ticket.copy(facts = ticket.facts + fact) }
+        val driver = node("driver", work = { askDriver(lookupMillis) }) { ticket, fact -> ticket.copy(facts = ticket.facts + fact) }
+        val answer = node("answer") { ticket -> ticket.copy(reply = "Hi ${ticket.customer}, ${ticket.facts.joinToString(" and ")}.") }
 
-        START then write then check
-        conditionalEdge(check, targets = setOf(write, NodeRef.END)) { ticket ->
-            if (ticket.problem.isEmpty() || ticket.attempts >= MAX_ATTEMPTS) NodeRef.END else write
-        }
+        START then kitchen then answer
+        START then driver then answer
+        answer then END
     }.compile()
 
+/** Turns an event of a run into a line of text. */
+fun describe(event: GraphEvent<Ticket>): String =
+    when (event) {
+        is GraphEvent.NodeStarted -> "step ${event.step}: ${event.node} started"
+        is GraphEvent.NodeProgress -> "step ${event.step}: ${event.node} reports ${event.value}"
+        is GraphEvent.NodeCompleted -> "step ${event.step}: ${event.node} finished"
+        is GraphEvent.StepCompleted -> "step ${event.step} done, facts so far: ${event.state.facts.size}"
+        is GraphEvent.Completed -> "finished: ${event.state.reply}"
+        is GraphEvent.Interrupted -> "paused before ${event.nextNodes}"
+    }
+
 suspend fun main() {
-    val result = helpDesk().invoke(Ticket(customer = "Ana", message = "My pizza is late!"))
-    println("attempts: ${result.state.attempts}")
-    println("reply: ${result.state.reply}")
+    val (result, time) = measureTimedValue { helpDesk().invoke(Ticket(customer = "Ana", message = "Where is my pizza?")) }
+    println(result.state.reply)
+    println("Two lookups of one second each took ${time.inWholeMilliseconds} ms.")
+    println()
+
+    // The same run again, this time watched while it happens.
+    helpDesk().stream(Ticket(customer = "Ana", message = "Where is my pizza?")).collect { event ->
+        println(describe(event))
+    }
 }

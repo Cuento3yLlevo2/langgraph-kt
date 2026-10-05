@@ -1,4 +1,4 @@
-# Level 6: Save points
+# Level 5: Save points
 
 **Goal:** before the help desk gives money back, it stops and waits for a human to approve. The
 human may answer a minute or a day later.
@@ -20,7 +20,7 @@ The pause is not a node. It is a place where you tell the run to stop and save.
 
 ## The code
 
-[`level6/Level6.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level6/Level6.kt)
+[`level5/Level5.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level5/Level5.kt)
 
 ```kotlin
 data class Ticket(
@@ -75,7 +75,7 @@ suspend fun main() {
 This level asks you a question, so run it with plain output:
 
 ```bash
-./gradlew :samples:runLevel6 --console=plain -q
+./gradlew :samples:runLevel5 --console=plain -q
 ```
 
 ```
@@ -120,7 +120,7 @@ into the run: `ticket.copy(approved = approved)`. Then `pay` runs with the updat
 
 - **`invoke` is "new game", `resume` is "continue".** `invoke` always starts from `START` and
   replaces the save in that slot.
-- **A save is written after every step**, not only at a pause. Level 8 uses this to retry after a
+- **A save is written after every step**, not only at a pause. Level 7 uses this to retry after a
   failure.
 - **`interruptAfter`** also exists. It stops after a node has run instead of before.
 
@@ -172,4 +172,4 @@ You can now:
 - pause a run before a node and continue it with a human's decision,
 - tell `invoke`, `resume` and `lastResult` apart.
 
-[Back to level 5](05-two-things-at-once.md) · [All levels](README.md) · Next: [Level 7, the agent](07-the-agent.md)
+[Back to level 4](04-two-things-at-once.md) · [All levels](README.md) · Next: [Level 6, the agent](06-the-agent.md)
