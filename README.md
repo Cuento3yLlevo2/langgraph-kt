@@ -146,14 +146,15 @@ ESCALATION: Hi Cleo, a colleague from our team will reply to you personally toda
 ```kotlin
 dependencies {
     // The graph builder and the engine. This is all the quick start needs.
-    implementation("io.github.cuento3yllevo2:langgraph-kt-core:0.1.0-alpha04")
+    implementation("io.github.cuento3yllevo2:langgraph-kt-core:0.1.0-alpha05")
 
     // Optional modules. Add only the ones you use.
-    implementation("io.github.cuento3yllevo2:langgraph-kt-serialization:0.1.0-alpha04")   // save @Serializable states
-    implementation("io.github.cuento3yllevo2:langgraph-kt-checkpoint-file:0.1.0-alpha04") // save runs as JSON files
-    implementation("io.github.cuento3yllevo2:langgraph-kt-agent:0.1.0-alpha04")           // chat models, tools and the tool-calling agent
-    implementation("io.github.cuento3yllevo2:langgraph-kt-anthropic:0.1.0-alpha04")       // call Claude, on every platform
-    implementation("io.github.cuento3yllevo2:langgraph-kt-langchain4j:0.1.0-alpha04")     // call AI models through LangChain4j (JVM)
+    implementation("io.github.cuento3yllevo2:langgraph-kt-serialization:0.1.0-alpha05")      // save @Serializable states
+    implementation("io.github.cuento3yllevo2:langgraph-kt-checkpoint-file:0.1.0-alpha05")    // save runs as JSON files
+    implementation("io.github.cuento3yllevo2:langgraph-kt-checkpoint-browser:0.1.0-alpha05") // save runs in a browser's localStorage (JS and Wasm)
+    implementation("io.github.cuento3yllevo2:langgraph-kt-agent:0.1.0-alpha05")              // chat models, tools and the tool-calling agent
+    implementation("io.github.cuento3yllevo2:langgraph-kt-anthropic:0.1.0-alpha05")          // call Claude, on every platform
+    implementation("io.github.cuento3yllevo2:langgraph-kt-langchain4j:0.1.0-alpha05")        // call AI models through LangChain4j (JVM)
 }
 ```
 
@@ -162,7 +163,7 @@ dependencies {
 | `langgraph-kt-core` | JVM/Android, iOS, macOS, Linux, Windows, JS, Wasm | Graph builder, execution engine, checkpointing interfaces |
 | `langgraph-kt-serialization` | same as core | `KotlinxStateSerializer` for `@Serializable` states, `CheckpointCodec` for custom checkpointers |
 | `langgraph-kt-checkpoint-file` | same as core (Node.js only for JS/Wasm) | `FileCheckpointer`, one JSON file per thread |
-| `langgraph-kt-checkpoint-browser` | JS and Wasm in a browser | `LocalStorageCheckpointer`, runs that survive a page reload. Not released yet: it comes with the version after `0.1.0-alpha04`. |
+| `langgraph-kt-checkpoint-browser` | JS and Wasm in a browser | `LocalStorageCheckpointer`, runs that survive a page reload |
 | `langgraph-kt-agent` | same as core | `ChatModel`, `Tool`, and the tool-calling agent: `toolAgent` / `toolLoop` |
 | `langgraph-kt-anthropic` | same as core | `AnthropicChatModel`, Claude through Ktor |
 | `langgraph-kt-langchain4j` | JVM (Java 17+) | `LangChain4jChatModel` and `chatNode` / `chatMessagesNode` for LangChain4j 1.x models |
@@ -172,7 +173,7 @@ Java 17 because LangChain4j does.
 
 ### Status
 
-Alpha. `0.1.0-alpha04` is the latest release, and it is on Maven Central. The API may still change
+Alpha. `0.1.0-alpha05` is the latest release, and it is on Maven Central. The API may still change
 before `1.0`; the [changelog](CHANGELOG.md) lists what changes in each version.
 
 ## Tutorial
