@@ -7,6 +7,18 @@ breaking changes.
 
 ## [Unreleased]
 
+### Added
+
+- Level 9 of the tutorial, "An agent with tools": a tool, `toolAgent`, and the same loop in a graph
+  of your own with `toolLoop`, step by step. Its program runs without an API key
+  (`./gradlew :samples:runLevel9`).
+
+### Changed
+
+- The tutorial levels "Game over screens" and "Your own workflow" are now levels 10 and 11. Their
+  pages are `docs/10-game-over-screens.md` and `docs/11-your-own-workflow.md`, and their run tasks
+  are `runLevel10` and `runLevel11`. The complete help desk of the last level has a tool agent.
+
 ## [0.1.0-alpha04] - 2026-10-04
 
 ### Added
