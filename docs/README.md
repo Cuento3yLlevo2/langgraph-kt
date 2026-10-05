@@ -43,8 +43,8 @@ plugs in.
 | [7. Game over screens](07-game-over-screens.md) | Understand and recover from errors | exceptions, retry with `resume` |
 | [8. Your own workflow](08-your-own-workflow.md) | Combine every move and design a graph for your own problem | the complete help desk, a recipe, testing |
 
-Take them in order; each one takes about 10 minutes. The [cheat sheet](cheat-sheet.md) has every
-word and every move on one page.
+Take them in order. Most take about 10 minutes; level 6 is the longest. The
+[cheat sheet](cheat-sheet.md) has every word and every move on one page.
 
 ## How a level works
 
