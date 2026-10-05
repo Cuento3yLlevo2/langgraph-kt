@@ -9,6 +9,9 @@ breaking changes.
 
 ### Added
 
+- `langgraph-kt-checkpoint-browser`, a new module for Kotlin/JS and Kotlin/Wasm in a browser.
+  `LocalStorageCheckpointer` keeps the checkpoints in the page's `localStorage`, so a paused run is
+  still there after a reload. A full or blocked storage is reported as a `LocalStorageException`.
 - The tutorial teaches agents with tools. Level 6, "The agent", has a node that asks a model, a
   tool, `toolAgent`, and the same loop in a graph of your own with `toolLoop`. Its program runs
   without an API key (`./gradlew :samples:runLevel6`).

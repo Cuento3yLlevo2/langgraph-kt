@@ -162,6 +162,7 @@ dependencies {
 | `langgraph-kt-core` | JVM/Android, iOS, macOS, Linux, Windows, JS, Wasm | Graph builder, execution engine, checkpointing interfaces |
 | `langgraph-kt-serialization` | same as core | `KotlinxStateSerializer` for `@Serializable` states, `CheckpointCodec` for custom checkpointers |
 | `langgraph-kt-checkpoint-file` | same as core (Node.js only for JS/Wasm) | `FileCheckpointer`, one JSON file per thread |
+| `langgraph-kt-checkpoint-browser` | JS and Wasm in a browser | `LocalStorageCheckpointer`, runs that survive a page reload. Not released yet: it comes with the version after `0.1.0-alpha04`. |
 | `langgraph-kt-agent` | same as core | `ChatModel`, `Tool`, and the tool-calling agent: `toolAgent` / `toolLoop` |
 | `langgraph-kt-anthropic` | same as core | `AnthropicChatModel`, Claude through Ktor |
 | `langgraph-kt-langchain4j` | JVM (Java 17+) | `LangChain4jChatModel` and `chatNode` / `chatMessagesNode` for LangChain4j 1.x models |
@@ -311,7 +312,8 @@ Runnable version: [`HumanInTheLoop`](samples/src/main/kotlin/org/langgraphkt/sam
 - A step that fails is not saved, so `resume` runs all of its nodes again, including the ones that
   had already finished. Make side effects such as sending an email safe to repeat.
 - `interruptAfter` pauses after a node instead of before it.
-- `MemoryCheckpointer` keeps checkpoints in memory, which is what tests want.
+- `MemoryCheckpointer` keeps checkpoints in memory, which is what tests want. `FileCheckpointer`
+  keeps them in files, and `LocalStorageCheckpointer` in the storage of a browser.
 
 #### Approve or send back
 
@@ -373,26 +375,48 @@ A run that stopped because a node failed is reported as `Interrupted` as well. T
 saved when it starts and its state after every finished step, so `resume(config)` retries from the
 step that failed, even when that was the first one.
 
+#### In a browser
+
+A web app has no file system. `LocalStorageCheckpointer`, from `langgraph-kt-checkpoint-browser`,
+keeps the checkpoints in the page's `localStorage`, so a paused run is still there after the page
+is reloaded or the browser is closed:
+
+```kotlin
+val config = GraphConfig(
+    threadId = "refund-42",
+    // Every page of your site shares one localStorage, so give the keys a prefix of your own.
+    checkpointer = LocalStorageCheckpointer(KotlinxStateSerializer<RefundState>(), keyPrefix = "myapp.refund."),
+    interruptBefore = setOf("pay"),
+)
+
+// When the page opens: is a run of this thread waiting for a decision?
+if (graph.lastResult(config) is GraphResult.Interrupted) showTheDecision()
+```
+
+A browser keeps about 5 MB for a site. When that is full, the run fails with a
+`LocalStorageException` and the checkpoint stored before stays as it was. The person using the
+browser can read `localStorage`, so do not keep secrets in the state.
+
 #### Storing checkpoints somewhere else
 
-To store checkpoints in a database, in browser `localStorage` or on a server, implement the
+To store checkpoints in a database, in the preferences of a phone or on a server, implement the
 three-method `Checkpointer` interface. `CheckpointCodec` turns a checkpoint into a string and back,
 so only the storage calls are left to write:
 
 ```kotlin
-class LocalStorageCheckpointer<State>(private val codec: CheckpointCodec<State>) : Checkpointer<State> {
+class DatabaseCheckpointer<State>(private val runs: RunTable, private val codec: CheckpointCodec<State>) : Checkpointer<State> {
     // Called after every step. encode() turns the checkpoint into a JSON string.
     override suspend fun save(threadId: String, checkpoint: Checkpoint<State>) =
-        localStorage.setItem(threadId, codec.encode(checkpoint))
+        runs.upsert(threadId, codec.encode(checkpoint))
 
     // Called by resume() and lastResult(). Returns null if this thread has no saved run.
     override suspend fun load(threadId: String): Checkpoint<State>? =
-        localStorage.getItem(threadId)?.let { codec.decode(threadId, it) }
+        runs.find(threadId)?.let { codec.decode(threadId, it) }
 
-    override suspend fun delete(threadId: String) = localStorage.removeItem(threadId)
+    override suspend fun delete(threadId: String) = runs.delete(threadId)
 }
 
-val checkpointer = LocalStorageCheckpointer(CheckpointCodec<RefundState>())
+val checkpointer = DatabaseCheckpointer(runs, CheckpointCodec<RefundState>())
 ```
 
 ### Parallel branches
@@ -707,6 +731,7 @@ extends `LangGraphException`:
 | `MaxIterationsExceededException` | The run took more steps than `GraphConfig.maxIterations` (default 25). |
 | `CheckpointNotFoundException`, `GraphAlreadyCompletedException` | `resume` had nothing to continue. |
 | `CheckpointCorruptedException` | A stored checkpoint could not be read. |
+| `LocalStorageException` | The browser refused to read or write `localStorage`: it is full, or the page may not use it. From `langgraph-kt-checkpoint-browser`. |
 | `ChatModelException` | A call to a `ChatModel` failed, or the model declined to answer. From `langgraph-kt-agent`. A run reports it as the `cause` of a `NodeExecutionException`. |
 
 ## Design

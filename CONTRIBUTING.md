@@ -31,6 +31,9 @@ Useful commands:
 Apple targets (iOS, macOS) only build and test on macOS, and the Windows target only tests on
 Windows. CI covers all of them, so you do not need every OS locally.
 
+The tests of `langgraph-kt-checkpoint-browser` need a real browser, so `check` runs them in headless
+Chrome. Install Chrome or Chromium, and set `CHROME_BIN` to its path if it is not found.
+
 ## Project layout
 
 | Path | Contents |
@@ -38,6 +41,7 @@ Windows. CI covers all of them, so you do not need every OS locally.
 | `langgraph-kt-core` | Graph builder, execution engine, checkpoint interfaces (multiplatform, depends only on kotlinx-coroutines) |
 | `langgraph-kt-serialization` | `KotlinxStateSerializer` (multiplatform) |
 | `langgraph-kt-checkpoint-file` | `FileCheckpointer` on kotlinx-io (multiplatform) |
+| `langgraph-kt-checkpoint-browser` | `LocalStorageCheckpointer` for web apps (JS and Wasm in a browser) |
 | `langgraph-kt-agent` | `ChatModel`, tools and the tool-calling agent loop (multiplatform) |
 | `langgraph-kt-anthropic` | `AnthropicChatModel`, Claude through Ktor (multiplatform) |
 | `langgraph-kt-langchain4j` | LangChain4j integration (JVM) |
