@@ -49,8 +49,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # The release is built on macOS and runs every test there, so the tests that need a
+          # browser run on macOS here as well.
           - os: macos-latest
-            tasks: iosSimulatorArm64Test macosArm64Test
+            tasks: iosSimulatorArm64Test macosArm64Test :langgraph-kt-checkpoint-browser:allTests
           - os: windows-latest
             tasks: mingwX64Test
     runs-on: ${{ matrix.os }}
