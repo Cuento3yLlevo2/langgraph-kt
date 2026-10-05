@@ -7,6 +7,10 @@ breaking changes.
 
 ## [Unreleased]
 
+### Added
+
+- A [roadmap](ROADMAP.md): what is planned before `1.0`, in which order, and what is not planned.
+
 ## [0.1.0-alpha05] - 2026-10-05
 
 ### Added

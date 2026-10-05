@@ -11,9 +11,10 @@ Last updated: 2026-10-05.
 
 ## Where the project is
 
-`0.1.0-alpha04` is on Maven Central. It has the graph builder and the engine (loops, parallel
-branches, streaming, checkpoints, pausing for a person), a tool-calling agent for every platform,
-and model modules for Claude and for LangChain4j. The API can still change in any release.
+`0.1.0-alpha05` is on Maven Central. It has the graph builder and the engine (loops, parallel
+branches, streaming, checkpoints, pausing for a person), checkpointers for memory, files and the
+browser, a tool-calling agent for every platform, and model modules for Claude and for LangChain4j.
+The API can still change in any release.
 
 ## The way to 1.0
 
@@ -50,7 +51,6 @@ New modules and additions to `langgraph-kt-agent`. They do not change the core.
 
 | Feature | What you get | State | Issue |
 |---|---|---|---|
-| Browser checkpointer | `langgraph-kt-checkpoint-browser` saves runs in the browser's `localStorage`, for JS and Wasm apps. | In progress | |
 | Database checkpointer | Saves runs in a SQL database, for servers and for Android apps. | Planned | |
 | OpenAI and Ollama | `langgraph-kt-openai` and `langgraph-kt-ollama` on Ktor, for every platform. Today these models are reached through LangChain4j, on the JVM only. | Planned | [#37] |
 | Typed answers from a model | Ask a model for a `@Serializable` class and get an instance of it, built on the schema generator that tools already use. | Planned | |
@@ -65,7 +65,7 @@ New modules and additions to `langgraph-kt-agent`. They do not change the core.
 - **A checkpoint format you can rely on.** A checkpoint written by one version can be read by every
   later `1.x` version, and a guide explains how to change a state class when saved runs exist.
 - **Tests in a real browser.** The JS and Wasm tests of the agent and model modules run on Node.js
-  today.
+  today. Only the browser checkpointer is tested in a browser.
 - **Documentation.** A guide for every feature on this page, a tutorial level where one fits, and a
   page for people who know LangGraph for Python: what has the same name and what is different.
 - **Written rules.** Which Kotlin versions are supported, and how long a deprecated declaration
