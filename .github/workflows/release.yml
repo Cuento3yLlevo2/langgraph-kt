@@ -29,8 +29,16 @@ jobs:
             exit 1
           fi
 
+      # The macOS job of the CI workflow runs the same tasks on every pull request.
       - name: Check
         run: ./gradlew check apiCheck
+
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-reports-release
+          path: '**/build/reports/'
 
       - name: Publish
         run: ./gradlew publishAndReleaseToMavenCentral --no-configuration-cache
