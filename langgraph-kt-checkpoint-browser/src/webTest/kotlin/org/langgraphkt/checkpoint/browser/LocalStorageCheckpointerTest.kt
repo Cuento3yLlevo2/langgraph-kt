@@ -146,14 +146,15 @@ class LocalStorageCheckpointerTest {
         runTest {
             val checkpointer = checkpointer()
             checkpointer.save("ticket-42", paused)
-            // A browser keeps about 5 MB for a page. This reply alone is larger.
-            val tooLarge = paused.copy(state = Ticket("Ana", reply = "pizza ".repeat(2_000_000)))
+            fillTheStorage()
+            // Less than 4,096 characters are free. This reply alone is longer.
+            val tooLarge = paused.copy(state = Ticket("Ana", reply = "pizza ".repeat(1_000)))
 
             val failure = assertFailsWith<LocalStorageException> { checkpointer.save("ticket-42", tooLarge) }
 
             assertEquals("ticket-42", failure.threadId)
             assertTrue(
-                failure.message!!.startsWith("Checkpoint of thread 'ticket-42': localStorage could not store the checkpoint (12000"),
+                failure.message!!.startsWith("Checkpoint of thread 'ticket-42': localStorage could not store the checkpoint (6"),
                 failure.message,
             )
             assertNotNull(failure.cause)
@@ -211,3 +212,24 @@ private fun length(): Int = js("globalThis.localStorage.length")
 private fun item(key: String): String? = js("globalThis.localStorage.getItem(key)")
 
 private fun put(key: String, value: String): Unit = js("globalThis.localStorage.setItem(key, value)")
+
+/**
+ * Fills the storage of the page until less than 4,096 characters are free.
+ *
+ * The browser does the work, with pieces that get smaller. A text of several megabytes built in
+ * Kotlin took longer than the two seconds a test has when the machine was busy.
+ */
+private fun fillTheStorage(): Unit =
+    js(
+        """
+        (function () {
+            var count = 0;
+            [1048576, 65536, 4096].forEach(function (size) {
+                try {
+                    while (true) globalThis.localStorage.setItem('filler.' + count++, 'x'.repeat(size));
+                } catch (full) {
+                }
+            });
+        })()
+        """,
+    )
