@@ -15,15 +15,15 @@ import org.langgraphkt.NodeExecutionException
 import org.langgraphkt.agent.AgentState
 import org.langgraphkt.agent.ChatMessage
 import org.langgraphkt.agent.textDelta
-import org.langgraphkt.samples.tutorial.level10.endlessLoop
-import org.langgraphkt.samples.tutorial.level10.forgottenArrow
-import org.langgraphkt.samples.tutorial.level10.missingReducer
-import org.langgraphkt.samples.tutorial.level10.misspelledNode
 import org.langgraphkt.samples.tutorial.level6.describe
 import org.langgraphkt.samples.tutorial.level7.PAY
-import org.langgraphkt.samples.tutorial.level8.PretendModel
-import org.langgraphkt.samples.tutorial.level9.pretendModel
-import org.langgraphkt.samples.tutorial.level9.ticketDesk
+import org.langgraphkt.samples.tutorial.level8.pretendModel
+import org.langgraphkt.samples.tutorial.level8.replyDesk
+import org.langgraphkt.samples.tutorial.level8.ticketDesk
+import org.langgraphkt.samples.tutorial.level9.endlessLoop
+import org.langgraphkt.samples.tutorial.level9.forgottenArrow
+import org.langgraphkt.samples.tutorial.level9.missingReducer
+import org.langgraphkt.samples.tutorial.level9.misspelledNode
 import org.langgraphkt.states
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -31,11 +31,9 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 import org.langgraphkt.samples.tutorial.level1.Ticket as Ticket1
 import org.langgraphkt.samples.tutorial.level1.helpDesk as helpDesk1
+import org.langgraphkt.samples.tutorial.level10.PAY as PAY10
 import org.langgraphkt.samples.tutorial.level10.Ticket as Ticket10
 import org.langgraphkt.samples.tutorial.level10.helpDesk as helpDesk10
-import org.langgraphkt.samples.tutorial.level11.PAY as PAY11
-import org.langgraphkt.samples.tutorial.level11.Ticket as Ticket11
-import org.langgraphkt.samples.tutorial.level11.helpDesk as helpDesk11
 import org.langgraphkt.samples.tutorial.level2.Ticket as Ticket2
 import org.langgraphkt.samples.tutorial.level2.helpDesk as helpDesk2
 import org.langgraphkt.samples.tutorial.level3.Ticket as Ticket3
@@ -47,9 +45,9 @@ import org.langgraphkt.samples.tutorial.level5.helpDesk as helpDesk5
 import org.langgraphkt.samples.tutorial.level7.Ticket as Ticket7
 import org.langgraphkt.samples.tutorial.level7.helpDesk as helpDesk7
 import org.langgraphkt.samples.tutorial.level8.Ticket as Ticket8
+import org.langgraphkt.samples.tutorial.level8.describe as describe8
 import org.langgraphkt.samples.tutorial.level8.helpDesk as helpDesk8
 import org.langgraphkt.samples.tutorial.level9.Ticket as Ticket9
-import org.langgraphkt.samples.tutorial.level9.describe as describe9
 import org.langgraphkt.samples.tutorial.level9.helpDesk as helpDesk9
 
 /** Keeps the code and the output shown in the tutorial in `docs/` true. */
@@ -175,15 +173,15 @@ class TutorialTest {
     @Test
     fun `level 8 stores the reply of the model`() =
         runTest {
-            val state = helpDesk8(PretendModel()).invoke(Ticket8("Ana", "Where is my pizza?")).state
+            val state = replyDesk(pretendModel).invoke(Ticket8("Ana", "Where is my pizza?")).state
 
-            assertEquals("Thanks for your patience! Your pizza is on its way.", state.reply)
+            assertEquals("Thanks for your message! We are looking into it.", state.reply)
         }
 
     @Test
-    fun `level 9 lets the model look up what the customer asks for`() =
+    fun `level 8 lets the model look up what the customer asks for`() =
         runTest {
-            val state = helpDesk9(pretendModel).invoke(AgentState("I'm Ana. Where is my pizza, and how much is a cola?")).state
+            val state = helpDesk8(pretendModel).invoke(AgentState("I'm Ana. Where is my pizza, and how much is a cola?")).state
 
             assertEquals(
                 listOf(
@@ -193,15 +191,15 @@ class TutorialTest {
                     "menu_price: One cola costs 2 euros.",
                     "model: The pizza for Ana left the oven and the driver is 5 minutes away. One cola costs 2 euros.",
                 ),
-                state.messages.map { describe9(it) },
+                state.messages.map { describe8(it) },
             )
             assertEquals("The pizza for Ana left the oven and the driver is 5 minutes away. One cola costs 2 euros.", state.answer)
         }
 
     @Test
-    fun `level 9 tells the model when a tool fails`() =
+    fun `level 8 tells the model when a tool fails`() =
         runTest {
-            val state = helpDesk9(pretendModel).invoke(AgentState("Do you sell tiramisu?")).state
+            val state = helpDesk8(pretendModel).invoke(AgentState("Do you sell tiramisu?")).state
 
             val result = state.messages.filterIsInstance<ChatMessage.ToolResult>().single()
             assertEquals(true, result.isError)
@@ -209,9 +207,9 @@ class TutorialTest {
         }
 
     @Test
-    fun `level 9 runs the agent inside a graph with its own state`() =
+    fun `level 8 runs the agent inside a graph with its own state`() =
         runTest {
-            val state = ticketDesk(pretendModel).invoke(Ticket9(customer = "Ben", message = "Do you sell salad?")).state
+            val state = ticketDesk(pretendModel).invoke(Ticket8(customer = "Ben", message = "Do you sell salad?")).state
 
             assertEquals("Hi Ben! One salad costs 6 euros.", state.reply)
             assertEquals("I'm Ben. Do you sell salad?", state.conversation.first().text)
@@ -219,15 +217,15 @@ class TutorialTest {
         }
 
     @Test
-    fun `level 9 delivers the answer of the model to a stream`() =
+    fun `level 8 delivers the answer of the model to a stream`() =
         runTest {
-            val pieces = helpDesk9(pretendModel).stream(AgentState("How much is a cola?")).mapNotNull { it.textDelta }.toList()
+            val pieces = helpDesk8(pretendModel).stream(AgentState("How much is a cola?")).mapNotNull { it.textDelta }.toList()
 
             assertEquals("One cola costs 2 euros.", pieces.joinToString(""))
         }
 
     @Test
-    fun `level 10 mistakes are reported with the messages shown in the tutorial`() =
+    fun `level 9 mistakes are reported with the messages shown in the tutorial`() =
         runTest {
             assertEquals(
                 "Edge references unknown to-node: anwser",
@@ -243,18 +241,18 @@ class TutorialTest {
             )
             assertEquals(
                 "Graph execution exceeded max iterations (25). Possible infinite loop.",
-                assertFailsWith<MaxIterationsExceededException> { endlessLoop().invoke(Ticket10("Ana", "Hello")) }.message,
+                assertFailsWith<MaxIterationsExceededException> { endlessLoop().invoke(Ticket9("Ana", "Hello")) }.message,
             )
         }
 
     @Test
-    fun `level 10 retries a failed node with resume`() =
+    fun `level 9 retries a failed node with resume`() =
         runTest {
             var calls = 0
-            val graph = helpDesk10 { if (++calls == 1) error("the kitchen phone is busy") else "Your pizza is in the oven." }
-            val config = GraphConfig(threadId = "ticket-42", checkpointer = MemoryCheckpointer<Ticket10>())
+            val graph = helpDesk9 { if (++calls == 1) error("the kitchen phone is busy") else "Your pizza is in the oven." }
+            val config = GraphConfig(threadId = "ticket-42", checkpointer = MemoryCheckpointer<Ticket9>())
 
-            val failure = assertFailsWith<NodeExecutionException> { graph.invoke(Ticket10("Ana", "Where is my pizza?"), config) }
+            val failure = assertFailsWith<NodeExecutionException> { graph.invoke(Ticket9("Ana", "Where is my pizza?"), config) }
             assertEquals("Node 'kitchen' failed: the kitchen phone is busy", failure.message)
             assertEquals("kitchen", failure.nodeName)
 
@@ -262,26 +260,26 @@ class TutorialTest {
         }
 
     @Test
-    fun `level 11 handles a delivery question, a refund, a menu question and anything else`() =
+    fun `level 10 handles a delivery question, a refund, a menu question and anything else`() =
         runTest {
-            val graph = helpDesk11(pretendModel)
-            val checkpointer = MemoryCheckpointer<Ticket11>()
+            val graph = helpDesk10(pretendModel)
+            val checkpointer = MemoryCheckpointer<Ticket10>()
 
-            fun config(threadId: String) = GraphConfig(threadId = threadId, checkpointer = checkpointer, interruptBefore = setOf(PAY11))
+            fun config(threadId: String) = GraphConfig(threadId = threadId, checkpointer = checkpointer, interruptBefore = setOf(PAY10))
 
-            val delivery = graph.invoke(Ticket11("Ana", "Where is my pizza?"), config("ticket-1"))
+            val delivery = graph.invoke(Ticket10("Ana", "Where is my pizza?"), config("ticket-1"))
             assertEquals("Hi Ana, your pizza left the oven and the driver is 5 minutes away.", delivery.state.reply)
             assertEquals(2, delivery.state.attempts)
 
-            val refund = graph.invoke(Ticket11("Ana", "My pizza arrived cold. I want a refund."), config("ticket-2"))
-            assertIs<GraphResult.Interrupted<Ticket11>>(refund)
+            val refund = graph.invoke(Ticket10("Ana", "My pizza arrived cold. I want a refund."), config("ticket-2"))
+            assertIs<GraphResult.Interrupted<Ticket10>>(refund)
             assertEquals("Sorry Ana! We sent you 12 euros.", graph.resume(config("ticket-2")) { it.copy(approved = true) }.state.reply)
 
-            val menu = graph.invoke(Ticket11("Ana", "Do you sell salad?"), config("ticket-3"))
+            val menu = graph.invoke(Ticket10("Ana", "Do you sell salad?"), config("ticket-3"))
             assertEquals("Hi Ana! One salad costs 6 euros.", menu.state.reply)
             assertEquals(4, menu.state.conversation.size)
 
-            val other = graph.invoke(Ticket11("Ana", "Thanks for the pizza!"), config("ticket-4"))
+            val other = graph.invoke(Ticket10("Ana", "Thanks for the pizza!"), config("ticket-4"))
             assertEquals("Hi Ana, a colleague will reply soon.", other.state.reply)
         }
 }

@@ -1,4 +1,4 @@
-# Level 11: Your own workflow
+# Level 10: Your own workflow
 
 **Goal:** put every move together, then design a graph for a problem of your own.
 
@@ -6,7 +6,7 @@
 
 ## The complete help desk
 
-Levels 1 to 10 each showed one move on a small graph. Here they are in one:
+Levels 1 to 9 each showed one move on a small graph. Here they are in one:
 
 ```mermaid
 flowchart LR
@@ -25,7 +25,7 @@ flowchart LR
     model -.has its answer.-> send --> E
 ```
 
-[`level11/Level11.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level11/Level11.kt)
+[`level10/Level10.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level10/Level10.kt)
 has the whole program. This is the part that draws the map:
 
 ```kotlin
@@ -51,7 +51,7 @@ send then END
 ```
 
 ```bash
-./gradlew :samples:runLevel11
+./gradlew :samples:runLevel10
 ```
 
 ```
@@ -71,7 +71,7 @@ Open the file and find each move:
 | A loop | `check` sends a reply without the customer's name back to `write` | 4 |
 | A pause | `interruptBefore = setOf(PAY)` in `main`, then `resume` | 7 |
 | A save slot per job | `threadId = "ticket-1"`, `"ticket-2"`, ... | 7 |
-| An agent with tools | `agent` is a `toolLoop` with the price tool of level 9, for questions about the menu. `helpDesk(model)` takes its model as a parameter, and `main` passes the pretend model. | 9 |
+| An agent with tools | `agent` is a `toolLoop` with the price tool of level 8, for questions about the menu. `helpDesk(model)` takes its model as a parameter, and `main` passes the pretend model. | 8 |
 
 Two details are new. The arrows of the agent are not in the code above, because `toolLoop` draws
 them: from `model` to `tools` and back, and from `model` to `send`, the node given as `then`.
@@ -149,7 +149,7 @@ suspend fun main() {
 A graph is a function from a starting state to a final state, which makes it easy to test: run it
 and compare. Two habits keep the tests fast and reliable:
 
-- **Pass in what the nodes depend on.** The help desks of levels 8, 9 and 11 take the model as a
+- **Pass in what the nodes depend on.** The help desks of levels 8 and 10 take the model as a
   parameter, so a test passes a pretend model that answers at once and always the same.
 - **Use `runTest`** from `kotlinx-coroutines-test`. It lets a test call `suspend` functions, and it
   skips waiting: a `delay` of one second takes no real time.
@@ -183,7 +183,7 @@ dependencies {
     implementation("io.github.cuento3yllevo2:langgraph-kt-checkpoint-file:0.1.0-alpha04") // FileCheckpointer
     implementation("io.github.cuento3yllevo2:langgraph-kt-agent:0.1.0-alpha04")           // ChatModel, tools, toolAgent
     implementation("io.github.cuento3yllevo2:langgraph-kt-anthropic:0.1.0-alpha04")       // AnthropicChatModel
-    implementation("io.github.cuento3yllevo2:langgraph-kt-langchain4j:0.1.0-alpha04")     // chatNode (JVM, Java 17+)
+    implementation("io.github.cuento3yllevo2:langgraph-kt-langchain4j:0.1.0-alpha04")     // LangChain4j models (JVM, Java 17+)
 }
 ```
 
@@ -216,4 +216,4 @@ know where an AI model goes, and how to let it call your functions. From here:
   user interface, in the browser and on the desktop.
 - The [API reference](https://cuento3yllevo2.github.io/langgraph-kt/) describes every function.
 
-[Back to level 10](10-game-over-screens.md) · [All levels](README.md)
+[Back to level 9](09-game-over-screens.md) · [All levels](README.md)

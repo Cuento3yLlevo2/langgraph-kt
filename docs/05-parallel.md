@@ -110,7 +110,7 @@ Three things to know:
   more than once, so it must not send, save or pay anything.
 - **A node that returns the whole ticket still works here.** One of them can share a step with
   nodes like `kitchen`. Two of them cannot: `compile()` refuses that graph, and you will see its
-  message in level 10.
+  message in level 9.
 
 And `answer`? Two arrows lead to it, but they arrive in the same step, so it runs once, with the
 ticket that has both facts.

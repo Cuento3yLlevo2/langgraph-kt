@@ -120,7 +120,7 @@ into the run: `ticket.copy(approved = approved)`. Then `pay` runs with the updat
 
 - **`invoke` is "new game", `resume` is "continue".** `invoke` always starts from `START` and
   replaces the save in that slot.
-- **A save is written after every step**, not only at a pause. Level 10 uses this to retry after a
+- **A save is written after every step**, not only at a pause. Level 9 uses this to retry after a
   failure.
 - **`interruptAfter`** also exists. It stops after a node has run instead of before.
 
@@ -172,4 +172,4 @@ You can now:
 - pause a run before a node and continue it with a human's decision,
 - tell `invoke`, `resume` and `lastResult` apart.
 
-[Back to level 6](06-watching-a-run.md) · [All levels](README.md) · Next: [Level 8, a real AI model](08-a-real-ai-model.md)
+[Back to level 6](06-watching-a-run.md) · [All levels](README.md) · Next: [Level 8, the agent](08-the-agent.md)
