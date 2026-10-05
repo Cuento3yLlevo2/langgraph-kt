@@ -9,15 +9,25 @@ breaking changes.
 
 ### Added
 
-- Level 9 of the tutorial, "An agent with tools": a tool, `toolAgent`, and the same loop in a graph
-  of your own with `toolLoop`, step by step. Its program runs without an API key
-  (`./gradlew :samples:runLevel9`).
+- The tutorial teaches agents with tools. Level 6, "The agent", has a node that asks a model, a
+  tool, `toolAgent`, and the same loop in a graph of your own with `toolLoop`. Its program runs
+  without an API key (`./gradlew :samples:runLevel6`).
 
 ### Changed
 
-- The tutorial levels "Game over screens" and "Your own workflow" are now levels 10 and 11. Their
-  pages are `docs/10-game-over-screens.md` and `docs/11-your-own-workflow.md`, and their run tasks
-  are `runLevel10` and `runLevel11`. The complete help desk of the last level has a tool agent.
+- The tutorial has eight levels, one for each stage of the Pixel Pizza game, in place of eleven:
+  1. A line of nodes (was "Your first graph" and "A line of nodes")
+  2. Choices
+  3. Loops
+  4. Two things at once (was "Doing two things at once" and "Watching a run")
+  5. Save points
+  6. The agent (was "A real AI model", now on the `ChatModel` of `langgraph-kt-agent` in place of
+     LangChain4j's `chatNode`, and with tools)
+  7. Game over screens
+  8. Your own workflow, whose complete help desk now has a tool agent
+
+  The pages in `docs/`, the run tasks (`runLevel1` to `runLevel8`) and the sample packages are
+  renumbered to match. "The idea" is an introduction without a number.
 
 ## [0.1.0-alpha04] - 2026-10-04
 
