@@ -13,6 +13,7 @@ flowchart LR
     S([START]) --> read
     read -.delivery.-> look_up
     read -.refund.-> prepare
+    read -.menu.-> model
     read -.anything else.-> write
     look_up --> kitchen --> write
     look_up --> driver --> write
@@ -20,6 +21,8 @@ flowchart LR
     check -.has a problem.-> write
     check -.good.-> E([END])
     prepare --> P{{pause}} --> pay --> E
+    model -.asks for a tool.-> tools --> model
+    model -.has its answer.-> send --> E
 ```
 
 [`level11/Level11.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level11/Level11.kt)
@@ -27,10 +30,11 @@ has the whole program. This is the part that draws the map:
 
 ```kotlin
 START then read
-conditionalEdge(read, targets = setOf(lookUp, prepare, write)) { ticket ->
+conditionalEdge(read, targets = setOf(lookUp, prepare, agent, write)) { ticket ->
     when (ticket.topic) {
         "delivery" -> lookUp
         "refund" -> prepare
+        "menu" -> agent
         else -> write
     }
 }
@@ -43,6 +47,7 @@ conditionalEdge(check, targets = setOf(write, NodeRef.END)) { ticket ->
 }
 
 prepare then pay then END
+send then END
 ```
 
 ```bash
@@ -53,7 +58,8 @@ prepare then pay then END
 ticket-1: Hi Ana, your pizza left the oven and the driver is 5 minutes away.
 ticket-2: a manager approves the refund of 12 euros
 ticket-2: Sorry Ana! We sent you 12 euros.
-ticket-3: Hi Ana, a colleague will reply soon.
+ticket-3: Hi Ana! One salad costs 6 euros.
+ticket-4: Hi Ana, a colleague will reply soon.
 ```
 
 Open the file and find each move:
@@ -65,8 +71,12 @@ Open the file and find each move:
 | A loop | `check` sends a reply without the customer's name back to `write` | 4 |
 | A pause | `interruptBefore = setOf(PAY)` in `main`, then `resume` | 7 |
 | A save slot per job | `threadId = "ticket-1"`, `"ticket-2"`, ... | 7 |
+| An agent with tools | `agent` is a `toolLoop` with the price tool of level 9, for questions about the menu. `helpDesk(model)` takes its model as a parameter, and `main` passes the pretend model. | 9 |
 
-One detail is new. A router returns one name, so it cannot start two nodes. To split into parallel
+Two details are new. The arrows of the agent are not in the code above, because `toolLoop` draws
+them: from `model` to `tools` and back, and from `model` to `send`, the node given as `then`.
+
+And a router returns one name, so it cannot start two nodes. To split into parallel
 work after a choice, route to one node and give that node two arrows. That is all `look_up` is for:
 its function returns the ticket unchanged.
 
@@ -98,11 +108,15 @@ state and a limit in the router.
 lookups, can share a step. Draw several arrows from one node, and give each of those nodes a
 `work` and an `update`.
 
-**8. Where must a human look first?** Anything that costs money, cannot be undone, or goes out to a
+**8. Does a step have to decide by itself what to look up?** When you know which lookups a job
+needs, write them as nodes: they are cheaper and easier to test. When that depends on what the
+customer wrote, give a model the lookups as tools and add it with `toolLoop`.
+
+**9. Where must a human look first?** Anything that costs money, cannot be undone, or goes out to a
 customer. Put `interruptBefore` there, give the run a checkpointer and a `threadId`, and continue
 with `resume`.
 
-**9. What can fail?** Every node that calls a model or a network. With a checkpointer you can retry
+**10. What can fail?** Every node that calls a model or a network. With a checkpointer you can retry
 from the last save with `resume`.
 
 Start with steps 1 to 4 and get a straight line working, as in level 2. Then add one move at a
@@ -135,8 +149,8 @@ suspend fun main() {
 A graph is a function from a starting state to a final state, which makes it easy to test: run it
 and compare. Two habits keep the tests fast and reliable:
 
-- **Pass in what the nodes depend on.** Level 8's `helpDesk(model)` takes the model as a parameter,
-  so a test passes a pretend model that answers at once and always the same.
+- **Pass in what the nodes depend on.** The help desks of levels 8, 9 and 11 take the model as a
+  parameter, so a test passes a pretend model that answers at once and always the same.
 - **Use `runTest`** from `kotlinx-coroutines-test`. It lets a test call `suspend` functions, and it
   skips waiting: a `delay` of one second takes no real time.
 
@@ -191,8 +205,8 @@ Use pretend functions first, as the tutorial does. Plug in a real model when the
 
 ## Game complete
 
-You can build a workflow with choices, loops, parallel work, live progress, pauses and retries, and
-you know where an AI model goes. From here:
+You can build a workflow with choices, loops, parallel work, live progress, pauses and retries. You
+know where an AI model goes, and how to let it call your functions. From here:
 
 - The [cheat sheet](cheat-sheet.md) has every word and every move on one page.
 - The [README](../README.md#guides) has shorter, denser guides, including a reviewer who can send

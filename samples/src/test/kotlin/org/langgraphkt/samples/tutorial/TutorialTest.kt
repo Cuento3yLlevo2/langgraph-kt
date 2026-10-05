@@ -262,9 +262,9 @@ class TutorialTest {
         }
 
     @Test
-    fun `level 11 handles a delivery question, a refund and anything else`() =
+    fun `level 11 handles a delivery question, a refund, a menu question and anything else`() =
         runTest {
-            val graph = helpDesk11()
+            val graph = helpDesk11(pretendModel)
             val checkpointer = MemoryCheckpointer<Ticket11>()
 
             fun config(threadId: String) = GraphConfig(threadId = threadId, checkpointer = checkpointer, interruptBefore = setOf(PAY11))
@@ -277,7 +277,11 @@ class TutorialTest {
             assertIs<GraphResult.Interrupted<Ticket11>>(refund)
             assertEquals("Sorry Ana! We sent you 12 euros.", graph.resume(config("ticket-2")) { it.copy(approved = true) }.state.reply)
 
-            val other = graph.invoke(Ticket11("Ana", "Do you sell salad?"), config("ticket-3"))
+            val menu = graph.invoke(Ticket11("Ana", "Do you sell salad?"), config("ticket-3"))
+            assertEquals("Hi Ana! One salad costs 6 euros.", menu.state.reply)
+            assertEquals(4, menu.state.conversation.size)
+
+            val other = graph.invoke(Ticket11("Ana", "Thanks for the pizza!"), config("ticket-4"))
             assertEquals("Hi Ana, a colleague will reply soon.", other.state.reply)
         }
 }

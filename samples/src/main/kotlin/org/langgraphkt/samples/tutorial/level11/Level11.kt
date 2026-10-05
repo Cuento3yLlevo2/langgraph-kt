@@ -9,12 +9,18 @@ import org.langgraphkt.MemoryCheckpointer
 import org.langgraphkt.NodeRef
 import org.langgraphkt.START
 import org.langgraphkt.StateGraph
+import org.langgraphkt.agent.ChatMessage
+import org.langgraphkt.agent.ChatModel
+import org.langgraphkt.agent.toolLoop
+import org.langgraphkt.samples.tutorial.level9.menuPrice
+import org.langgraphkt.samples.tutorial.level9.pretendModel
 
 data class Ticket(
     val customer: String,
     val message: String,
     val topic: String = "",
     val facts: List<String> = emptyList(),
+    val conversation: List<ChatMessage> = emptyList(),
     val refund: Int = 0,
     val approved: Boolean = false,
     val reply: String = "",
@@ -29,6 +35,7 @@ fun topicOf(message: String): String =
     when {
         "refund" in message.lowercase() -> "refund"
         "where" in message.lowercase() -> "delivery"
+        "sell" in message.lowercase() || "cost" in message.lowercase() -> "menu"
         else -> "other"
     }
 
@@ -53,7 +60,7 @@ suspend fun askDriver(millis: Long): String {
 }
 
 /** Level 11 of the tutorial in `docs/`: every move of the earlier levels in one graph. */
-fun helpDesk(lookupMillis: Long = 1_000): CompiledGraph<Ticket> =
+fun helpDesk(model: ChatModel, lookupMillis: Long = 1_000): CompiledGraph<Ticket> =
     StateGraph<Ticket> {
         val read = node("read") { ticket -> ticket.copy(topic = topicOf(ticket.message)) }
 
@@ -61,6 +68,18 @@ fun helpDesk(lookupMillis: Long = 1_000): CompiledGraph<Ticket> =
         val lookUp = node("look_up") { ticket -> ticket }
         val kitchen = node("kitchen", work = { askKitchen(lookupMillis) }) { ticket, fact -> ticket.copy(facts = ticket.facts + fact) }
         val driver = node("driver", work = { askDriver(lookupMillis) }) { ticket, fact -> ticket.copy(facts = ticket.facts + fact) }
+
+        // Questions about the menu: a model looks up the prices with the tool of level 9.
+        val send = node("send") { ticket -> ticket.copy(reply = "Hi ${ticket.customer}! ${ticket.conversation.last().text}") }
+        val agent =
+            toolLoop(
+                model = model,
+                tools = listOf(menuPrice),
+                messages = { ticket -> ticket.conversation },
+                append = { ticket, new -> ticket.copy(conversation = ticket.conversation + new) },
+                firstMessage = { ticket -> "I'm ${ticket.customer}. ${ticket.message}" },
+                then = send,
+            )
 
         // Every reply is written and checked, and rewritten if the check finds a problem.
         val write = node("write") { ticket -> ticket.copy(reply = writeReply(ticket), attempts = ticket.attempts + 1) }
@@ -78,10 +97,11 @@ fun helpDesk(lookupMillis: Long = 1_000): CompiledGraph<Ticket> =
             }
 
         START then read
-        conditionalEdge(read, targets = setOf(lookUp, prepare, write)) { ticket ->
+        conditionalEdge(read, targets = setOf(lookUp, prepare, agent, write)) { ticket ->
             when (ticket.topic) {
                 "delivery" -> lookUp
                 "refund" -> prepare
+                "menu" -> agent
                 else -> write
             }
         }
@@ -94,12 +114,14 @@ fun helpDesk(lookupMillis: Long = 1_000): CompiledGraph<Ticket> =
         }
 
         prepare then pay then END
+        send then END
     }.compile()
 
 suspend fun main() {
-    val graph = helpDesk()
+    // The pretend model of level 9. Pass a real one to let it answer the questions about the menu.
+    val graph = helpDesk(pretendModel)
     val checkpointer = MemoryCheckpointer<Ticket>()
-    val messages = listOf("Where is my pizza?", "My pizza arrived cold. I want a refund.", "Do you sell salad?")
+    val messages = listOf("Where is my pizza?", "My pizza arrived cold. I want a refund.", "Do you sell salad?", "Thanks for the pizza!")
 
     messages.forEachIndexed { index, message ->
         val config = GraphConfig(threadId = "ticket-${index + 1}", checkpointer = checkpointer, interruptBefore = setOf(PAY))
