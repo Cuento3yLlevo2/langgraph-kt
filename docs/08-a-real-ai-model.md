@@ -125,8 +125,7 @@ val answer = node("answer") { ticket -> ticket.copy(reply = askMyModel(ticket.me
 `langgraph-kt-langchain4j` is for the JVM (Java 17 or newer, which LangChain4j requires). On the
 other platforms, write the node this way with an HTTP client of your choice, or use the `ChatModel`
 of `langgraph-kt-agent`, which works everywhere. The README shows it under
-[AI models](../README.md#ai-models), and under [Agents with tools](../README.md#agents-with-tools)
-how a model calls your functions.
+[AI models](../README.md#ai-models), and the next level uses it to let a model call your functions.
 
 ### What changes when the model is real
 
@@ -152,4 +151,4 @@ You can now:
 - swap a pretend model for a real one without touching the graph,
 - write a model call by hand when you are not on the JVM.
 
-[Back to level 7](07-save-points.md) · [All levels](README.md) · Next: [Level 10, game over screens](10-game-over-screens.md)
+[Back to level 7](07-save-points.md) · [All levels](README.md) · Next: [Level 9, an agent with tools](09-an-agent-with-tools.md)

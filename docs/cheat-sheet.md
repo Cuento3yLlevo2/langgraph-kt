@@ -27,6 +27,8 @@ Every word and every move of the [tutorial](README.md) on one page.
 | Interrupt | A pause before or after a node, usually to wait for a human | [7](07-save-points.md) |
 | Human-in-the-loop | A workflow in which a person decides something before it continues | [7](07-save-points.md) |
 | Prompt | The text sent to an AI model | [8](08-a-real-ai-model.md) |
+| Tool | A function the model may ask your program to run: a name, a description and an input class | [9](09-an-agent-with-tools.md) |
+| Agent | A model that decides by itself which tools to call, and how often, before it answers | [9](09-an-agent-with-tools.md) |
 
 ## Building a graph
 
@@ -105,8 +107,8 @@ Pauses need a checkpointer.
 
 ## An agent with tools
 
-From `langgraph-kt-agent`. The README explains it under
-[Agents with tools](../README.md#agents-with-tools).
+From `langgraph-kt-agent`. [Level 9](09-an-agent-with-tools.md) teaches it, and the README has the
+short version under [Agents with tools](../README.md#agents-with-tools).
 
 ```kotlin
 @Serializable

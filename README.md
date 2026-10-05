@@ -177,9 +177,9 @@ before `1.0`; the [changelog](CHANGELOG.md) lists what changes in each version.
 ## Tutorial
 
 New to agent workflows, or to graphs? The [tutorial](docs/README.md) starts from zero and adds one
-idea per level, like a game: a node, a choice, a loop, parallel work, pausing for a human. Every
-level is a small program you can run, for example `./gradlew :samples:runLevel1`. The
-[cheat sheet](docs/cheat-sheet.md) has every term and every call on one page.
+idea per level, like a game: a node, a choice, a loop, parallel work, pausing for a human, an agent
+with tools. Every level is a small program you can run, for example `./gradlew :samples:runLevel1`.
+The [cheat sheet](docs/cheat-sheet.md) has every term and every call on one page.
 
 ## Guides
 
@@ -674,6 +674,7 @@ toolLoop(
 
 Runnable version: [`ToolAgent`](samples/src/main/kotlin/org/langgraphkt/samples/ToolAgent.kt). It
 runs without an API key, and with Claude when `ANTHROPIC_API_KEY` is set.
+[Level 9 of the tutorial](docs/09-an-agent-with-tools.md) explains the same agent step by step.
 
 ### Inspecting a graph
 

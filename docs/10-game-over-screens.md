@@ -183,4 +183,4 @@ You can now:
 - tell mistakes found by `compile()` from failures during a run,
 - continue a failed run from its last save.
 
-[Back to level 8](08-a-real-ai-model.md) · [All levels](README.md) · Next: [Level 11, your own workflow](11-your-own-workflow.md)
+[Back to level 9](09-an-agent-with-tools.md) · [All levels](README.md) · Next: [Level 11, your own workflow](11-your-own-workflow.md)
