@@ -80,7 +80,8 @@ Chrome. Install Chrome or Chromium, and set `CHROME_BIN` to its path if it is no
 
 ## Making a change
 
-1. For anything larger than a small fix, open an issue first so the approach can be discussed.
+1. For anything larger than a small fix, open an issue first so the approach can be discussed. The
+   [roadmap](ROADMAP.md) lists what is planned before `1.0`.
 2. Branch from `main` (for example `feature/room-checkpointer` or `fix/resume-after-crash`).
 3. Write the code and its tests. Core tests go in `commonTest` and use `runTest { }` from
    `kotlinx-coroutines-test`, so they run on every platform. Use `MemoryCheckpointer` unless the
