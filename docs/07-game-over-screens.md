@@ -1,4 +1,4 @@
-# Level 10: Game over screens
+# Level 7: Game over screens
 
 **Goal:** recognize what the library tells you when something is wrong, and continue a run after a
 node has failed.
@@ -10,10 +10,10 @@ This level makes five mistakes on purpose.
 
 ## Run it
 
-[`level10/Level10.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level10/Level10.kt)
+[`level7/Level7.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level7/Level7.kt)
 
 ```bash
-./gradlew :samples:runLevel10
+./gradlew :samples:runLevel7
 ```
 
 ```
@@ -88,7 +88,7 @@ Node 'read' fans out to several nodes that return a whole state, so compile() ne
 
 Two arrows leave `read`, so `kitchen` and `driver` run at the same time. Each returns a whole
 ticket, and nothing says how to make one ticket out of two. Give the two nodes a `work` and an
-`update` (level 5). The other way out is a `Reducer`, a function that merges whole states; the
+`update` (level 4). The other way out is a `Reducer`, a function that merges whole states; the
 [README](../README.md#merging-whole-states) shows one.
 
 If a map has several mistakes, the message lists all of them at once.
@@ -110,7 +110,7 @@ Graph execution exceeded max iterations (25). Possible infinite loop.
 ```
 
 `write then write` is a valid map, so it compiles. The run goes round until the step limit stops it
-with `MaxIterationsExceededException`. Give the loop a way to reach `END` (level 4).
+with `MaxIterationsExceededException`. Give the loop a way to reach `END` (level 3).
 
 ### 5. A node that fails
 
@@ -143,9 +143,10 @@ After a retry: Hi Ana! Your pizza is in the oven.
 
 The phone call fails the first time and works the second time, like a network call that sometimes
 fails. When a node throws an exception, the run stops and you get a `NodeExecutionException`. It
-tells you which node failed (`e.nodeName`) and why (`e.cause` is the original exception).
+tells you which node failed (`e.nodeName`) and why (`e.cause` is the original exception). A failed
+call to an AI model arrives the same way: the `cause` is a `ChatModelException`.
 
-Now the save points of level 7 pay off. The run had a checkpointer, and a save is written after
+Now the save points of level 5 pay off. The run had a checkpointer, and a save is written after
 every step, so the result of `greet` was already saved when `kitchen` failed. `resume(config)`
 continues from that save: it runs `kitchen` again and does **not** run `greet` again. In a real
 workflow, that means the three model calls that already succeeded are not paid for twice.
@@ -170,7 +171,7 @@ Every exception the library throws is a `LangGraphException`, so one `catch` can
 
 ## Your turn
 
-1. Fix mistakes 1 to 4 in `Level10.kt` one at a time and watch the lines disappear from the output.
+1. Fix mistakes 1 to 4 in `Level7.kt` one at a time and watch the lines disappear from the output.
    For number 4, the smallest fix is a conditional edge that returns `END` once the reply has three
    exclamation marks.
 2. In mistake 5, remove `checkpointer` from the `GraphConfig`. What does `resume` say now?
@@ -183,4 +184,4 @@ You can now:
 - tell mistakes found by `compile()` from failures during a run,
 - continue a failed run from its last save.
 
-[Back to level 9](09-an-agent-with-tools.md) · [All levels](README.md) · Next: [Level 11, your own workflow](11-your-own-workflow.md)
+[Back to level 6](06-the-agent.md) · [All levels](README.md) · Next: [Level 8, your own workflow](08-your-own-workflow.md)

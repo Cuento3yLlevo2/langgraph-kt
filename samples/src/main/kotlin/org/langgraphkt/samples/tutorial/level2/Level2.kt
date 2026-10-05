@@ -12,7 +12,6 @@ data class Ticket(
     val reply: String = "",
 )
 
-/** A real help desk would ask an AI model. Looking for keywords is enough to learn the moves. */
 fun topicOf(message: String): String =
     when {
         "refund" in message.lowercase() -> "refund"
@@ -20,17 +19,31 @@ fun topicOf(message: String): String =
         else -> "other"
     }
 
-/** Level 2 of the tutorial in `docs/`: two nodes in a row, each adding to the state. */
+/** Level 2 of the tutorial in `docs/`: a conditional edge picks one of three paths. */
 fun helpDesk(): CompiledGraph<Ticket> =
     StateGraph<Ticket> {
         val read = node("read") { ticket -> ticket.copy(topic = topicOf(ticket.message)) }
-        val answer = node("answer") { ticket -> ticket.copy(reply = "Hi ${ticket.customer}, we got your ${ticket.topic} question.") }
+        val track = node("track") { ticket -> ticket.copy(reply = "Your pizza left the oven and is on its way.") }
+        val refund = node("refund") { ticket -> ticket.copy(reply = "We are sorry. Your money is on its way back.") }
+        val answer = node("answer") { ticket -> ticket.copy(reply = "Thanks for your message. A human will reply soon.") }
 
-        START then read then answer then END
+        START then read
+        conditionalEdge(read, targets = setOf(track, refund, answer)) { ticket ->
+            when (ticket.topic) {
+                "delivery" -> track
+                "refund" -> refund
+                else -> answer
+            }
+        }
+        track then END
+        refund then END
+        answer then END
     }.compile()
 
 suspend fun main() {
-    val result = helpDesk().invoke(Ticket(customer = "Ana", message = "Where is my pizza?"))
-    println("topic: ${result.state.topic}")
-    println("reply: ${result.state.reply}")
+    val graph = helpDesk()
+    for (message in listOf("Where is my pizza?", "I want a refund", "Do you sell salad?")) {
+        val result = graph.invoke(Ticket(customer = "Ana", message = message))
+        println("$message -> ${result.state.reply}")
+    }
 }

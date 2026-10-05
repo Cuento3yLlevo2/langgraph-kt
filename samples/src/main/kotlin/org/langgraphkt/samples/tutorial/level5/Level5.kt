@@ -1,46 +1,56 @@
 package org.langgraphkt.samples.tutorial.level5
 
-import kotlinx.coroutines.delay
 import org.langgraphkt.CompiledGraph
 import org.langgraphkt.END
+import org.langgraphkt.GraphConfig
+import org.langgraphkt.GraphResult
+import org.langgraphkt.MemoryCheckpointer
 import org.langgraphkt.START
 import org.langgraphkt.StateGraph
-import kotlin.time.measureTimedValue
 
 data class Ticket(
     val customer: String,
     val message: String,
-    val facts: List<String> = emptyList(),
+    val refund: Int = 0,
+    val approved: Boolean = false,
     val reply: String = "",
 )
 
-/** A slow call to the kitchen. `delay` stands in for the time a real call to another system takes. */
-suspend fun askKitchen(millis: Long): String {
-    delay(millis)
-    return "your pizza left the oven"
-}
+const val PAY = "pay"
 
-/** A slow call to the driver. */
-suspend fun askDriver(millis: Long): String {
-    delay(millis)
-    return "the driver is 5 minutes away"
-}
-
-/** Level 5 of the tutorial in `docs/`: two slow lookups run at the same time. */
-fun helpDesk(lookupMillis: Long = 1_000): CompiledGraph<Ticket> =
+/** Level 5 of the tutorial in `docs/`: the run stops before money moves and waits for a human. */
+fun helpDesk(): CompiledGraph<Ticket> =
     StateGraph<Ticket> {
-        // `work` asks and returns what it found. The block after it writes that fact into the ticket.
-        val kitchen = node("kitchen", work = { askKitchen(lookupMillis) }) { ticket, fact -> ticket.copy(facts = ticket.facts + fact) }
-        val driver = node("driver", work = { askDriver(lookupMillis) }) { ticket, fact -> ticket.copy(facts = ticket.facts + fact) }
-        val answer = node("answer") { ticket -> ticket.copy(reply = "Hi ${ticket.customer}, ${ticket.facts.joinToString(" and ")}.") }
+        val prepare = node("prepare") { ticket -> ticket.copy(refund = 12) }
+        val pay =
+            node(PAY) { ticket ->
+                if (ticket.approved) {
+                    ticket.copy(reply = "Sorry ${ticket.customer}! We sent you ${ticket.refund} euros.")
+                } else {
+                    ticket.copy(reply = "Sorry ${ticket.customer}, we cannot refund this order.")
+                }
+            }
 
-        START then kitchen then answer
-        START then driver then answer
-        answer then END
+        START then prepare then pay then END
     }.compile()
 
 suspend fun main() {
-    val (result, time) = measureTimedValue { helpDesk().invoke(Ticket(customer = "Ana", message = "Where is my pizza?")) }
-    println(result.state.reply)
-    println("Two lookups of one second each took ${time.inWholeMilliseconds} ms.")
+    val graph = helpDesk()
+    val config =
+        GraphConfig(
+            threadId = "ticket-42",
+            checkpointer = MemoryCheckpointer<Ticket>(),
+            interruptBefore = setOf(PAY),
+        )
+
+    when (val paused = graph.invoke(Ticket(customer = "Ana", message = "My pizza arrived cold. I want a refund."), config)) {
+        is GraphResult.Interrupted -> println("Paused before ${paused.nextNodes}. Refund: ${paused.state.refund} euros.")
+        is GraphResult.Completed -> error("Expected the run to pause before paying")
+    }
+
+    print("Approve the refund? [y/N] ")
+    val approved = readlnOrNull()?.trim().equals("y", ignoreCase = true)
+
+    val finished = graph.resume(config) { ticket -> ticket.copy(approved = approved) }
+    println(finished.state.reply)
 }

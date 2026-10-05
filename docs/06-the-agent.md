@@ -1,16 +1,62 @@
-# Level 9: An agent with tools
+# Level 6: The agent
 
-**Goal:** the model looks up the order and the price by itself before it answers.
+**Goal:** an AI model writes the reply, and looks up the order and the price by itself first.
 
-**New moves:** `Tool`, `toolAgent`, `AgentState`, `toolLoop`.
+**New moves:** `ChatModel`, `chat`, `Tool`, `toolAgent`, `toolLoop`.
 
-The model of level 8 could write a friendly sentence, but it knew nothing about Ana's order. In
-level 5 the help desk did know, because *you* decided that every ticket needs a call to the kitchen
-and a call to the driver.
+Until now, small Kotlin functions pretended to be the AI. You have built choices, loops, parallel
+work and pauses without a model, which shows what the library really is: it organizes the work. A
+model is one of the things a node can use to do its work.
 
-An **agent** is a model that makes that decision itself. You give it a list of functions it may
-use, and it chooses which ones to call, and how often, before it answers. Those functions are
-called **tools**.
+This level has two parts. First a node asks a model for a reply. Then the model gets **tools**:
+functions it may call when it needs to know something. A model that decides by itself which tools
+to call, and how often, before it answers, is called an **agent**.
+
+## A model in a node
+
+```mermaid
+flowchart LR
+    S([START]) --> answer --> E([END])
+    answer <-.asks.-> M[(AI model)]
+```
+
+The model is not on the map. It is outside, and the `answer` node talks to it.
+
+[`level6/Level6.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level6/Level6.kt)
+
+```kotlin
+fun replyDesk(model: ChatModel): CompiledGraph<Ticket> =
+    StateGraph<Ticket> {
+        val answer =
+            node(
+                "answer",
+                work = { ticket ->
+                    model.chat("Reply in one friendly sentence to ${ticket.customer}, who wrote: ${ticket.message}", system = HELP_DESK)
+                },
+            ) { ticket, reply -> ticket.copy(reply = reply) }
+
+        START then answer then END
+    }.compile()
+```
+
+`ChatModel` is a small type from the module `langgraph-kt-agent`. It stands for any AI model, and
+`model.chat(...)` sends it a text and returns the text it answers. The text you send is called a
+*prompt*. `system` is a second text with standing instructions, here who the model works for.
+
+The call is slow, so it is the `work` of the node, and the block after it writes the reply into the
+ticket (level 4).
+
+The graph takes the model as a parameter instead of creating it. This level passes a
+`pretendModel`, ordinary Kotlin code that answers at once, so it runs anywhere and costs nothing.
+Your tests should do the same. Asked "Where is my pizza?", it replies:
+
+```
+Thanks for your message! We are looking into it.
+```
+
+That is friendly and useless. The model knows nothing about Ana's order. In level 4 the help desk
+did know, because *you* decided that every ticket needs a call to the kitchen and a call to the
+driver. Tools let the model make that decision.
 
 ## The map
 
@@ -22,12 +68,10 @@ flowchart LR
     model -.has its answer.-> E([END])
 ```
 
-You know both moves on this map: a choice (level 3) and an arrow that goes back (level 4). You do
+You know both moves on this map: a choice (level 2) and an arrow that goes back (level 3). You do
 not have to draw it. The library has this graph ready-made.
 
 ## The code
-
-[`level9/Level9.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level9/Level9.kt)
 
 ```kotlin
 @Serializable
@@ -53,7 +97,7 @@ val menuPrice: Tool =
         "One ${lookup.item} costs $price euros."
     }
 
-const val HELP_DESK = "You work at the help desk of Pixel Pizza. Look up orders and prices with the tools. Never guess."
+const val HELP_DESK = "You work at the help desk of Pixel Pizza. Never guess where an order is or what something costs."
 
 fun helpDesk(model: ChatModel): CompiledGraph<AgentState> = toolAgent(model, tools = listOf(orderStatus, menuPrice), system = HELP_DESK)
 
@@ -63,18 +107,18 @@ suspend fun main() {
 }
 ```
 
-The file has three more things. `pretendModel` stands in for a real model, as in level 8: it asks
-for a tool when the question has a word it knows, and answers with what the tools returned.
-`describe` turns one message into one line of text. `ticketDesk` is explained
-[further down](#the-agent-inside-your-own-graph).
+The file also has the `pretendModel`, which asks for a tool when the question has a word it knows
+and answers with what the tools returned, and `describe`, which turns one message into one line.
 
 ## Run it
 
 ```bash
-./gradlew :samples:runLevel9
+./gradlew :samples:runLevel6
 ```
 
 ```
+Thanks for your message! We are looking into it.
+
 customer: I'm Ana. Where is my pizza, and how much is a cola?
 model asks for: order_status {"customer":"Ana"}, menu_price {"item":"cola"}
 order_status: The pizza for Ana left the oven and the driver is 5 minutes away.
@@ -84,7 +128,8 @@ model: The pizza for Ana left the oven and the driver is 5 minutes away. One col
 Hi Ben! One salad costs 6 euros.
 ```
 
-The first five lines are the conversation of the agent. The last line comes from `ticketDesk`.
+The first line is the model without tools. The next five are the conversation of the agent. The
+last line is explained [further down](#the-agent-inside-your-own-graph).
 
 ## What happened
 
@@ -104,18 +149,16 @@ description. When the model asks for the tool, it fills in the fields, and your 
 an `OrderLookup` that is ready to use.
 
 `@Description` tells the model what a field is for. Write the descriptions with care: they are all
-the model knows about your tool.
-
-`@Serializable` comes from kotlinx.serialization and needs its Gradle plugin. This repository
-already has it.
+the model knows about your tool. `@Serializable` comes from kotlinx.serialization and needs its
+Gradle plugin, which this repository already has.
 
 ### The loop
 
-Read the output again, line by line:
+Read the conversation in the output again, line by line:
 
 1. The `model` node sends the question to the model, with the list of tools. The model does not
    answer yet. It asks for two tools in one go.
-2. The `tools` node runs both functions, at the same time, as in level 5. Their results are added
+2. The `tools` node runs both functions, at the same time, as in level 4. Their results are added
    to the conversation.
 3. The `model` node sends the conversation again, now with the results. This time the model writes
    its answer and asks for nothing, so the run goes to `END`.
@@ -208,7 +251,7 @@ Hi Ben! One salad costs 6 euros.
 ### Watching the answer arrive
 
 A real model writes its answer word by word, and a person would rather read along than wait. Run
-the agent with `stream` from level 6, and each event that carries a piece of the answer has it in
+the agent with `stream` from level 4, and each event that carries a piece of the answer has it in
 `textDelta`:
 
 ```kotlin
@@ -222,33 +265,36 @@ pretend model has nothing to write slowly, so its whole answer arrives as one pi
 
 ### Plugging in a real model
 
-The `ChatModel` of this level is not the one of level 8. Level 8 used the type of LangChain4j. This
-one belongs to langgraph-kt (`org.langgraphkt.agent.ChatModel`, in the module `langgraph-kt-agent`)
-and works on every platform. Both have the same name, so check the import when you mix them.
+Build a real `ChatModel` and pass it in. Nothing else changes.
 
 ```kotlin
 // Claude, on every platform. From the module langgraph-kt-anthropic; HttpClient is the Ktor client.
 val model: ChatModel = AnthropicChatModel(HttpClient(), apiKey = System.getenv("ANTHROPIC_API_KEY"), model = "claude-opus-5-5")
 
-// Or a LangChain4j model like the one of level 8, on the JVM. From the module langgraph-kt-langchain4j.
-val model: ChatModel = LangChain4jChatModel(langChain4jModel)
+// Most other models, on the JVM, through LangChain4j. From the module langgraph-kt-langchain4j.
+val model: ChatModel = LangChain4jChatModel(OpenAiChatModel.builder().apiKey(System.getenv("OPENAI_API_KEY")).modelName("gpt-5").build())
 
 val state = helpDesk(model).invoke(AgentState("I'm Ana. Where is my pizza?")).state
 ```
 
-Nothing else changes. The
+This snippet is not part of the runnable level, because it needs an account and a key. Keep the key
+out of your source code; read it from an environment variable as shown. The
 [ToolAgent sample](../samples/src/main/kotlin/org/langgraphkt/samples/ToolAgent.kt) is this help
-desk with Claude: it uses the real model when the environment variable `ANTHROPIC_API_KEY` is set,
-and a pretend one when it is not.
+desk with Claude: it uses the real model when `ANTHROPIC_API_KEY` is set, and a pretend one when it
+is not. The README has more under [AI models](../README.md#ai-models).
 
-### What to know before you ship it
+### What changes when the model is real
 
-- **Ask a person before a tool does something that cannot be undone.** The node that runs the tools
-  is named `tools`, so `interruptBefore = setOf("tools")` from level 7 pauses the run before any
-  tool runs. The README shows how to read the calls that wait and how to say no, under
-  [Agents with tools](../README.md#agents-with-tools).
-- **Every round costs a model call.** Asking for tools and getting the results is one round, and it
-  takes two steps. With the default `maxIterations` of 25, an agent can do twelve rounds.
+- **It is slow.** A call takes seconds. Level 4 lets you show progress and make several calls at
+  once.
+- **It is not always right.** That is what the loop of level 3 is for, and the pause of level 5.
+- **It can fail.** The network drops, the provider is busy. That is the next level.
+- **It costs money.** Every call does. Asking for tools and getting the results is one round of the
+  agent, and it takes two steps, so the default `maxIterations` of 25 allows twelve rounds.
+- **Its tools act for you.** Ask a person before a tool does something that cannot be undone. The
+  node that runs the tools is named `tools`, so `interruptBefore = setOf("tools")` from level 5
+  pauses the run before any tool runs. The README shows how to read the calls that wait and how to
+  say no, under [Agents with tools](../README.md#agents-with-tools).
 
 ## Your turn
 
@@ -258,13 +304,15 @@ and a pretend one when it is not.
 3. Write a third tool, `opening_hours`, with an input class that has a `day`, and add it to the
    list in `helpDesk`. The pretend model does not know it. Teach it: in `pretendModel`, add a call
    to your tool when the question contains "open".
+4. If you have an API key, plug in a real model as shown above.
 
 ## Level complete
 
 You can now:
 
-- write a tool that a model can call,
-- build an agent with `toolAgent` and read its conversation,
+- make a node that asks an AI model, and swap a pretend model for a real one without touching the
+  graph,
+- write a tool and build an agent with `toolAgent`,
 - put the agent inside a graph of your own with `toolLoop`.
 
-[Back to level 8](08-a-real-ai-model.md) · [All levels](README.md) · Next: [Level 10, game over screens](10-game-over-screens.md)
+[Back to level 5](05-save-points.md) · [All levels](README.md) · Next: [Level 7, game over screens](07-game-over-screens.md)

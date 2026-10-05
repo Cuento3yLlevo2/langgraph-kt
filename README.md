@@ -176,10 +176,12 @@ before `1.0`; the [changelog](CHANGELOG.md) lists what changes in each version.
 
 ## Tutorial
 
-New to agent workflows, or to graphs? The [tutorial](docs/README.md) starts from zero and adds one
-idea per level, like a game: a node, a choice, a loop, parallel work, pausing for a human, an agent
-with tools. Every level is a small program you can run, for example `./gradlew :samples:runLevel1`.
-The [cheat sheet](docs/cheat-sheet.md) has every term and every call on one page.
+New to agent workflows, or to graphs? The [tutorial](docs/README.md) starts from zero and has eight
+levels, like a game: a line of nodes, a choice, a loop, parallel work, pausing for a human, an agent
+with tools, errors, and a complete workflow. Every level is a small program you can run, for example
+`./gradlew :samples:runLevel1`, and matches a stage of the
+[Pixel Pizza game](https://cuento3yllevo2.github.io/langgraph-kt-demo/). The
+[cheat sheet](docs/cheat-sheet.md) has every term and every call on one page.
 
 ## Guides
 
@@ -674,7 +676,7 @@ toolLoop(
 
 Runnable version: [`ToolAgent`](samples/src/main/kotlin/org/langgraphkt/samples/ToolAgent.kt). It
 runs without an API key, and with Claude when `ANTHROPIC_API_KEY` is set.
-[Level 9 of the tutorial](docs/09-an-agent-with-tools.md) explains the same agent step by step.
+[Level 6 of the tutorial](docs/06-the-agent.md) explains the same agent step by step.
 
 ### Inspecting a graph
 
@@ -732,7 +734,7 @@ Runnable examples live in [`samples/`](samples/src/main/kotlin/org/langgraphkt/s
 ./gradlew :samples:runParallelResearch  # three lookups at the same time
 ./gradlew :samples:runChatAgent         # a chat agent built on a LangChain4j model
 ./gradlew :samples:runToolAgent         # an agent that calls tools, with or without an API key
-./gradlew :samples:runLevel1            # ... runLevel11, the levels of the tutorial
+./gradlew :samples:runLevel1            # ... runLevel8, the levels of the tutorial
 ```
 
 For a complete app, see [langgraph-kt-demo](https://github.com/Cuento3yLlevo2/langgraph-kt-demo),

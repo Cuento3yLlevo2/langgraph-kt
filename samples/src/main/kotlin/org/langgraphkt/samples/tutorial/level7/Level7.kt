@@ -3,54 +3,86 @@ package org.langgraphkt.samples.tutorial.level7
 import org.langgraphkt.CompiledGraph
 import org.langgraphkt.END
 import org.langgraphkt.GraphConfig
-import org.langgraphkt.GraphResult
+import org.langgraphkt.LangGraphException
 import org.langgraphkt.MemoryCheckpointer
+import org.langgraphkt.NodeExecutionException
 import org.langgraphkt.START
 import org.langgraphkt.StateGraph
 
 data class Ticket(
     val customer: String,
     val message: String,
-    val refund: Int = 0,
-    val approved: Boolean = false,
     val reply: String = "",
 )
 
-const val PAY = "pay"
-
-/** Level 7 of the tutorial in `docs/`: the run stops before money moves and waits for a human. */
-fun helpDesk(): CompiledGraph<Ticket> =
+/** Mistake 1: an arrow points at "anwser", but the node is called "answer". */
+fun misspelledNode(): CompiledGraph<Ticket> =
     StateGraph<Ticket> {
-        val prepare = node("prepare") { ticket -> ticket.copy(refund = 12) }
-        val pay =
-            node(PAY) { ticket ->
-                if (ticket.approved) {
-                    ticket.copy(reply = "Sorry ${ticket.customer}! We sent you ${ticket.refund} euros.")
-                } else {
-                    ticket.copy(reply = "Sorry ${ticket.customer}, we cannot refund this order.")
-                }
-            }
+        node("answer") { ticket -> ticket.copy(reply = "Hello!") }
 
-        START then prepare then pay then END
+        edge(START, "anwser")
     }.compile()
 
-suspend fun main() {
-    val graph = helpDesk()
-    val config =
-        GraphConfig(
-            threadId = "ticket-42",
-            checkpointer = MemoryCheckpointer<Ticket>(),
-            interruptBefore = setOf(PAY),
-        )
+/** Mistake 2: no arrow leads to "check", so it could never run. */
+fun forgottenArrow(): CompiledGraph<Ticket> =
+    StateGraph<Ticket> {
+        val answer = node("answer") { ticket -> ticket.copy(reply = "Hello!") }
+        node("check") { ticket -> ticket }
 
-    when (val paused = graph.invoke(Ticket(customer = "Ana", message = "My pizza arrived cold. I want a refund."), config)) {
-        is GraphResult.Interrupted -> println("Paused before ${paused.nextNodes}. Refund: ${paused.state.refund} euros.")
-        is GraphResult.Completed -> error("Expected the run to pause before paying")
+        START then answer then END
+    }.compile()
+
+/** Mistake 3: "read" starts two nodes at once, but nothing says how to merge their results. */
+fun missingReducer(): CompiledGraph<Ticket> =
+    StateGraph<Ticket> {
+        val read = node("read") { ticket -> ticket }
+        val kitchen = node("kitchen") { ticket -> ticket }
+        val driver = node("driver") { ticket -> ticket }
+
+        START then read
+        read then kitchen then END
+        read then driver then END
+    }.compile()
+
+/** Mistake 4: the loop has no way out. This one compiles; it fails when it runs. */
+fun endlessLoop(): CompiledGraph<Ticket> =
+    StateGraph<Ticket> {
+        val write = node("write") { ticket -> ticket.copy(reply = ticket.reply + "!") }
+
+        START then write then write
+    }.compile()
+
+/** A help desk whose second node depends on something that can fail: a phone call to the kitchen. */
+fun helpDesk(callKitchen: suspend () -> String): CompiledGraph<Ticket> =
+    StateGraph<Ticket> {
+        val greet = node("greet") { ticket -> ticket.copy(reply = "Hi ${ticket.customer}!") }
+        val kitchen = node("kitchen") { ticket -> ticket.copy(reply = "${ticket.reply} ${callKitchen()}") }
+
+        START then greet then kitchen then END
+    }.compile()
+
+/** Level 7 of the tutorial in `docs/`: what the library says when something is wrong. */
+suspend fun main() {
+    val ticket = Ticket(customer = "Ana", message = "Where is my pizza?")
+
+    val mistakes: List<suspend () -> Unit> =
+        listOf({ misspelledNode() }, { forgottenArrow() }, { missingReducer() }, { endlessLoop().invoke(ticket) })
+    for (mistake in mistakes) {
+        try {
+            mistake()
+        } catch (e: LangGraphException) {
+            println("${e::class.simpleName}: ${e.message}")
+        }
     }
 
-    print("Approve the refund? [y/N] ")
-    val approved = readlnOrNull()?.trim().equals("y", ignoreCase = true)
-
-    val finished = graph.resume(config) { ticket -> ticket.copy(approved = approved) }
-    println(finished.state.reply)
+    // A node fails. The steps before it are saved, so resume() retries from there.
+    var calls = 0
+    val graph = helpDesk { if (++calls == 1) error("the kitchen phone is busy") else "Your pizza is in the oven." }
+    val config = GraphConfig(threadId = "ticket-42", checkpointer = MemoryCheckpointer<Ticket>())
+    try {
+        graph.invoke(ticket, config)
+    } catch (e: NodeExecutionException) {
+        println("${e::class.simpleName}: ${e.message}")
+    }
+    println("After a retry: ${graph.resume(config).state.reply}")
 }
