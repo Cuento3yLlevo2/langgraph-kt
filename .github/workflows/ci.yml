@@ -49,10 +49,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # The release is built on macOS and runs every test there, so the tests that need a
-          # browser run on macOS here as well.
+          # The release is built on macOS and runs this check first. Running the same check here
+          # shows a failure on a pull request, not after the tag is pushed. The job keeps its name
+          # because the protection of main requires it.
           - os: macos-latest
-            tasks: iosSimulatorArm64Test macosArm64Test :langgraph-kt-checkpoint-browser:allTests
+            tasks: check apiCheck
           - os: windows-latest
             tasks: mingwX64Test
     runs-on: ${{ matrix.os }}
@@ -66,3 +67,9 @@ jobs:
       - name: Run native tests
         shell: bash
         run: ./gradlew ${{ matrix.tasks }} --continue
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-reports-${{ matrix.os }}
+          path: '**/build/reports/'
