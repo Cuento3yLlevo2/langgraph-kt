@@ -9,7 +9,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
  */
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
-    id("langgraph.quality")
+    id("telar.quality")
 }
 
 kotlin {

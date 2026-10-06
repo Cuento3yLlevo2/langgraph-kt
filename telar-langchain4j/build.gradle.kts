@@ -1,8 +1,8 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    id("langgraph.jvm-library")
-    id("langgraph.publishing")
+    id("telar.jvm-library")
+    id("telar.publishing")
     // The tests declare a @Serializable tool input.
     id("org.jetbrains.kotlin.plugin.serialization")
 }

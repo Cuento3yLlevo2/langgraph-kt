@@ -1,5 +1,5 @@
 plugins {
-    id("langgraph.root")
+    id("telar.root")
 }
 
 dependencies {

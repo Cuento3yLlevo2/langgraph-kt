@@ -1,6 +1,6 @@
 plugins {
-    id("langgraph.kmp-library")
-    id("langgraph.publishing")
+    id("telar.kmp-library")
+    id("telar.publishing")
 }
 
 kotlin {

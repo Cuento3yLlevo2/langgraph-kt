@@ -52,9 +52,9 @@ is a directed graph: nodes transform an immutable state and edges decide what ru
   `ChatModel`; `chatNode` / `chatMessagesNode` build a node straight from a LangChain4j model
 - **`samples`**: runnable examples with tests; not published. `samples/.../tutorial/levelN` is the
   code of the tutorial in `docs/`; a page shows its level's code and output, so change both together
-- **`build-logic`**: convention plugins `langgraph.kmp-library`, `langgraph.web-library`,
-  `langgraph.jvm-library`, `langgraph.quality` (ktlint, Kover, Dokka), `langgraph.publishing`,
-  `langgraph.root`
+- **`build-logic`**: convention plugins `telar.kmp-library`, `telar.web-library`,
+  `telar.jvm-library`, `telar.quality` (ktlint, Kover, Dokka), `telar.publishing`,
+  `telar.root`
 
 ### Execution Flow
 

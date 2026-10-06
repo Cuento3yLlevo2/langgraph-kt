@@ -1,6 +1,6 @@
 plugins {
-    id("langgraph.web-library")
-    id("langgraph.publishing")
+    id("telar.web-library")
+    id("telar.publishing")
     id("org.jetbrains.kotlin.plugin.serialization")
 }
 

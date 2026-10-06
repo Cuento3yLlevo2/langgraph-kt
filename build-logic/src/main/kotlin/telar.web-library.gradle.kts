@@ -8,7 +8,7 @@ import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
  */
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
-    id("langgraph.quality")
+    id("telar.quality")
 }
 
 kotlin {
