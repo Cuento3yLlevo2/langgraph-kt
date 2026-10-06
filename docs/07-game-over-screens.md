@@ -155,7 +155,7 @@ Without a checkpointer there is no save, and the only way to try again is `invok
 
 ## All the game over screens
 
-Every exception the library throws is a `LangGraphException`, so one `catch` can handle them all.
+Every exception the library throws is a `TelarException`, so one `catch` can handle them all.
 
 | Exception | Meaning | What to do |
 |---|---|---|

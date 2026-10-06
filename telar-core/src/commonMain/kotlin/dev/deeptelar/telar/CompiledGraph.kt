@@ -321,10 +321,10 @@ public class CompiledGraph<State> internal constructor(
     /**
      * Runs [block], which calls code of the application (a node, the condition of an edge or the
      * reducer), and rethrows what it throws as the exception that [failure] builds. That includes a
-     * [LangGraphException], such as the failure of a graph that a node runs, so the caller always
+     * [TelarException], such as the failure of a graph that a node runs, so the caller always
      * learns which part of this graph failed.
      */
-    private suspend inline fun <T> wrapFailure(failure: (Exception) -> LangGraphException, block: () -> T): T =
+    private suspend inline fun <T> wrapFailure(failure: (Exception) -> TelarException, block: () -> T): T =
         try {
             block()
         } catch (e: CancellationException) {

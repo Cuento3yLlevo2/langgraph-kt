@@ -88,7 +88,7 @@ next active nodes. A checkpoint is saved after every step when a checkpointer is
 | `GraphTopology` | Nodes and edges of a compiled graph, from `CompiledGraph.topology` |
 | `Checkpointer<State>` | `save` / `load` / `delete` per thread |
 | `Checkpoint<State>` | `state`, `nextNodes` (empty when complete), `step`, `interruptedBefore` |
-| `LangGraphException` | Base of all library exceptions (see `Exceptions.kt`) |
+| `TelarException` | Base of all library exceptions (see `Exceptions.kt`) |
 
 ### Key Design Rules
 
@@ -98,7 +98,7 @@ next active nodes. A checkpoint is saved after every step when a checkpointer is
    `withContext(Dispatchers.IO)`. Never swallow `CancellationException`.
 3. **Small, type-safe API.** Explicit API mode is on: public declarations need `public`, explicit
    types and KDoc. Keep internals `internal`. Validate in `compile()` rather than at run time, and
-   throw `LangGraphException` subclasses.
+   throw `TelarException` subclasses.
 4. **Core stays common.** No platform or third-party dependencies in `telar-core`.
 
 ### Testing

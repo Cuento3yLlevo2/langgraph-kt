@@ -74,7 +74,7 @@ Chrome. Install Chrome or Chromium, and set `CHROME_BIN` to its path if it is no
   type, and KDoc.
 - Keep implementation details `internal`. Graphs are only created through `StateGraph`.
 - Prefer checks that fail in `compile()` over checks that fail in the middle of a run, and throw a
-  `LangGraphException` subclass rather than a generic exception.
+  `TelarException` subclass rather than a generic exception.
 - Core must stay in `commonMain` and depend only on kotlinx-coroutines. Platform- or
   library-specific code belongs in its own module.
 

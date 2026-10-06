@@ -3,11 +3,11 @@ package dev.deeptelar.telar.samples.tutorial.level7
 import dev.deeptelar.telar.CompiledGraph
 import dev.deeptelar.telar.END
 import dev.deeptelar.telar.GraphConfig
-import dev.deeptelar.telar.LangGraphException
 import dev.deeptelar.telar.MemoryCheckpointer
 import dev.deeptelar.telar.NodeExecutionException
 import dev.deeptelar.telar.START
 import dev.deeptelar.telar.StateGraph
+import dev.deeptelar.telar.TelarException
 
 data class Ticket(
     val customer: String,
@@ -70,7 +70,7 @@ suspend fun main() {
     for (mistake in mistakes) {
         try {
             mistake()
-        } catch (e: LangGraphException) {
+        } catch (e: TelarException) {
             println("${e::class.simpleName}: ${e.message}")
         }
     }

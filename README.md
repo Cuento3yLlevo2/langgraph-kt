@@ -721,7 +721,7 @@ topology.dynamicRoutes         // nodes whose conditional edge declares no targe
 
 Mistakes in the graph itself (an unknown node name, a node nothing leads to, two nodes that return
 a whole state in the same step without a reducer) are reported by `compile()`, before anything runs. Everything the library throws
-extends `LangGraphException`:
+extends `TelarException`:
 
 | Exception | When |
 |---|---|

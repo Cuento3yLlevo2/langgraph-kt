@@ -149,7 +149,7 @@ agent.invoke(state.withUserMessage("And two?"))  // the next turn of the convers
 
 ## Errors
 
-All are `LangGraphException`s. [Level 7](07-game-over-screens.md) explains each one.
+All are `TelarException`s. [Level 7](07-game-over-screens.md) explains each one.
 
 | Exception | Meaning |
 |---|---|

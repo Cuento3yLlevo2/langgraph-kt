@@ -17,13 +17,13 @@ public final class dev/deeptelar/telar/Checkpoint {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class dev/deeptelar/telar/CheckpointCorruptedException : dev/deeptelar/telar/LangGraphException {
+public final class dev/deeptelar/telar/CheckpointCorruptedException : dev/deeptelar/telar/TelarException {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getThreadId ()Ljava/lang/String;
 }
 
-public final class dev/deeptelar/telar/CheckpointNotFoundException : dev/deeptelar/telar/LangGraphException {
+public final class dev/deeptelar/telar/CheckpointNotFoundException : dev/deeptelar/telar/TelarException {
 	public fun <init> (Ljava/lang/String;)V
 	public final fun getThreadId ()Ljava/lang/String;
 }
@@ -52,12 +52,12 @@ public final class dev/deeptelar/telar/ConstantsKt {
 	public static final field START Ljava/lang/String;
 }
 
-public final class dev/deeptelar/telar/EdgeConditionException : dev/deeptelar/telar/LangGraphException {
+public final class dev/deeptelar/telar/EdgeConditionException : dev/deeptelar/telar/TelarException {
 	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
 	public final fun getFrom ()Ljava/lang/String;
 }
 
-public final class dev/deeptelar/telar/GraphAlreadyCompletedException : dev/deeptelar/telar/LangGraphException {
+public final class dev/deeptelar/telar/GraphAlreadyCompletedException : dev/deeptelar/telar/TelarException {
 	public fun <init> (Ljava/lang/String;)V
 	public final fun getThreadId ()Ljava/lang/String;
 }
@@ -242,22 +242,17 @@ public final class dev/deeptelar/telar/GraphTopology {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class dev/deeptelar/telar/GraphValidationException : dev/deeptelar/telar/LangGraphException {
+public final class dev/deeptelar/telar/GraphValidationException : dev/deeptelar/telar/TelarException {
 	public fun <init> (Ljava/lang/String;)V
 }
 
-public final class dev/deeptelar/telar/InvalidRouteException : dev/deeptelar/telar/LangGraphException {
+public final class dev/deeptelar/telar/InvalidRouteException : dev/deeptelar/telar/TelarException {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun getFrom ()Ljava/lang/String;
 	public final fun getTarget ()Ljava/lang/String;
 }
 
-public abstract class dev/deeptelar/telar/LangGraphException : java/lang/RuntimeException {
-	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-}
-
-public final class dev/deeptelar/telar/MaxIterationsExceededException : dev/deeptelar/telar/LangGraphException {
+public final class dev/deeptelar/telar/MaxIterationsExceededException : dev/deeptelar/telar/TelarException {
 	public fun <init> (I)V
 	public final fun getMaxIterations ()I
 }
@@ -269,7 +264,7 @@ public final class dev/deeptelar/telar/MemoryCheckpointer : dev/deeptelar/telar/
 	public fun save (Ljava/lang/String;Ldev/deeptelar/telar/Checkpoint;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
-public final class dev/deeptelar/telar/NodeExecutionException : dev/deeptelar/telar/LangGraphException {
+public final class dev/deeptelar/telar/NodeExecutionException : dev/deeptelar/telar/TelarException {
 	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
 	public final fun getNodeName ()Ljava/lang/String;
 }
@@ -293,7 +288,7 @@ public abstract interface class dev/deeptelar/telar/Reducer {
 	public abstract fun reduce (Ljava/lang/Object;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
-public final class dev/deeptelar/telar/ReducerException : dev/deeptelar/telar/LangGraphException {
+public final class dev/deeptelar/telar/ReducerException : dev/deeptelar/telar/TelarException {
 	public fun <init> (Ljava/util/List;Ljava/lang/Throwable;)V
 	public final fun getNodes ()Ljava/util/List;
 }
@@ -323,5 +318,10 @@ public final class dev/deeptelar/telar/StateGraphKt {
 public abstract interface class dev/deeptelar/telar/StateSerializer {
 	public abstract fun deserialize (Ljava/lang/String;)Ljava/lang/Object;
 	public abstract fun serialize (Ljava/lang/Object;)Ljava/lang/String;
+}
+
+public abstract class dev/deeptelar/telar/TelarException : java/lang/RuntimeException {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 

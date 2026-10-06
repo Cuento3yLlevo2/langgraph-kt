@@ -174,7 +174,7 @@ public final class dev/deeptelar/telar/agent/ChatModel$DefaultImpls {
 	public static fun stream (Ldev/deeptelar/telar/agent/ChatModel;Ldev/deeptelar/telar/agent/ChatRequest;)Lkotlinx/coroutines/flow/Flow;
 }
 
-public final class dev/deeptelar/telar/agent/ChatModelException : dev/deeptelar/telar/LangGraphException {
+public final class dev/deeptelar/telar/agent/ChatModelException : dev/deeptelar/telar/TelarException {
 	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }

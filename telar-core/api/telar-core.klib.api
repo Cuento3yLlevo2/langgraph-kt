@@ -168,8 +168,8 @@ sealed interface <#A: out kotlin/Any?> dev.deeptelar.telar/GraphResult { // dev.
     }
 }
 
-abstract class dev.deeptelar.telar/LangGraphException : kotlin/RuntimeException { // dev.deeptelar.telar/LangGraphException|null[0]
-    constructor <init>(kotlin/String, kotlin/Throwable? = ...) // dev.deeptelar.telar/LangGraphException.<init>|<init>(kotlin.String;kotlin.Throwable?){}[0]
+abstract class dev.deeptelar.telar/TelarException : kotlin/RuntimeException { // dev.deeptelar.telar/TelarException|null[0]
+    constructor <init>(kotlin/String, kotlin/Throwable? = ...) // dev.deeptelar.telar/TelarException.<init>|<init>(kotlin.String;kotlin.Throwable?){}[0]
 }
 
 final class <#A: kotlin/Any?> dev.deeptelar.telar/Checkpoint { // dev.deeptelar.telar/Checkpoint|null[0]
@@ -261,28 +261,28 @@ final class <#A: kotlin/Any?> dev.deeptelar.telar/StateGraph { // dev.deeptelar.
     final fun node(kotlin/String, kotlin.coroutines/SuspendFunction1<#A, #A>): dev.deeptelar.telar/NodeRef // dev.deeptelar.telar/StateGraph.node|node(kotlin.String;kotlin.coroutines.SuspendFunction1<1:0,1:0>){}[0]
 }
 
-final class dev.deeptelar.telar/CheckpointCorruptedException : dev.deeptelar.telar/LangGraphException { // dev.deeptelar.telar/CheckpointCorruptedException|null[0]
+final class dev.deeptelar.telar/CheckpointCorruptedException : dev.deeptelar.telar/TelarException { // dev.deeptelar.telar/CheckpointCorruptedException|null[0]
     constructor <init>(kotlin/String, kotlin/String, kotlin/Throwable? = ...) // dev.deeptelar.telar/CheckpointCorruptedException.<init>|<init>(kotlin.String;kotlin.String;kotlin.Throwable?){}[0]
 
     final val threadId // dev.deeptelar.telar/CheckpointCorruptedException.threadId|{}threadId[0]
         final fun <get-threadId>(): kotlin/String // dev.deeptelar.telar/CheckpointCorruptedException.threadId.<get-threadId>|<get-threadId>(){}[0]
 }
 
-final class dev.deeptelar.telar/CheckpointNotFoundException : dev.deeptelar.telar/LangGraphException { // dev.deeptelar.telar/CheckpointNotFoundException|null[0]
+final class dev.deeptelar.telar/CheckpointNotFoundException : dev.deeptelar.telar/TelarException { // dev.deeptelar.telar/CheckpointNotFoundException|null[0]
     constructor <init>(kotlin/String) // dev.deeptelar.telar/CheckpointNotFoundException.<init>|<init>(kotlin.String){}[0]
 
     final val threadId // dev.deeptelar.telar/CheckpointNotFoundException.threadId|{}threadId[0]
         final fun <get-threadId>(): kotlin/String // dev.deeptelar.telar/CheckpointNotFoundException.threadId.<get-threadId>|<get-threadId>(){}[0]
 }
 
-final class dev.deeptelar.telar/EdgeConditionException : dev.deeptelar.telar/LangGraphException { // dev.deeptelar.telar/EdgeConditionException|null[0]
+final class dev.deeptelar.telar/EdgeConditionException : dev.deeptelar.telar/TelarException { // dev.deeptelar.telar/EdgeConditionException|null[0]
     constructor <init>(kotlin/String, kotlin/Throwable) // dev.deeptelar.telar/EdgeConditionException.<init>|<init>(kotlin.String;kotlin.Throwable){}[0]
 
     final val from // dev.deeptelar.telar/EdgeConditionException.from|{}from[0]
         final fun <get-from>(): kotlin/String // dev.deeptelar.telar/EdgeConditionException.from.<get-from>|<get-from>(){}[0]
 }
 
-final class dev.deeptelar.telar/GraphAlreadyCompletedException : dev.deeptelar.telar/LangGraphException { // dev.deeptelar.telar/GraphAlreadyCompletedException|null[0]
+final class dev.deeptelar.telar/GraphAlreadyCompletedException : dev.deeptelar.telar/TelarException { // dev.deeptelar.telar/GraphAlreadyCompletedException|null[0]
     constructor <init>(kotlin/String) // dev.deeptelar.telar/GraphAlreadyCompletedException.<init>|<init>(kotlin.String){}[0]
 
     final val threadId // dev.deeptelar.telar/GraphAlreadyCompletedException.threadId|{}threadId[0]
@@ -328,11 +328,11 @@ final class dev.deeptelar.telar/GraphTopology { // dev.deeptelar.telar/GraphTopo
     final fun toString(): kotlin/String // dev.deeptelar.telar/GraphTopology.toString|toString(){}[0]
 }
 
-final class dev.deeptelar.telar/GraphValidationException : dev.deeptelar.telar/LangGraphException { // dev.deeptelar.telar/GraphValidationException|null[0]
+final class dev.deeptelar.telar/GraphValidationException : dev.deeptelar.telar/TelarException { // dev.deeptelar.telar/GraphValidationException|null[0]
     constructor <init>(kotlin/String) // dev.deeptelar.telar/GraphValidationException.<init>|<init>(kotlin.String){}[0]
 }
 
-final class dev.deeptelar.telar/InvalidRouteException : dev.deeptelar.telar/LangGraphException { // dev.deeptelar.telar/InvalidRouteException|null[0]
+final class dev.deeptelar.telar/InvalidRouteException : dev.deeptelar.telar/TelarException { // dev.deeptelar.telar/InvalidRouteException|null[0]
     constructor <init>(kotlin/String, kotlin/String) // dev.deeptelar.telar/InvalidRouteException.<init>|<init>(kotlin.String;kotlin.String){}[0]
 
     final val from // dev.deeptelar.telar/InvalidRouteException.from|{}from[0]
@@ -341,14 +341,14 @@ final class dev.deeptelar.telar/InvalidRouteException : dev.deeptelar.telar/Lang
         final fun <get-target>(): kotlin/String // dev.deeptelar.telar/InvalidRouteException.target.<get-target>|<get-target>(){}[0]
 }
 
-final class dev.deeptelar.telar/MaxIterationsExceededException : dev.deeptelar.telar/LangGraphException { // dev.deeptelar.telar/MaxIterationsExceededException|null[0]
+final class dev.deeptelar.telar/MaxIterationsExceededException : dev.deeptelar.telar/TelarException { // dev.deeptelar.telar/MaxIterationsExceededException|null[0]
     constructor <init>(kotlin/Int) // dev.deeptelar.telar/MaxIterationsExceededException.<init>|<init>(kotlin.Int){}[0]
 
     final val maxIterations // dev.deeptelar.telar/MaxIterationsExceededException.maxIterations|{}maxIterations[0]
         final fun <get-maxIterations>(): kotlin/Int // dev.deeptelar.telar/MaxIterationsExceededException.maxIterations.<get-maxIterations>|<get-maxIterations>(){}[0]
 }
 
-final class dev.deeptelar.telar/NodeExecutionException : dev.deeptelar.telar/LangGraphException { // dev.deeptelar.telar/NodeExecutionException|null[0]
+final class dev.deeptelar.telar/NodeExecutionException : dev.deeptelar.telar/TelarException { // dev.deeptelar.telar/NodeExecutionException|null[0]
     constructor <init>(kotlin/String, kotlin/Throwable) // dev.deeptelar.telar/NodeExecutionException.<init>|<init>(kotlin.String;kotlin.Throwable){}[0]
 
     final val nodeName // dev.deeptelar.telar/NodeExecutionException.nodeName|{}nodeName[0]
@@ -367,7 +367,7 @@ final class dev.deeptelar.telar/NodeRef { // dev.deeptelar.telar/NodeRef|null[0]
     }
 }
 
-final class dev.deeptelar.telar/ReducerException : dev.deeptelar.telar/LangGraphException { // dev.deeptelar.telar/ReducerException|null[0]
+final class dev.deeptelar.telar/ReducerException : dev.deeptelar.telar/TelarException { // dev.deeptelar.telar/ReducerException|null[0]
     constructor <init>(kotlin.collections/List<kotlin/String>, kotlin/Throwable) // dev.deeptelar.telar/ReducerException.<init>|<init>(kotlin.collections.List<kotlin.String>;kotlin.Throwable){}[0]
 
     final val nodes // dev.deeptelar.telar/ReducerException.nodes|{}nodes[0]

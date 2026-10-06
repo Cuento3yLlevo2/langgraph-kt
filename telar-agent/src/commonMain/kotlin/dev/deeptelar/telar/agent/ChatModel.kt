@@ -1,7 +1,7 @@
 package dev.deeptelar.telar.agent
 
 import dev.deeptelar.telar.GraphEvent
-import dev.deeptelar.telar.LangGraphException
+import dev.deeptelar.telar.TelarException
 import dev.deeptelar.telar.isProgressCollected
 import dev.deeptelar.telar.reportProgress
 import kotlinx.coroutines.flow.Flow
@@ -180,4 +180,4 @@ public data class TokenUsage(
 public class ChatModelException(
     message: String,
     cause: Throwable? = null,
-) : LangGraphException(message, cause)
+) : TelarException(message, cause)

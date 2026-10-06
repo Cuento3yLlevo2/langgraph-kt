@@ -188,7 +188,7 @@ final class dev.deeptelar.telar.agent/AgentState { // dev.deeptelar.telar.agent/
     }
 }
 
-final class dev.deeptelar.telar.agent/ChatModelException : dev.deeptelar.telar/LangGraphException { // dev.deeptelar.telar.agent/ChatModelException|null[0]
+final class dev.deeptelar.telar.agent/ChatModelException : dev.deeptelar.telar/TelarException { // dev.deeptelar.telar.agent/ChatModelException|null[0]
     constructor <init>(kotlin/String, kotlin/Throwable? = ...) // dev.deeptelar.telar.agent/ChatModelException.<init>|<init>(kotlin.String;kotlin.Throwable?){}[0]
 }
 

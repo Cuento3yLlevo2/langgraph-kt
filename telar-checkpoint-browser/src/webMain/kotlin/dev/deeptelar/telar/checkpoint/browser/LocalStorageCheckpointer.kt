@@ -4,8 +4,8 @@ package dev.deeptelar.telar.checkpoint.browser
 
 import dev.deeptelar.telar.Checkpoint
 import dev.deeptelar.telar.Checkpointer
-import dev.deeptelar.telar.LangGraphException
 import dev.deeptelar.telar.StateSerializer
+import dev.deeptelar.telar.TelarException
 import dev.deeptelar.telar.serialization.CheckpointCodec
 import kotlin.js.ExperimentalWasmJsInterop
 
@@ -77,7 +77,7 @@ public class LocalStorageException(
     public val threadId: String,
     message: String,
     cause: Throwable? = null,
-) : LangGraphException("Checkpoint of thread '$threadId': $message", cause)
+) : TelarException("Checkpoint of thread '$threadId': $message", cause)
 
 private fun getItem(key: String): String? = js("globalThis.localStorage.getItem(key)")
 
