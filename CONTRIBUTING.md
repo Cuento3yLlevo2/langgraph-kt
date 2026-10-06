@@ -22,7 +22,7 @@ Useful commands:
 |---|---|
 | `./gradlew check` | Compiles every target, runs all tests that can run on your OS, ktlint, and the coverage gate |
 | `./gradlew :langgraph-kt-core:jvmTest` | Fast feedback: core tests on the JVM only |
-| `./gradlew :langgraph-kt-core:jvmTest --tests "org.langgraphkt.InterruptTest"` | A single test class |
+| `./gradlew :langgraph-kt-core:jvmTest --tests "dev.deeptelar.telar.InterruptTest"` | A single test class |
 | `./gradlew ktlintFormat` | Fixes formatting |
 | `./gradlew apiCheck` / `apiDump` | Checks / updates the public API dumps (see below) |
 | `./gradlew :samples:runQuickStart` | Runs a sample |

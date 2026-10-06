@@ -6,19 +6,19 @@
 // - Show declarations: true
 
 // Library unique name: <langgraph-kt:langgraph-kt-serialization>
-final class <#A: kotlin/Any?> org.langgraphkt.serialization/CheckpointCodec { // org.langgraphkt.serialization/CheckpointCodec|null[0]
-    constructor <init>(org.langgraphkt/StateSerializer<#A>) // org.langgraphkt.serialization/CheckpointCodec.<init>|<init>(org.langgraphkt.StateSerializer<1:0>){}[0]
+final class <#A: kotlin/Any?> dev.deeptelar.telar.serialization/CheckpointCodec { // dev.deeptelar.telar.serialization/CheckpointCodec|null[0]
+    constructor <init>(dev.deeptelar.telar/StateSerializer<#A>) // dev.deeptelar.telar.serialization/CheckpointCodec.<init>|<init>(dev.deeptelar.telar.StateSerializer<1:0>){}[0]
 
-    final fun decode(kotlin/String, kotlin/String): org.langgraphkt/Checkpoint<#A> // org.langgraphkt.serialization/CheckpointCodec.decode|decode(kotlin.String;kotlin.String){}[0]
-    final fun encode(org.langgraphkt/Checkpoint<#A>): kotlin/String // org.langgraphkt.serialization/CheckpointCodec.encode|encode(org.langgraphkt.Checkpoint<1:0>){}[0]
+    final fun decode(kotlin/String, kotlin/String): dev.deeptelar.telar/Checkpoint<#A> // dev.deeptelar.telar.serialization/CheckpointCodec.decode|decode(kotlin.String;kotlin.String){}[0]
+    final fun encode(dev.deeptelar.telar/Checkpoint<#A>): kotlin/String // dev.deeptelar.telar.serialization/CheckpointCodec.encode|encode(dev.deeptelar.telar.Checkpoint<1:0>){}[0]
 }
 
-final class <#A: kotlin/Any?> org.langgraphkt.serialization/KotlinxStateSerializer : org.langgraphkt/StateSerializer<#A> { // org.langgraphkt.serialization/KotlinxStateSerializer|null[0]
-    constructor <init>(kotlinx.serialization/KSerializer<#A>, kotlinx.serialization.json/Json = ...) // org.langgraphkt.serialization/KotlinxStateSerializer.<init>|<init>(kotlinx.serialization.KSerializer<1:0>;kotlinx.serialization.json.Json){}[0]
+final class <#A: kotlin/Any?> dev.deeptelar.telar.serialization/KotlinxStateSerializer : dev.deeptelar.telar/StateSerializer<#A> { // dev.deeptelar.telar.serialization/KotlinxStateSerializer|null[0]
+    constructor <init>(kotlinx.serialization/KSerializer<#A>, kotlinx.serialization.json/Json = ...) // dev.deeptelar.telar.serialization/KotlinxStateSerializer.<init>|<init>(kotlinx.serialization.KSerializer<1:0>;kotlinx.serialization.json.Json){}[0]
 
-    final fun deserialize(kotlin/String): #A // org.langgraphkt.serialization/KotlinxStateSerializer.deserialize|deserialize(kotlin.String){}[0]
-    final fun serialize(#A): kotlin/String // org.langgraphkt.serialization/KotlinxStateSerializer.serialize|serialize(1:0){}[0]
+    final fun deserialize(kotlin/String): #A // dev.deeptelar.telar.serialization/KotlinxStateSerializer.deserialize|deserialize(kotlin.String){}[0]
+    final fun serialize(#A): kotlin/String // dev.deeptelar.telar.serialization/KotlinxStateSerializer.serialize|serialize(1:0){}[0]
 }
 
-final inline fun <#A: reified kotlin/Any?> org.langgraphkt.serialization/CheckpointCodec(kotlinx.serialization.json/Json = ...): org.langgraphkt.serialization/CheckpointCodec<#A> // org.langgraphkt.serialization/CheckpointCodec|CheckpointCodec(kotlinx.serialization.json.Json){0§<kotlin.Any?>}[0]
-final inline fun <#A: reified kotlin/Any?> org.langgraphkt.serialization/KotlinxStateSerializer(kotlinx.serialization.json/Json = ...): org.langgraphkt.serialization/KotlinxStateSerializer<#A> // org.langgraphkt.serialization/KotlinxStateSerializer|KotlinxStateSerializer(kotlinx.serialization.json.Json){0§<kotlin.Any?>}[0]
+final inline fun <#A: reified kotlin/Any?> dev.deeptelar.telar.serialization/CheckpointCodec(kotlinx.serialization.json/Json = ...): dev.deeptelar.telar.serialization/CheckpointCodec<#A> // dev.deeptelar.telar.serialization/CheckpointCodec|CheckpointCodec(kotlinx.serialization.json.Json){0§<kotlin.Any?>}[0]
+final inline fun <#A: reified kotlin/Any?> dev.deeptelar.telar.serialization/KotlinxStateSerializer(kotlinx.serialization.json/Json = ...): dev.deeptelar.telar.serialization/KotlinxStateSerializer<#A> // dev.deeptelar.telar.serialization/KotlinxStateSerializer|KotlinxStateSerializer(kotlinx.serialization.json.Json){0§<kotlin.Any?>}[0]

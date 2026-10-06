@@ -14,13 +14,13 @@ flowchart LR
     S([START]) --> greet --> E([END])
 ```
 
-[`level1/Level1.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level1/Level1.kt)
+[`level1/Level1.kt`](../samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level1/Level1.kt)
 
 ```kotlin
-import org.langgraphkt.CompiledGraph
-import org.langgraphkt.END
-import org.langgraphkt.START
-import org.langgraphkt.StateGraph
+import dev.deeptelar.telar.CompiledGraph
+import dev.deeptelar.telar.END
+import dev.deeptelar.telar.START
+import dev.deeptelar.telar.StateGraph
 
 data class Ticket(
     val customer: String,

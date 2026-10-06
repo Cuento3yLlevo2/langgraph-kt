@@ -52,7 +52,7 @@ flowchart LR
 ```
 
 ```kotlin
-import org.langgraphkt.*
+import dev.deeptelar.telar.*
 
 enum class Category { REFUND, TECHNICAL, ESCALATION }
 
@@ -128,7 +128,7 @@ suspend fun main() {
 }
 ```
 
-This is the [`QuickStart`](samples/src/main/kotlin/org/langgraphkt/samples/QuickStart.kt) sample. To
+This is the [`QuickStart`](samples/src/main/kotlin/dev/deeptelar/telar/samples/QuickStart.kt) sample. To
 run it from a clone of this repository:
 
 ```bash
@@ -304,7 +304,7 @@ when (val result = graph.invoke(RefundState(orderId = "1001", amount = 250), con
 val finished = graph.resume(config) { state -> state.copy(approved = true) }
 ```
 
-Runnable version: [`HumanInTheLoop`](samples/src/main/kotlin/org/langgraphkt/samples/HumanInTheLoop.kt).
+Runnable version: [`HumanInTheLoop`](samples/src/main/kotlin/dev/deeptelar/telar/samples/HumanInTheLoop.kt).
 
 - `invoke` always starts a new run for the thread. `resume` continues the saved one, optionally
   editing the state first.
@@ -357,7 +357,7 @@ while (result is GraphResult.Interrupted) {
 }
 ```
 
-Runnable version: [`ReviewLoop`](samples/src/main/kotlin/org/langgraphkt/samples/ReviewLoop.kt).
+Runnable version: [`ReviewLoop`](samples/src/main/kotlin/dev/deeptelar/telar/samples/ReviewLoop.kt).
 
 #### Where a thread stands
 
@@ -452,7 +452,7 @@ val graph = StateGraph<ResearchState> {
 }.compile()
 ```
 
-Runnable version: [`ParallelResearch`](samples/src/main/kotlin/org/langgraphkt/samples/ParallelResearch.kt).
+Runnable version: [`ParallelResearch`](samples/src/main/kotlin/dev/deeptelar/telar/samples/ParallelResearch.kt).
 
 - The updates are applied in the order the nodes were added to the graph (`web`, then `docs`), each
   to the state that the previous one produced. If two nodes write the same property, the one added
@@ -572,7 +572,7 @@ cannot stream delivers its text in one piece, so the same code works with every 
 On the JVM, `langgraph-kt-langchain4j` also builds a node straight from a
 [LangChain4j](https://docs.langchain4j.dev) model with `chatNode` (one text in, one text out) and
 `chatMessagesNode` (a list of LangChain4j messages). Both run the blocking call on `Dispatchers.IO`.
-The [`ChatAgent`](samples/src/main/kotlin/org/langgraphkt/samples/ChatAgent.kt) sample uses them.
+The [`ChatAgent`](samples/src/main/kotlin/dev/deeptelar/telar/samples/ChatAgent.kt) sample uses them.
 
 ### Agents with tools
 
@@ -700,7 +700,7 @@ toolLoop(
 )
 ```
 
-Runnable version: [`ToolAgent`](samples/src/main/kotlin/org/langgraphkt/samples/ToolAgent.kt). It
+Runnable version: [`ToolAgent`](samples/src/main/kotlin/dev/deeptelar/telar/samples/ToolAgent.kt). It
 runs without an API key, and with Claude when `ANTHROPIC_API_KEY` is set.
 [Level 6 of the tutorial](docs/06-the-agent.md) explains the same agent step by step.
 
@@ -752,7 +752,7 @@ To build it locally, run `./gradlew dokkaGenerate` and open `build/dokka/html/in
 
 ## Samples
 
-Runnable examples live in [`samples/`](samples/src/main/kotlin/org/langgraphkt/samples):
+Runnable examples live in [`samples/`](samples/src/main/kotlin/dev/deeptelar/telar/samples):
 
 ```bash
 ./gradlew :samples:runQuickStart        # the email support agent of the quick start

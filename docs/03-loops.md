@@ -18,7 +18,7 @@ flowchart LR
 
 ## The code
 
-[`level3/Level3.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level3/Level3.kt)
+[`level3/Level3.kt`](../samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level3/Level3.kt)
 
 ```kotlin
 data class Ticket(

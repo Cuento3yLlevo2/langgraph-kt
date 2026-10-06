@@ -10,7 +10,7 @@ This level makes five mistakes on purpose.
 
 ## Run it
 
-[`level7/Level7.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level7/Level7.kt)
+[`level7/Level7.kt`](../samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level7/Level7.kt)
 
 ```bash
 ./gradlew :samples:runLevel7

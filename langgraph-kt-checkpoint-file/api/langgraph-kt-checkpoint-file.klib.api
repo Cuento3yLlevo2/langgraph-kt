@@ -6,10 +6,10 @@
 // - Show declarations: true
 
 // Library unique name: <langgraph-kt:langgraph-kt-checkpoint-file>
-final class <#A: kotlin/Any?> org.langgraphkt.checkpoint.file/FileCheckpointer : org.langgraphkt/Checkpointer<#A> { // org.langgraphkt.checkpoint.file/FileCheckpointer|null[0]
-    constructor <init>(kotlinx.io.files/Path, org.langgraphkt/StateSerializer<#A>, kotlinx.io.files/FileSystem = ...) // org.langgraphkt.checkpoint.file/FileCheckpointer.<init>|<init>(kotlinx.io.files.Path;org.langgraphkt.StateSerializer<1:0>;kotlinx.io.files.FileSystem){}[0]
+final class <#A: kotlin/Any?> dev.deeptelar.telar.checkpoint.file/FileCheckpointer : dev.deeptelar.telar/Checkpointer<#A> { // dev.deeptelar.telar.checkpoint.file/FileCheckpointer|null[0]
+    constructor <init>(kotlinx.io.files/Path, dev.deeptelar.telar/StateSerializer<#A>, kotlinx.io.files/FileSystem = ...) // dev.deeptelar.telar.checkpoint.file/FileCheckpointer.<init>|<init>(kotlinx.io.files.Path;dev.deeptelar.telar.StateSerializer<1:0>;kotlinx.io.files.FileSystem){}[0]
 
-    final suspend fun delete(kotlin/String) // org.langgraphkt.checkpoint.file/FileCheckpointer.delete|delete(kotlin.String){}[0]
-    final suspend fun load(kotlin/String): org.langgraphkt/Checkpoint<#A>? // org.langgraphkt.checkpoint.file/FileCheckpointer.load|load(kotlin.String){}[0]
-    final suspend fun save(kotlin/String, org.langgraphkt/Checkpoint<#A>) // org.langgraphkt.checkpoint.file/FileCheckpointer.save|save(kotlin.String;org.langgraphkt.Checkpoint<1:0>){}[0]
+    final suspend fun delete(kotlin/String) // dev.deeptelar.telar.checkpoint.file/FileCheckpointer.delete|delete(kotlin.String){}[0]
+    final suspend fun load(kotlin/String): dev.deeptelar.telar/Checkpoint<#A>? // dev.deeptelar.telar.checkpoint.file/FileCheckpointer.load|load(kotlin.String){}[0]
+    final suspend fun save(kotlin/String, dev.deeptelar.telar/Checkpoint<#A>) // dev.deeptelar.telar.checkpoint.file/FileCheckpointer.save|save(kotlin.String;dev.deeptelar.telar.Checkpoint<1:0>){}[0]
 }

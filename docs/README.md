@@ -53,7 +53,7 @@ Each level has the same parts:
 - **Goal**: what the help desk can do at the end.
 - **The map**: a drawing of the graph.
 - **The code**: the program. It is a real file in
-  [`samples/.../tutorial`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial), and a test
+  [`samples/.../tutorial`](../samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial), and a test
   checks that it prints what this guide says.
 - **Run it**: one command, and the output you should see.
 - **Your turn**: a small change to make yourself. This is where you actually learn it, so do not

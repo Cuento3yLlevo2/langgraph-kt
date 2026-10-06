@@ -22,7 +22,7 @@ flowchart LR
 
 The model is not on the map. It is outside, and the `answer` node talks to it.
 
-[`level6/Level6.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level6/Level6.kt)
+[`level6/Level6.kt`](../samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level6/Level6.kt)
 
 ```kotlin
 fun replyDesk(model: ChatModel): CompiledGraph<Ticket> =
@@ -260,7 +260,7 @@ helpDesk(model).stream(AgentState("How much is a cola?")).collect { event ->
 }
 ```
 
-It needs `import org.langgraphkt.agent.textDelta`. For every other event `textDelta` is `null`. The
+It needs `import dev.deeptelar.telar.agent.textDelta`. For every other event `textDelta` is `null`. The
 pretend model has nothing to write slowly, so its whole answer arrives as one piece.
 
 ### Plugging in a real model
@@ -279,7 +279,7 @@ val state = helpDesk(model).invoke(AgentState("I'm Ana. Where is my pizza?")).st
 
 This snippet is not part of the runnable level, because it needs an account and a key. Keep the key
 out of your source code; read it from an environment variable as shown. The
-[ToolAgent sample](../samples/src/main/kotlin/org/langgraphkt/samples/ToolAgent.kt) is this help
+[ToolAgent sample](../samples/src/main/kotlin/dev/deeptelar/telar/samples/ToolAgent.kt) is this help
 desk with Claude: it uses the real model when `ANTHROPIC_API_KEY` is set, and a pretend one when it
 is not. The README has more under [AI models](../README.md#ai-models).
 

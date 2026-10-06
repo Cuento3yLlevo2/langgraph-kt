@@ -22,7 +22,7 @@ Read CONTRIBUTING.md as well; its design rules apply to every change.
 Single test class:
 
 ```bash
-./gradlew :langgraph-kt-core:jvmTest --tests "org.langgraphkt.InterruptTest"
+./gradlew :langgraph-kt-core:jvmTest --tests "dev.deeptelar.telar.InterruptTest"
 ```
 
 **Requirements:** JDK 17+. Use the `./gradlew` wrapper (Gradle 9.8, Kotlin 2.4). Versions live in

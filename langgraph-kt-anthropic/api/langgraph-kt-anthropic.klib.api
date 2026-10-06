@@ -6,14 +6,14 @@
 // - Show declarations: true
 
 // Library unique name: <langgraph-kt:langgraph-kt-anthropic>
-final class org.langgraphkt.anthropic/AnthropicChatModel : org.langgraphkt.agent/ChatModel { // org.langgraphkt.anthropic/AnthropicChatModel|null[0]
-    constructor <init>(io.ktor.client/HttpClient, kotlin/String, kotlin/String, kotlin/Int = ..., kotlinx.serialization.json/JsonObject = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ..., kotlin/String = ...) // org.langgraphkt.anthropic/AnthropicChatModel.<init>|<init>(io.ktor.client.HttpClient;kotlin.String;kotlin.String;kotlin.Int;kotlinx.serialization.json.JsonObject;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.String){}[0]
+final class dev.deeptelar.telar.anthropic/AnthropicChatModel : dev.deeptelar.telar.agent/ChatModel { // dev.deeptelar.telar.anthropic/AnthropicChatModel|null[0]
+    constructor <init>(io.ktor.client/HttpClient, kotlin/String, kotlin/String, kotlin/Int = ..., kotlinx.serialization.json/JsonObject = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ..., kotlin/String = ...) // dev.deeptelar.telar.anthropic/AnthropicChatModel.<init>|<init>(io.ktor.client.HttpClient;kotlin.String;kotlin.String;kotlin.Int;kotlinx.serialization.json.JsonObject;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.String){}[0]
 
-    final fun stream(org.langgraphkt.agent/ChatRequest): kotlinx.coroutines.flow/Flow<org.langgraphkt.agent/ChatEvent> // org.langgraphkt.anthropic/AnthropicChatModel.stream|stream(org.langgraphkt.agent.ChatRequest){}[0]
-    final suspend fun chat(org.langgraphkt.agent/ChatRequest): org.langgraphkt.agent/ChatResponse // org.langgraphkt.anthropic/AnthropicChatModel.chat|chat(org.langgraphkt.agent.ChatRequest){}[0]
+    final fun stream(dev.deeptelar.telar.agent/ChatRequest): kotlinx.coroutines.flow/Flow<dev.deeptelar.telar.agent/ChatEvent> // dev.deeptelar.telar.anthropic/AnthropicChatModel.stream|stream(dev.deeptelar.telar.agent.ChatRequest){}[0]
+    final suspend fun chat(dev.deeptelar.telar.agent/ChatRequest): dev.deeptelar.telar.agent/ChatResponse // dev.deeptelar.telar.anthropic/AnthropicChatModel.chat|chat(dev.deeptelar.telar.agent.ChatRequest){}[0]
 
-    final object Companion { // org.langgraphkt.anthropic/AnthropicChatModel.Companion|null[0]
-        final const val DEFAULT_MAX_TOKENS // org.langgraphkt.anthropic/AnthropicChatModel.Companion.DEFAULT_MAX_TOKENS|{}DEFAULT_MAX_TOKENS[0]
-            final fun <get-DEFAULT_MAX_TOKENS>(): kotlin/Int // org.langgraphkt.anthropic/AnthropicChatModel.Companion.DEFAULT_MAX_TOKENS.<get-DEFAULT_MAX_TOKENS>|<get-DEFAULT_MAX_TOKENS>(){}[0]
+    final object Companion { // dev.deeptelar.telar.anthropic/AnthropicChatModel.Companion|null[0]
+        final const val DEFAULT_MAX_TOKENS // dev.deeptelar.telar.anthropic/AnthropicChatModel.Companion.DEFAULT_MAX_TOKENS|{}DEFAULT_MAX_TOKENS[0]
+            final fun <get-DEFAULT_MAX_TOKENS>(): kotlin/Int // dev.deeptelar.telar.anthropic/AnthropicChatModel.Companion.DEFAULT_MAX_TOKENS.<get-DEFAULT_MAX_TOKENS>|<get-DEFAULT_MAX_TOKENS>(){}[0]
     }
 }

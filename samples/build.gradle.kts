@@ -37,7 +37,7 @@ listOf("QuickStart", "HumanInTheLoop", "ReviewLoop", "ParallelResearch", "ChatAg
     tasks.register<JavaExec>("run$sample") {
         group = "samples"
         description = "Runs the $sample sample."
-        mainClass.set("org.langgraphkt.samples.${sample}Kt")
+        mainClass.set("dev.deeptelar.telar.samples.${sample}Kt")
         classpath = sourceSets.main.get().runtimeClasspath
         standardInput = System.`in`
     }
@@ -48,7 +48,7 @@ listOf("QuickStart", "HumanInTheLoop", "ReviewLoop", "ParallelResearch", "ChatAg
     tasks.register<JavaExec>("runLevel$level") {
         group = "tutorial"
         description = "Runs level $level of the tutorial in docs/."
-        mainClass.set("org.langgraphkt.samples.tutorial.level$level.Level${level}Kt")
+        mainClass.set("dev.deeptelar.telar.samples.tutorial.level$level.Level${level}Kt")
         classpath = sourceSets.main.get().runtimeClasspath
         standardInput = System.`in`
     }

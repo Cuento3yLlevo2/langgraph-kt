@@ -20,7 +20,7 @@ The pause is not a node. It is a place where you tell the run to stop and save.
 
 ## The code
 
-[`level5/Level5.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level5/Level5.kt)
+[`level5/Level5.kt`](../samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level5/Level5.kt)
 
 ```kotlin
 data class Ticket(
@@ -151,7 +151,7 @@ val checkpointer = FileCheckpointer(Path("checkpoints"), KotlinxStateSerializer<
 ```
 
 `@Serializable` tells Kotlin how to turn the ticket into text for the file. The
-[HumanInTheLoop sample](../samples/src/main/kotlin/org/langgraphkt/samples/HumanInTheLoop.kt) is a
+[HumanInTheLoop sample](../samples/src/main/kotlin/dev/deeptelar/telar/samples/HumanInTheLoop.kt) is a
 complete program that does this.
 
 A web app has no files. There, `LocalStorageCheckpointer` keeps the saves in the browser, so a

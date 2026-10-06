@@ -19,7 +19,7 @@ Two arrows leave `START`. Both are ordinary arrows, so both are followed.
 
 ## The code
 
-[`level4/Level4.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level4/Level4.kt)
+[`level4/Level4.kt`](../samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level4/Level4.kt)
 
 ```kotlin
 data class Ticket(
@@ -193,7 +193,7 @@ Three more things to know:
 
 - **`states()` gives only the state.** Often a screen just wants to show the newest state.
   `helpDesk().stream(ticket).states()` turns the events into the state after each step. It needs
-  `import org.langgraphkt.states`.
+  `import dev.deeptelar.telar.states`.
 - **Nothing runs until you collect.** Calling `stream(...)` does not start anything. The run starts
   when you `collect`, and collecting twice runs the graph twice.
 
