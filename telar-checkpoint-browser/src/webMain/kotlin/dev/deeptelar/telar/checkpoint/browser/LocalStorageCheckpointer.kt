@@ -39,7 +39,7 @@ import kotlin.js.ExperimentalWasmJsInterop
  */
 public class LocalStorageCheckpointer<State>(
     serializer: StateSerializer<State>,
-    private val keyPrefix: String = "langgraph.checkpoint.",
+    private val keyPrefix: String = "telar.checkpoint.",
 ) : Checkpointer<State> {
     private val codec = CheckpointCodec(serializer)
 

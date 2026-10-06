@@ -115,7 +115,7 @@ class LocalStorageCheckpointerTest {
             LocalStorageCheckpointer(KotlinxStateSerializer<Ticket>()).save("ticket-42", paused)
 
             assertNotNull(item("pizza.save.ticket-42"))
-            assertNotNull(item("langgraph.checkpoint.ticket-42"))
+            assertNotNull(item("telar.checkpoint.ticket-42"))
             // Two graphs on one page do not read each other's runs when their prefixes differ.
             assertNull(checkpointer(keyPrefix = "other.").load("ticket-42"))
         }
