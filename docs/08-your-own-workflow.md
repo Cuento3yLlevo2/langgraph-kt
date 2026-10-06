@@ -188,6 +188,10 @@ dependencies {
 }
 ```
 
+`0.1.0-alpha05` is the last release under the project's earlier name, langgraph-kt, and its package
+is `org.langgraphkt`. From the next release the artifacts are `dev.deeptelar:telar-*` and the
+package is `dev.deeptelar.telar`, as in this tutorial.
+
 The artifacts are on Maven Central, so your project needs the `mavenCentral()` repository. The
 [README](../README.md#installation) lists the targets of each module.
 

@@ -30,8 +30,11 @@ Single test class:
 
 ## Architecture Overview
 
-langgraph-kt is a Kotlin Multiplatform execution engine for stateful AI agent workflows. Computation
+Telar is a Kotlin Multiplatform execution engine for stateful AI agent workflows. Computation
 is a directed graph: nodes transform an immutable state and edges decide what runs next.
+
+The project was called langgraph-kt until `0.1.0-alpha05`. The GitHub repositories and their URLs
+still have that name, and so do the changelog entries of the releases made under it.
 
 ### Modules
 

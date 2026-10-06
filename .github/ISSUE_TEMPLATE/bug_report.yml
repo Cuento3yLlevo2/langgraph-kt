@@ -20,7 +20,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: langgraph-kt version
+      label: Telar version
       placeholder: 0.1.0-alpha05
     validations:
       required: true

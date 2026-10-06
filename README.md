@@ -1,21 +1,21 @@
-# langgraph-kt
+# Telar
 
 [![CI](https://github.com/Cuento3yLlevo2/langgraph-kt/actions/workflows/ci.yml/badge.svg)](https://github.com/Cuento3yLlevo2/langgraph-kt/actions/workflows/ci.yml)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.cuento3yllevo2/langgraph-kt-core?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.cuento3yllevo2/langgraph-kt-core)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Kotlin](https://img.shields.io/badge/kotlin-2.4-7F52FF.svg?logo=kotlin)](https://kotlinlang.org)
 
-langgraph-kt is a Kotlin Multiplatform library for building AI agents and other multi-step
+Telar is a Kotlin Multiplatform library for building AI agents and other multi-step
 workflows. You describe the work as a **graph**: a few small steps, and arrows that say which step
 comes next. The library runs it, and takes care of loops, steps that run at the same time, live
 progress, and pausing until a person approves. A model that calls your functions as tools is one
 such graph, and it comes [ready-made](#agents-with-tools) for every platform.
 
 **[Try it in your browser](https://cuento3yllevo2.github.io/langgraph-kt-demo/):** Pixel Pizza is a
-small game in which every stage runs a langgraph-kt graph, from two nodes in a row to a full agent
+small game in which every stage runs a Telar graph, from two nodes in a row to a full agent
 workflow. No account and no API key needed.
 
-> langgraph-kt is an independent project inspired by [LangGraph](https://github.com/langchain-ai/langgraph).
+> Telar is an independent project inspired by [LangGraph](https://github.com/langchain-ai/langgraph).
 > It is not affiliated with or endorsed by LangChain, Inc.
 
 **Contents:** [The idea](#the-idea) · [Quick start](#quick-start) · [Installation](#installation) ·
@@ -157,6 +157,11 @@ dependencies {
     implementation("io.github.cuento3yllevo2:langgraph-kt-langchain4j:0.1.0-alpha05")        // call AI models through LangChain4j (JVM)
 }
 ```
+
+> **The name is changing.** The project was called langgraph-kt until `0.1.0-alpha05`, the release
+> shown above. From the next release the artifacts are `dev.deeptelar:telar-*` and the package is
+> `dev.deeptelar.telar`, which the examples on this page already use. With `0.1.0-alpha05`, import
+> `org.langgraphkt` in its place.
 
 | Module | Targets | Purpose |
 |---|---|---|

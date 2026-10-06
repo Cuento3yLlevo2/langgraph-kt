@@ -1,6 +1,6 @@
-# The langgraph-kt tutorial
+# The Telar tutorial
 
-This guide teaches langgraph-kt the way a game teaches you to play: eight levels, each with a new
+This guide teaches Telar the way a game teaches you to play: eight levels, each with a new
 move and a small task to try it out, and nothing you have not been shown yet. You do not need to
 know LangGraph, AI agents or graphs. You need to be able to read a little Kotlin.
 

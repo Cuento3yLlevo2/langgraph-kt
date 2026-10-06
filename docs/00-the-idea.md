@@ -16,18 +16,19 @@ text back. A real job is rarely one question. To answer a customer, a help desk 
 
 Something has to decide which of these happens next, carry the results from one to the other,
 repeat a step, do two things at once, and wait for the human. That something is a **workflow**, and
-langgraph-kt is a library for building and running one.
+Telar is a library for building and running one.
 
-langgraph-kt does not contain an AI model. It is the part around the model that organizes the work.
+Telar does not contain an AI model. It is the part around the model that organizes the work.
 Each piece of work is an ordinary Kotlin function, so it can call a model, a database, a web
 service, or nothing at all.
 
-> The name comes from [LangGraph](https://github.com/langchain-ai/langgraph), a Python library built
-> on the same idea. You do not need to know it. langgraph-kt is an independent project.
+> The idea comes from [LangGraph](https://github.com/langchain-ai/langgraph), a Python library. You
+> do not need to know it. Telar is an independent project, and its name is the Spanish word for a
+> loom.
 
 ## The map
 
-In langgraph-kt you describe the workflow as a map, like the map of a board game:
+In Telar you describe the workflow as a map, like the map of a board game:
 
 ```mermaid
 flowchart LR

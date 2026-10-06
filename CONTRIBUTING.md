@@ -1,4 +1,4 @@
-# Contributing to langgraph-kt
+# Contributing to Telar
 
 Thank you for considering a contribution. This guide covers the setup, the checks a change must
 pass, and the design rules the project follows.

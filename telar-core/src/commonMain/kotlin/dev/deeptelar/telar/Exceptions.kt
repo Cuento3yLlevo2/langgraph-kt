@@ -1,7 +1,7 @@
 package dev.deeptelar.telar
 
 /**
- * Base class for every error raised by langgraph-kt itself, so callers can catch the whole family
+ * Base class for every error raised by Telar itself, so callers can catch the whole family
  * with a single `catch (e: TelarException)`. Integration modules and custom [Checkpointer]s may
  * add their own subclasses.
  */

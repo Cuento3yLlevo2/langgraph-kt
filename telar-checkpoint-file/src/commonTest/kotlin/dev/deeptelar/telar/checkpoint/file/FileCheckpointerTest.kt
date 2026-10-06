@@ -29,7 +29,7 @@ data class SerializableState(
 )
 
 class FileCheckpointerTest {
-    private val tempDir = Path(SystemTemporaryDirectory, "langgraph-kt-test-${Random.nextLong().toULong()}")
+    private val tempDir = Path(SystemTemporaryDirectory, "telar-test-${Random.nextLong().toULong()}")
     private val serializer = KotlinxStateSerializer<SerializableState>()
 
     private fun newCheckpointer() = FileCheckpointer(tempDir, serializer)

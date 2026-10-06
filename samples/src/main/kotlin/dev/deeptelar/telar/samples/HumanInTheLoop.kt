@@ -44,7 +44,7 @@ fun refundConfig(directory: Path, threadId: String): GraphConfig<RefundState> =
 
 suspend fun main() {
     val graph = refundGraph()
-    val config = refundConfig(Path(SystemTemporaryDirectory, "langgraph-kt-refunds"), threadId = "order-1001")
+    val config = refundConfig(Path(SystemTemporaryDirectory, "telar-refunds"), threadId = "order-1001")
 
     when (val paused = graph.invoke(RefundState(orderId = "1001", amount = 250), config)) {
         is GraphResult.Interrupted -> println("${paused.state.log.last()}. Waiting for approval before ${paused.nextNodes}.")
