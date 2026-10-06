@@ -39,7 +39,7 @@ fun replyDesk(model: ChatModel): CompiledGraph<Ticket> =
     }.compile()
 ```
 
-`ChatModel` is a small type from the module `langgraph-kt-agent`. It stands for any AI model, and
+`ChatModel` is a small type from the module `telar-agent`. It stands for any AI model, and
 `model.chat(...)` sends it a text and returns the text it answers. The text you send is called a
 *prompt*. `system` is a second text with standing instructions, here who the model works for.
 
@@ -268,10 +268,10 @@ pretend model has nothing to write slowly, so its whole answer arrives as one pi
 Build a real `ChatModel` and pass it in. Nothing else changes.
 
 ```kotlin
-// Claude, on every platform. From the module langgraph-kt-anthropic; HttpClient is the Ktor client.
+// Claude, on every platform. From the module telar-anthropic; HttpClient is the Ktor client.
 val model: ChatModel = AnthropicChatModel(HttpClient(), apiKey = System.getenv("ANTHROPIC_API_KEY"), model = "claude-opus-5-5")
 
-// Most other models, on the JVM, through LangChain4j. From the module langgraph-kt-langchain4j.
+// Most other models, on the JVM, through LangChain4j. From the module telar-langchain4j.
 val model: ChatModel = LangChain4jChatModel(OpenAiChatModel.builder().apiKey(System.getenv("OPENAI_API_KEY")).modelName("gpt-5").build())
 
 val state = helpDesk(model).invoke(AgentState("I'm Ana. Where is my pizza?")).state

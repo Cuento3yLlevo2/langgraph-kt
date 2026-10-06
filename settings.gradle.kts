@@ -12,13 +12,13 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "langgraph-kt"
+rootProject.name = "telar"
 
-include("langgraph-kt-core")
-include("langgraph-kt-serialization")
-include("langgraph-kt-checkpoint-file")
-include("langgraph-kt-checkpoint-browser")
-include("langgraph-kt-agent")
-include("langgraph-kt-anthropic")
-include("langgraph-kt-langchain4j")
+include("telar-core")
+include("telar-serialization")
+include("telar-checkpoint-file")
+include("telar-checkpoint-browser")
+include("telar-agent")
+include("telar-anthropic")
+include("telar-langchain4j")
 include("samples")

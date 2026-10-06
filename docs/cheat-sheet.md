@@ -107,7 +107,7 @@ Pauses need a checkpointer.
 
 ## An agent with tools
 
-From `langgraph-kt-agent`. [Level 6](06-the-agent.md) teaches it, and the README has the
+From `telar-agent`. [Level 6](06-the-agent.md) teaches it, and the README has the
 short version under [Agents with tools](../README.md#agents-with-tools).
 
 ```kotlin

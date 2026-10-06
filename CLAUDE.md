@@ -8,11 +8,11 @@ Read CONTRIBUTING.md as well; its design rules apply to every change.
 ```bash
 ./gradlew check                              # Everything: compile all targets, tests, ktlint, coverage gate
 ./gradlew check apiCheck                     # What CI runs; apiCheck fails if the public API changed
-./gradlew :langgraph-kt-core:jvmTest         # Fast loop: core tests on the JVM only
-./gradlew :langgraph-kt-core:allTests        # Core tests on every target this OS can run (jvm, js, wasmJs, native)
-./gradlew :langgraph-kt-langchain4j:test     # LangChain4j module (JVM-only module, so the task is `test`)
-./gradlew :langgraph-kt-agent:jvmTest        # Agent module on the JVM (`allTests` for every target)
-./gradlew :langgraph-kt-checkpoint-browser:allTests  # Browser module, in headless Chrome
+./gradlew :telar-core:jvmTest         # Fast loop: core tests on the JVM only
+./gradlew :telar-core:allTests        # Core tests on every target this OS can run (jvm, js, wasmJs, native)
+./gradlew :telar-langchain4j:test     # LangChain4j module (JVM-only module, so the task is `test`)
+./gradlew :telar-agent:jvmTest        # Agent module on the JVM (`allTests` for every target)
+./gradlew :telar-checkpoint-browser:allTests  # Browser module, in headless Chrome
 ./gradlew kotlinUpgradeYarnLock kotlinWasmUpgradeYarnLock  # After a dependency change that touches JS or Wasm
 ./gradlew ktlintFormat                       # Fix formatting
 ./gradlew apiDump                            # Update */api/*.api after an intentional public API change
@@ -22,7 +22,7 @@ Read CONTRIBUTING.md as well; its design rules apply to every change.
 Single test class:
 
 ```bash
-./gradlew :langgraph-kt-core:jvmTest --tests "dev.deeptelar.telar.InterruptTest"
+./gradlew :telar-core:jvmTest --tests "dev.deeptelar.telar.InterruptTest"
 ```
 
 **Requirements:** JDK 17+. Use the `./gradlew` wrapper (Gradle 9.8, Kotlin 2.4). Versions live in
@@ -35,20 +35,20 @@ is a directed graph: nodes transform an immutable state and edges decide what ru
 
 ### Modules
 
-- **`langgraph-kt-core`** (KMP, `commonMain` only, depends only on kotlinx-coroutines): graph
+- **`telar-core`** (KMP, `commonMain` only, depends only on kotlinx-coroutines): graph
   builder, engine, checkpoint interfaces
-- **`langgraph-kt-serialization`** (KMP): `KotlinxStateSerializer` for `@Serializable` states,
+- **`telar-serialization`** (KMP): `KotlinxStateSerializer` for `@Serializable` states,
   `CheckpointCodec` (the shared checkpoint format, also used by `FileCheckpointer`)
-- **`langgraph-kt-checkpoint-file`** (KMP): `FileCheckpointer` on kotlinx-io
-- **`langgraph-kt-checkpoint-browser`** (JS and Wasm, browser only, code in `webMain`):
+- **`telar-checkpoint-file`** (KMP): `FileCheckpointer` on kotlinx-io
+- **`telar-checkpoint-browser`** (JS and Wasm, browser only, code in `webMain`):
   `LocalStorageCheckpointer` on `localStorage`. Its tests run in headless Chrome
-- **`langgraph-kt-agent`** (KMP): `ChatModel` (the provider-neutral model interface), `ChatMessage`,
+- **`telar-agent`** (KMP): `ChatModel` (the provider-neutral model interface), `ChatMessage`,
   `Tool` (JSON Schema built from a `@Serializable` input class in `ToolSchema.kt`), and the
   tool-calling loop: `toolLoop` adds a model node and a tools node to any graph, `toolAgent` is that
   loop as a graph over `AgentState`
-- **`langgraph-kt-anthropic`** (KMP): `AnthropicChatModel`, the Claude Messages API on Ktor client
+- **`telar-anthropic`** (KMP): `AnthropicChatModel`, the Claude Messages API on Ktor client
   core. The app supplies the `HttpClient` and its engine
-- **`langgraph-kt-langchain4j`** (JVM): `LangChain4jChatModel` adapts a LangChain4j 1.x model to
+- **`telar-langchain4j`** (JVM): `LangChain4jChatModel` adapts a LangChain4j 1.x model to
   `ChatModel`; `chatNode` / `chatMessagesNode` build a node straight from a LangChain4j model
 - **`samples`**: runnable examples with tests; not published. `samples/.../tutorial/levelN` is the
   code of the tutorial in `docs/`; a page shows its level's code and output, so change both together
@@ -99,7 +99,7 @@ next active nodes. A checkpoint is saved after every step when a checkpointer is
 3. **Small, type-safe API.** Explicit API mode is on: public declarations need `public`, explicit
    types and KDoc. Keep internals `internal`. Validate in `compile()` rather than at run time, and
    throw `LangGraphException` subclasses.
-4. **Core stays common.** No platform or third-party dependencies in `langgraph-kt-core`.
+4. **Core stays common.** No platform or third-party dependencies in `telar-core`.
 
 ### Testing
 

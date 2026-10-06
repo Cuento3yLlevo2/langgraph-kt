@@ -34,7 +34,7 @@ Each item has one of three states:
 
 ## 1. Finish the engine
 
-These change `langgraph-kt-core`, so they come first.
+These change `telar-core`, so they come first.
 
 | Feature | What you get | State | Issue |
 |---|---|---|---|
@@ -47,7 +47,7 @@ These change `langgraph-kt-core`, so they come first.
 
 ## 2. Around the engine
 
-New modules and additions to `langgraph-kt-agent`. They do not change the core.
+New modules and additions to `telar-agent`. They do not change the core.
 
 | Feature | What you get | State | Issue |
 |---|---|---|---|

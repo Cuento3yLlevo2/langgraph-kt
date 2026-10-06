@@ -160,15 +160,15 @@ dependencies {
 
 | Module | Targets | Purpose |
 |---|---|---|
-| `langgraph-kt-core` | JVM/Android, iOS, macOS, Linux, Windows, JS, Wasm | Graph builder, execution engine, checkpointing interfaces |
-| `langgraph-kt-serialization` | same as core | `KotlinxStateSerializer` for `@Serializable` states, `CheckpointCodec` for custom checkpointers |
-| `langgraph-kt-checkpoint-file` | same as core (Node.js only for JS/Wasm) | `FileCheckpointer`, one JSON file per thread |
-| `langgraph-kt-checkpoint-browser` | JS and Wasm in a browser | `LocalStorageCheckpointer`, runs that survive a page reload |
-| `langgraph-kt-agent` | same as core | `ChatModel`, `Tool`, and the tool-calling agent: `toolAgent` / `toolLoop` |
-| `langgraph-kt-anthropic` | same as core | `AnthropicChatModel`, Claude through Ktor |
-| `langgraph-kt-langchain4j` | JVM (Java 17+) | `LangChain4jChatModel` and `chatNode` / `chatMessagesNode` for LangChain4j 1.x models |
+| `telar-core` | JVM/Android, iOS, macOS, Linux, Windows, JS, Wasm | Graph builder, execution engine, checkpointing interfaces |
+| `telar-serialization` | same as core | `KotlinxStateSerializer` for `@Serializable` states, `CheckpointCodec` for custom checkpointers |
+| `telar-checkpoint-file` | same as core (Node.js only for JS/Wasm) | `FileCheckpointer`, one JSON file per thread |
+| `telar-checkpoint-browser` | JS and Wasm in a browser | `LocalStorageCheckpointer`, runs that survive a page reload |
+| `telar-agent` | same as core | `ChatModel`, `Tool`, and the tool-calling agent: `toolAgent` / `toolLoop` |
+| `telar-anthropic` | same as core | `AnthropicChatModel`, Claude through Ktor |
+| `telar-langchain4j` | JVM (Java 17+) | `LangChain4jChatModel` and `chatNode` / `chatMessagesNode` for LangChain4j 1.x models |
 
-Requires Kotlin 2.x. JVM artifacts target Java 11, except `langgraph-kt-langchain4j`, which needs
+Requires Kotlin 2.x. JVM artifacts target Java 11, except `telar-langchain4j`, which needs
 Java 17 because LangChain4j does.
 
 ### Status
@@ -254,7 +254,7 @@ val download = node("download", work = { order ->
 - With `invoke()` and `resume()` nobody collects, and the call does nothing.
 - Progress is not part of the state and is not saved in a checkpoint.
 
-The agent of `langgraph-kt-agent` uses this to show a model's answer while the model writes it; see
+The agent of `telar-agent` uses this to show a model's answer while the model writes it; see
 [Agents with tools](#agents-with-tools).
 
 ### Human-in-the-loop
@@ -379,7 +379,7 @@ step that failed, even when that was the first one.
 
 #### In a browser
 
-A web app has no file system. `LocalStorageCheckpointer`, from `langgraph-kt-checkpoint-browser`,
+A web app has no file system. `LocalStorageCheckpointer`, from `telar-checkpoint-browser`,
 keeps the checkpoints in the page's `localStorage`, so a paused run is still there after the page
 is reloaded or the browser is closed:
 
@@ -521,14 +521,14 @@ A node is a `suspend` function, so it can call any AI model with any client libr
 val classify = node("classify") { email -> email.copy(category = askMyModel(email.body)) }
 ```
 
-`langgraph-kt-agent` has a small interface for the model, `ChatModel`, so that the same graph works
+`telar-agent` has a small interface for the model, `ChatModel`, so that the same graph works
 with any provider and on every platform. Pick an implementation:
 
 ```kotlin
-// Claude, on every platform (langgraph-kt-anthropic). HttpClient is the Ktor client.
+// Claude, on every platform (telar-anthropic). HttpClient is the Ktor client.
 val model: ChatModel = AnthropicChatModel(HttpClient(), apiKey = key, model = "claude-opus-5-5")
 
-// Any LangChain4j model, on the JVM (langgraph-kt-langchain4j): OpenAI, Gemini, Ollama, ...
+// Any LangChain4j model, on the JVM (telar-langchain4j): OpenAI, Gemini, Ollama, ...
 val model: ChatModel = LangChain4jChatModel(OpenAiChatModel.builder().apiKey(key).modelName("gpt-5").build())
 
 // In a test, a lambda.
@@ -569,7 +569,7 @@ graph.stream(email).collect { event ->
 LangChain4j streaming model as well: `LangChain4jChatModel(openAi, streamingModel)`. A model that
 cannot stream delivers its text in one piece, so the same code works with every model.
 
-On the JVM, `langgraph-kt-langchain4j` also builds a node straight from a
+On the JVM, `telar-langchain4j` also builds a node straight from a
 [LangChain4j](https://docs.langchain4j.dev) model with `chatNode` (one text in, one text out) and
 `chatMessagesNode` (a list of LangChain4j messages). Both run the blocking call on `Dispatchers.IO`.
 The [`ChatAgent`](samples/src/main/kotlin/dev/deeptelar/telar/samples/ChatAgent.kt) sample uses them.
@@ -578,7 +578,7 @@ The [`ChatAgent`](samples/src/main/kotlin/dev/deeptelar/telar/samples/ChatAgent.
 
 An agent is a model that decides by itself which of your functions to call, and how often, before
 it answers. In a graph that is a loop of two nodes: the model answers or asks for tools, the tools
-run, and their results go back to the model. `langgraph-kt-agent` has this loop ready-made.
+run, and their results go back to the model. `telar-agent` has this loop ready-made.
 
 A **tool** is a function with a name and a description that the model reads. Its input is a
 `@Serializable` class, from which the library builds the schema the model needs:
@@ -733,8 +733,8 @@ extends `LangGraphException`:
 | `MaxIterationsExceededException` | The run took more steps than `GraphConfig.maxIterations` (default 25). |
 | `CheckpointNotFoundException`, `GraphAlreadyCompletedException` | `resume` had nothing to continue. |
 | `CheckpointCorruptedException` | A stored checkpoint could not be read. |
-| `LocalStorageException` | The browser refused to read or write `localStorage`: it is full, or the page may not use it. From `langgraph-kt-checkpoint-browser`. |
-| `ChatModelException` | A call to a `ChatModel` failed, or the model declined to answer. From `langgraph-kt-agent`. A run reports it as the `cause` of a `NodeExecutionException`. |
+| `LocalStorageException` | The browser refused to read or write `localStorage`: it is full, or the page may not use it. From `telar-checkpoint-browser`. |
+| `ChatModelException` | A call to a `ChatModel` failed, or the model declined to answer. From `telar-agent`. A run reports it as the `cause` of a `NodeExecutionException`. |
 
 ## Design
 
