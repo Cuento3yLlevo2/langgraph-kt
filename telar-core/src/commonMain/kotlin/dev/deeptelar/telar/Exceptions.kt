@@ -13,7 +13,8 @@ public abstract class TelarException(
 /**
  * The graph definition or its run configuration is invalid: for example an edge points at an unknown
  * node, or a fan-out has no [Reducer]. Thrown while building or compiling the graph, or when a run
- * starts, never in the middle of execution.
+ * starts. The only check that waits for a node to run is the one of [interrupt], which needs a
+ * checkpointer.
  */
 public class GraphValidationException(
     message: String,

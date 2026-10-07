@@ -381,5 +381,6 @@ final const val dev.deeptelar.telar/START // dev.deeptelar.telar/START|{}START[0
 
 final fun <#A: kotlin/Any?> (kotlinx.coroutines.flow/Flow<dev.deeptelar.telar/GraphEvent<#A>>).dev.deeptelar.telar/states(): kotlinx.coroutines.flow/Flow<#A> // dev.deeptelar.telar/states|states@kotlinx.coroutines.flow.Flow<dev.deeptelar.telar.GraphEvent<0:0>>(){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> dev.deeptelar.telar/StateGraph(kotlin/Function1<dev.deeptelar.telar/StateGraph<#A>, kotlin/Unit>): dev.deeptelar.telar/StateGraph<#A> // dev.deeptelar.telar/StateGraph|StateGraph(kotlin.Function1<dev.deeptelar.telar.StateGraph<0:0>,kotlin.Unit>){0§<kotlin.Any?>}[0]
+final suspend fun <#A: kotlin/Any?> dev.deeptelar.telar/interrupt(#A): kotlin/Nothing // dev.deeptelar.telar/interrupt|interrupt(0:0){0§<kotlin.Any?>}[0]
 final suspend fun dev.deeptelar.telar/isProgressCollected(): kotlin/Boolean // dev.deeptelar.telar/isProgressCollected|isProgressCollected(){}[0]
 final suspend fun dev.deeptelar.telar/reportProgress(kotlin/Any) // dev.deeptelar.telar/reportProgress|reportProgress(kotlin.Any){}[0]
