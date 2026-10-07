@@ -125,7 +125,7 @@ for understanding and testing what you submit. Agent-specific instructions live 
 
 One-time setup:
 
-- Register and verify the `io.github.cuento3yllevo2` namespace at <https://central.sonatype.com>.
+- Register and verify the `dev.deeptelar` namespace at <https://central.sonatype.com>.
 - Create a GPG key and publish its public part to a key server.
 - Add the repository secrets `MAVEN_CENTRAL_USERNAME`, `MAVEN_CENTRAL_PASSWORD` (a Central Portal
   user token), `SIGNING_IN_MEMORY_KEY` (the ASCII-armored private key) and

@@ -1,7 +1,7 @@
 # Telar
 
 [![CI](https://github.com/deeptelar/telar/actions/workflows/ci.yml/badge.svg)](https://github.com/deeptelar/telar/actions/workflows/ci.yml)
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.cuento3yllevo2/langgraph-kt-core?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.cuento3yllevo2/langgraph-kt-core)
+[![Maven Central](https://img.shields.io/maven-central/v/dev.deeptelar/telar-core?label=Maven%20Central)](https://central.sonatype.com/artifact/dev.deeptelar/telar-core)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Kotlin](https://img.shields.io/badge/kotlin-2.4-7F52FF.svg?logo=kotlin)](https://kotlinlang.org)
 
@@ -146,22 +146,20 @@ ESCALATION: Hi Cleo, a colleague from our team will reply to you personally toda
 ```kotlin
 dependencies {
     // The graph builder and the engine. This is all the quick start needs.
-    implementation("io.github.cuento3yllevo2:langgraph-kt-core:0.1.0-alpha05")
+    implementation("dev.deeptelar:telar-core:0.1.0-alpha06")
 
     // Optional modules. Add only the ones you use.
-    implementation("io.github.cuento3yllevo2:langgraph-kt-serialization:0.1.0-alpha05")      // save @Serializable states
-    implementation("io.github.cuento3yllevo2:langgraph-kt-checkpoint-file:0.1.0-alpha05")    // save runs as JSON files
-    implementation("io.github.cuento3yllevo2:langgraph-kt-checkpoint-browser:0.1.0-alpha05") // save runs in a browser's localStorage (JS and Wasm)
-    implementation("io.github.cuento3yllevo2:langgraph-kt-agent:0.1.0-alpha05")              // chat models, tools and the tool-calling agent
-    implementation("io.github.cuento3yllevo2:langgraph-kt-anthropic:0.1.0-alpha05")          // call Claude, on every platform
-    implementation("io.github.cuento3yllevo2:langgraph-kt-langchain4j:0.1.0-alpha05")        // call AI models through LangChain4j (JVM)
+    implementation("dev.deeptelar:telar-serialization:0.1.0-alpha06")      // save @Serializable states
+    implementation("dev.deeptelar:telar-checkpoint-file:0.1.0-alpha06")    // save runs as JSON files
+    implementation("dev.deeptelar:telar-checkpoint-browser:0.1.0-alpha06") // save runs in a browser's localStorage (JS and Wasm)
+    implementation("dev.deeptelar:telar-agent:0.1.0-alpha06")              // chat models, tools and the tool-calling agent
+    implementation("dev.deeptelar:telar-anthropic:0.1.0-alpha06")          // call Claude, on every platform
+    implementation("dev.deeptelar:telar-langchain4j:0.1.0-alpha06")        // call AI models through LangChain4j (JVM)
 }
 ```
 
-> **The name is changing.** The project was called langgraph-kt until `0.1.0-alpha05`, the release
-> shown above. From the next release the artifacts are `dev.deeptelar:telar-*` and the package is
-> `dev.deeptelar.telar`, which the examples on this page already use. With `0.1.0-alpha05`, import
-> `org.langgraphkt` in its place.
+> Until `0.1.0-alpha05` the project was called langgraph-kt, and its artifacts were
+> `io.github.cuento3yllevo2:langgraph-kt-*`. The [changelog](CHANGELOG.md) says how to update.
 
 | Module | Targets | Purpose |
 |---|---|---|
@@ -178,7 +176,7 @@ Java 17 because LangChain4j does.
 
 ### Status
 
-Alpha. `0.1.0-alpha05` is the latest release, and it is on Maven Central. The API may still change
+Alpha. `0.1.0-alpha06` is the latest release, and it is on Maven Central. The API may still change
 before `1.0`; the [changelog](CHANGELOG.md) lists what changes in each version, and the
 [roadmap](ROADMAP.md) lists what is planned.
 

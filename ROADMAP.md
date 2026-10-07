@@ -11,7 +11,7 @@ Last updated: 2026-10-05.
 
 ## Where the project is
 
-`0.1.0-alpha05` is on Maven Central. It has the graph builder and the engine (loops, parallel
+`0.1.0-alpha06` is on Maven Central. It has the graph builder and the engine (loops, parallel
 branches, streaming, checkpoints, pausing for a person), checkpointers for memory, files and the
 browser, a tool-calling agent for every platform, and model modules for Claude and for LangChain4j.
 The API can still change in any release.

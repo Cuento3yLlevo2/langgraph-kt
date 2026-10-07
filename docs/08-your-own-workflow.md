@@ -176,21 +176,20 @@ dependency:
 
 ```kotlin
 dependencies {
-    implementation("io.github.cuento3yllevo2:langgraph-kt-core:0.1.0-alpha05")
+    implementation("dev.deeptelar:telar-core:0.1.0-alpha06")
 
     // Only if you need them:
-    implementation("io.github.cuento3yllevo2:langgraph-kt-serialization:0.1.0-alpha05")      // save @Serializable states
-    implementation("io.github.cuento3yllevo2:langgraph-kt-checkpoint-file:0.1.0-alpha05")    // FileCheckpointer
-    implementation("io.github.cuento3yllevo2:langgraph-kt-checkpoint-browser:0.1.0-alpha05") // LocalStorageCheckpointer (browser)
-    implementation("io.github.cuento3yllevo2:langgraph-kt-agent:0.1.0-alpha05")              // ChatModel, tools, toolAgent
-    implementation("io.github.cuento3yllevo2:langgraph-kt-anthropic:0.1.0-alpha05")          // AnthropicChatModel
-    implementation("io.github.cuento3yllevo2:langgraph-kt-langchain4j:0.1.0-alpha05")        // LangChain4j models (JVM, Java 17+)
+    implementation("dev.deeptelar:telar-serialization:0.1.0-alpha06")      // save @Serializable states
+    implementation("dev.deeptelar:telar-checkpoint-file:0.1.0-alpha06")    // FileCheckpointer
+    implementation("dev.deeptelar:telar-checkpoint-browser:0.1.0-alpha06") // LocalStorageCheckpointer (browser)
+    implementation("dev.deeptelar:telar-agent:0.1.0-alpha06")              // ChatModel, tools, toolAgent
+    implementation("dev.deeptelar:telar-anthropic:0.1.0-alpha06")          // AnthropicChatModel
+    implementation("dev.deeptelar:telar-langchain4j:0.1.0-alpha06")        // LangChain4j models (JVM, Java 17+)
 }
 ```
 
-`0.1.0-alpha05` is the last release under the project's earlier name, langgraph-kt, and its package
-is `org.langgraphkt`. From the next release the artifacts are `dev.deeptelar:telar-*` and the
-package is `dev.deeptelar.telar`, as in this tutorial.
+Until `0.1.0-alpha05` the project was called langgraph-kt. If you used it under that name, the
+[changelog](../CHANGELOG.md) says how to update.
 
 The artifacts are on Maven Central, so your project needs the `mavenCentral()` repository. The
 [README](../README.md#installation) lists the targets of each module.
