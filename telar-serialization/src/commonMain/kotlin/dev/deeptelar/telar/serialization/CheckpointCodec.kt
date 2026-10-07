@@ -4,6 +4,9 @@ import dev.deeptelar.telar.Checkpoint
 import dev.deeptelar.telar.CheckpointCorruptedException
 import dev.deeptelar.telar.Checkpointer
 import dev.deeptelar.telar.StateSerializer
+import dev.deeptelar.telar.SubgraphPosition
+import kotlinx.serialization.EncodeDefault
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
@@ -28,7 +31,8 @@ import kotlinx.serialization.json.Json
  * ```
  *
  * The format is versioned and shared by every checkpointer built on this class, including
- * `FileCheckpointer`.
+ * `FileCheckpointer`. A checkpoint of a run that paused inside a subgraph is written as version 2,
+ * which a library before subgraphs refuses to read. Every other checkpoint is still version 1.
  *
  * @param serializer converts the graph state to and from a string.
  */
@@ -39,10 +43,12 @@ public class CheckpointCodec<State>(
     public fun encode(checkpoint: Checkpoint<State>): String =
         format.encodeToString(
             SerializedCheckpoint(
+                version = if (checkpoint.subgraphs.isEmpty()) 1 else SerializedCheckpoint.FORMAT_VERSION,
                 state = serializer.serialize(checkpoint.state),
                 nextNodes = checkpoint.nextNodes,
                 step = checkpoint.step,
                 interruptedBefore = checkpoint.interruptedBefore,
+                subgraphs = checkpoint.subgraphs.mapValues { it.value.serialized() },
             ),
         )
 
@@ -70,7 +76,15 @@ public class CheckpointCodec<State>(
                 // SerializationException is an IllegalArgumentException, as are most parsing failures.
                 throw CheckpointCorruptedException(threadId, "the stored state does not match the state type", e)
             }
-        return Checkpoint(state, envelope.nextNodes, envelope.step, envelope.interruptedBefore)
+        return Checkpoint(
+            state,
+            envelope.nextNodes,
+            envelope.step,
+            envelope.interruptedBefore,
+            envelope.subgraphs.mapValues {
+                it.value.position()
+            },
+        )
     }
 
     private companion object {
@@ -87,7 +101,12 @@ public class CheckpointCodec<State>(
 public inline fun <reified State> CheckpointCodec(json: Json = Json): CheckpointCodec<State> =
     CheckpointCodec(KotlinxStateSerializer<State>(json))
 
-/** Envelope around the serialized state. [version] allows the format to evolve. */
+/**
+ * Envelope around the serialized state. [version] allows the format to evolve.
+ *
+ * @property subgraphs left out when it is empty, so that a checkpoint without it reads as before.
+ */
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 internal data class SerializedCheckpoint(
     val version: Int = FORMAT_VERSION,
@@ -95,8 +114,26 @@ internal data class SerializedCheckpoint(
     val nextNodes: List<String>,
     val step: Int = 0,
     val interruptedBefore: Boolean = false,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val subgraphs: Map<String, SerializedPosition> = emptyMap(),
 ) {
     companion object {
-        const val FORMAT_VERSION = 1
+        /** Version 2 added [subgraphs]. */
+        const val FORMAT_VERSION = 2
     }
 }
+
+/** A [SubgraphPosition] in the envelope. */
+@OptIn(ExperimentalSerializationApi::class)
+@Serializable
+internal data class SerializedPosition(
+    val nextNodes: List<String>,
+    val step: Int = 0,
+    val interruptedBefore: Boolean = false,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val subgraphs: Map<String, SerializedPosition> = emptyMap(),
+)
+
+private fun SubgraphPosition.serialized(): SerializedPosition =
+    SerializedPosition(nextNodes, step, interruptedBefore, subgraphs.mapValues { it.value.serialized() })
+
+private fun SerializedPosition.position(): SubgraphPosition =
+    SubgraphPosition(nextNodes, step, interruptedBefore, subgraphs.mapValues { it.value.position() })

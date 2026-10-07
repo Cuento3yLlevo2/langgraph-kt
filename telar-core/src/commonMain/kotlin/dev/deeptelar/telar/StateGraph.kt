@@ -73,6 +73,64 @@ public class StateGraph<State> {
     public fun <Result> node(name: String, work: suspend (State) -> Result, update: suspend (State, Result) -> State): NodeRef =
         add(workNode(name, work, update))
 
+    /**
+     * Adds a node that runs another graph, a *subgraph*, on a state of its own type.
+     *
+     * [state] reads the state of the subgraph out of the state of this graph, and [update] writes it
+     * back:
+     *
+     * ```kotlin
+     * val research = subgraph(
+     *     "research", researchGraph,
+     *     state = { order -> order.research },
+     *     update = { order, research -> order.copy(research = research) },
+     * )
+     * START then intake then research then reply then END
+     * ```
+     *
+     * The subgraph runs from its [START] to its [END] inside one step of this graph, and the node
+     * behaves like one with a `work` and an `update`: it can run next to other nodes without a
+     * [Reducer].
+     *
+     * When a node of the subgraph calls [interrupt], this graph pauses too. [update] then writes
+     * the state of the subgraph into the state that is saved, so [GraphResult.Interrupted] shows
+     * what the subgraph asks, and [CompiledGraph.resume] continues inside the subgraph, at the
+     * node that paused, with what [state] reads from the saved state. For that to work, [state] has
+     * to return what [update] stored: keep the whole state of the subgraph in a property of this
+     * graph's state, as above. A subgraph that never pauses may also get a new state on every visit
+     * and give back only its result:
+     *
+     * ```kotlin
+     * state = { order -> Research(topic = order.topic) },
+     * update = { order, research -> order.copy(findings = research.findings) },
+     * ```
+     *
+     * Both functions must only read and build states. The engine may call them more than once for
+     * one run of the node. A failure inside the subgraph is the `cause` of this node's
+     * [NodeExecutionException], and [GraphConfig.maxIterations] limits the steps of the subgraph
+     * on their own, for each visit.
+     *
+     * @throws GraphValidationException if the name is blank, reserved ([START], [END]) or already used.
+     */
+    public fun <Child> subgraph(
+        name: String,
+        graph: CompiledGraph<Child>,
+        state: suspend (State) -> Child,
+        update: suspend (State, Child) -> State,
+    ): NodeRef = add(subgraphNode(name, graph, returnsState = false, state, update))
+
+    /**
+     * Adds a node that runs another graph with the same state type, a *subgraph*. It receives the
+     * state of this graph and its result is the next state, like a node that returns a whole state.
+     *
+     * A node of the subgraph can pause the run with [interrupt], and [CompiledGraph.resume]
+     * continues inside the subgraph. See the overload with a `state` and an `update`.
+     *
+     * @throws GraphValidationException if the name is blank, reserved ([START], [END]) or already used.
+     */
+    public fun subgraph(name: String, graph: CompiledGraph<State>): NodeRef =
+        add(subgraphNode(name, graph, returnsState = true, state = { it }, update = { _, result -> result }))
+
     private fun add(node: Node<State>): NodeRef {
         val name = node.name
         if (name.isBlank()) throw GraphValidationException("Node name must not be blank.")

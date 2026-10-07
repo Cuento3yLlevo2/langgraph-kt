@@ -43,6 +43,12 @@ import kotlin.coroutines.EmptyCoroutineContext
  * [GraphResult.Interrupted], and [resume] continues it. A step in which a node calls [interrupt] is
  * not saved: the state the node passed is, and [resume] runs the nodes of that step again.
  *
+ * ## Subgraphs
+ *
+ * A node added with [StateGraph.subgraph] runs another graph. That graph takes its own steps inside
+ * one step of this graph. When one of its nodes calls [interrupt], this run pauses as well, and
+ * [resume] continues inside the subgraph, at the node that paused.
+ *
  * ## Failures and retries
  *
  * With a checkpointer, a step is saved once its nodes have run, their results are merged and the
@@ -167,39 +173,79 @@ public class CompiledGraph<State> internal constructor(
                 config.checkpointer ?: throw GraphValidationException("resume() needs a GraphConfig with a checkpointer.")
             val checkpoint = checkpointer.load(config.threadId) ?: throw CheckpointNotFoundException(config.threadId)
             if (checkpoint.isComplete) throw GraphAlreadyCompletedException(config.threadId)
-            (checkpoint.nextNodes - nodes.keys).firstOrNull()?.let {
-                throw GraphValidationException(
-                    "Checkpoint of thread '${config.threadId}' refers to node '$it', which is not in this graph.",
-                )
-            }
+            validatePosition(config.threadId, checkpoint.nextNodes, checkpoint.subgraphs)
             // Only a run that paused before its next nodes continues past that pause. After any other
             // checkpoint (an interruptAfter pause, or a crash between steps) the pause is still due.
-            run(config, RunStart(update(checkpoint.state), checkpoint.nextNodes, checkpoint.step, checkpoint.interruptedBefore), progress)
+            val start =
+                RunStart(
+                    update(checkpoint.state),
+                    checkpoint.nextNodes,
+                    checkpoint.step,
+                    checkpoint.interruptedBefore,
+                    checkpoint.subgraphs,
+                )
+            run(config, start, progress)
         }
 
+    /**
+     * Runs this graph as the subgraph of the node [parent], from [START] or from where the run
+     * paused inside it. Nothing is saved here: a pause is returned, and the graph around saves it.
+     */
+    internal suspend fun runAsSubgraph(state: State, parent: RunningNode): RunEnd<State> {
+        val config = GraphConfig<State>(threadId = parent.threadId, maxIterations = parent.maxIterations)
+        val position = parent.position
+        val start =
+            if (position == null) {
+                RunStart(state, resolveNextNodes(listOf(START), state), step = 0, skipInterruptBefore = false)
+            } else {
+                RunStart(state, position.nextNodes, position.step, position.interruptedBefore, position.subgraphs)
+            }
+        // What the nodes of this graph report still reaches the collector of the run around it, as
+        // progress of [parent]. The events of this graph have no collector yet.
+        return FlowCollector<GraphEvent<State>> { }.run(config, start, progress = false, canPause = parent.canPause)
+    }
+
+    /**
+     * Where a run starts.
+     *
+     * @property subgraphs where the run stands inside the subgraphs among [activeNodes], for a run
+     * that paused in one of them.
+     */
     private class RunStart<State>(
         val state: State,
         val activeNodes: List<String>,
         val step: Int,
         val skipInterruptBefore: Boolean,
+        val subgraphs: Map<String, SubgraphPosition> = emptyMap(),
     )
 
-    private suspend fun FlowCollector<GraphEvent<State>>.run(config: GraphConfig<State>, start: RunStart<State>, progress: Boolean) {
+    /**
+     * Runs the graph from [start] and emits its events.
+     *
+     * @param canPause `true` when the run is saved, so that a node may pause it. A subgraph has no
+     * checkpointer of its own and can pause when the graph around it can.
+     */
+    private suspend fun FlowCollector<GraphEvent<State>>.run(
+        config: GraphConfig<State>,
+        start: RunStart<State>,
+        progress: Boolean,
+        canPause: Boolean = config.checkpointer != null,
+    ): RunEnd<State> {
         var state = start.state
         var activeNodes = start.activeNodes
         var step = start.step
         var skipInterruptBefore = start.skipInterruptBefore
+        var subgraphs = start.subgraphs
         var executedSteps = 0
 
-        suspend fun checkpoint(nextNodes: List<String>, interruptedBefore: Boolean = false) {
-            config.checkpointer?.save(config.threadId, Checkpoint(state, nextNodes, step, interruptedBefore))
-        }
+        suspend fun save(checkpoint: Checkpoint<State>): Checkpoint<State> =
+            checkpoint.also { config.checkpointer?.save(config.threadId, it) }
 
         while (activeNodes.isNotEmpty()) {
             if (!skipInterruptBefore && activeNodes.any { it in config.interruptBefore }) {
-                checkpoint(activeNodes, interruptedBefore = true)
+                val paused = save(Checkpoint(state, activeNodes, step, interruptedBefore = true))
                 emit(GraphEvent.Interrupted(state, activeNodes))
-                return
+                return RunEnd.Paused(paused)
             }
             skipInterruptBefore = false
 
@@ -207,47 +253,60 @@ public class CompiledGraph<State> internal constructor(
             executedSteps++
             step++
 
+            val run = StepRun(step, config.threadId, canPause, config.maxIterations, subgraphs, progress)
             state =
                 try {
-                    runStep(step, activeNodes, state, progress)
+                    runStep(run, activeNodes, state)
                 } catch (pause: NodeInterrupt) {
-                    val checkpointer =
-                        config.checkpointer ?: throw GraphValidationException(
+                    if (!canPause) {
+                        throw GraphValidationException(
                             "Node '${pause.node}' called interrupt(), which needs a GraphConfig with a checkpointer to save the paused run.",
                         )
+                    }
 
                     @Suppress("UNCHECKED_CAST")
                     val asked = pause.state as State
                     // The step did not finish, so it keeps its number, and resume runs its nodes again
-                    // without pausing before them a second time.
-                    checkpointer.save(config.threadId, Checkpoint(asked, activeNodes, step - 1, interruptedBefore = true))
+                    // without pausing before them a second time. A subgraph continues where it paused.
+                    val inside = pause.position?.let { mapOf(pause.node to it) }.orEmpty()
+                    val paused = save(Checkpoint(asked, activeNodes, step - 1, interruptedBefore = true, subgraphs = inside))
                     emit(GraphEvent.Interrupted(asked, activeNodes))
-                    return
+                    return RunEnd.Paused(paused)
                 }
+            // Only the first step of a resumed run continues inside a subgraph.
+            subgraphs = emptyMap()
             val nextNodes = resolveNextNodes(activeNodes, state)
-            checkpoint(nextNodes)
+            val saved = save(Checkpoint(state, nextNodes, step))
             emit(GraphEvent.StepCompleted(step, activeNodes, state))
 
             if (nextNodes.isNotEmpty() && activeNodes.any { it in config.interruptAfter }) {
                 emit(GraphEvent.Interrupted(state, nextNodes))
-                return
+                return RunEnd.Paused(saved)
             }
             activeNodes = nextNodes
         }
 
         emit(GraphEvent.Completed(state))
+        return RunEnd.Completed(state)
     }
 
-    private suspend fun FlowCollector<GraphEvent<State>>.runStep(
-        step: Int,
-        activeNodes: List<String>,
-        state: State,
-        progress: Boolean,
-    ): State {
+    /** What the nodes of one step need to know about their run. */
+    private class StepRun(
+        val step: Int,
+        val threadId: String,
+        val canPause: Boolean,
+        val maxIterations: Int,
+        val subgraphs: Map<String, SubgraphPosition>,
+        val progress: Boolean,
+    )
+
+    private suspend fun FlowCollector<GraphEvent<State>>.runStep(run: StepRun, activeNodes: List<String>, state: State): State {
+        val step = run.step
+        val progress = run.progress
         activeNodes.forEach { emit(GraphEvent.NodeStarted(step, it, state)) }
         if (activeNodes.size == 1 && !progress) {
             val name = activeNodes.single()
-            return runNode(nodes.getValue(name), state).state.also { emit(GraphEvent.NodeCompleted(step, name, it)) }
+            return runNode(run, nodes.getValue(name), state).state.also { emit(GraphEvent.NodeCompleted(step, name, it)) }
         }
 
         // A flow may only emit from the coroutine that collects it, so the nodes hand what they
@@ -261,7 +320,7 @@ public class CompiledGraph<State> internal constructor(
                     val results =
                         activeNodes.map { name ->
                             async(if (progress) reporter(name, signals) else EmptyCoroutineContext) {
-                                runNode(nodes.getValue(name), state).also { signals.send(NodeSignal.Finished(name, it.state)) }
+                                runNode(run, nodes.getValue(name), state).also { signals.send(NodeSignal.Finished(name, it.state)) }
                             }
                         }
                     var running = activeNodes.size
@@ -340,8 +399,8 @@ public class CompiledGraph<State> internal constructor(
         return combined
     }
 
-    private suspend fun runNode(node: Node<State>, state: State): NodeOutput<State> =
-        withContext(RunningNode(node.name)) {
+    private suspend fun runNode(run: StepRun, node: Node<State>, state: State): NodeOutput<State> =
+        withContext(RunningNode(node.name, run.threadId, run.canPause, run.maxIterations, run.subgraphs[node.name])) {
             wrapFailure({ NodeExecutionException(node.name, it) }) { node.run(state) }
         }
 
@@ -384,6 +443,21 @@ public class CompiledGraph<State> internal constructor(
         return target
     }
 
+    /** Checks that a checkpoint, or the position inside a subgraph, only names what this graph has. */
+    private fun validatePosition(threadId: String, nextNodes: List<String>, subgraphs: Map<String, SubgraphPosition>) {
+        (nextNodes - nodes.keys).firstOrNull()?.let {
+            throw GraphValidationException("Checkpoint of thread '$threadId' refers to node '$it', which is not in this graph.")
+        }
+        for ((name, position) in subgraphs) {
+            val subgraph =
+                nodes[name]?.subgraph?.takeIf { name in nextNodes }
+                    ?: throw GraphValidationException(
+                        "Checkpoint of thread '$threadId' refers to a subgraph '$name', which is not one of the nodes it continues with.",
+                    )
+            subgraph.validatePosition(threadId, position.nextNodes, position.subgraphs)
+        }
+    }
+
     private fun validateInterrupts(config: GraphConfig<State>) {
         val unknown = (config.interruptBefore + config.interruptAfter) - nodes.keys
         if (unknown.isNotEmpty()) {
@@ -398,4 +472,16 @@ public class CompiledGraph<State> internal constructor(
             is GraphEvent.NodeStarted, is GraphEvent.NodeProgress, is GraphEvent.NodeCompleted, is GraphEvent.StepCompleted ->
                 error("A graph stream always ends with Completed or Interrupted")
         }
+}
+
+/** How a run ended. */
+internal sealed interface RunEnd<out State> {
+    class Completed<State>(
+        val state: State,
+    ) : RunEnd<State>
+
+    /** The run paused. [checkpoint] is what it continues from, whether a checkpointer saved it or not. */
+    class Paused<State>(
+        val checkpoint: Checkpoint<State>,
+    ) : RunEnd<State>
 }

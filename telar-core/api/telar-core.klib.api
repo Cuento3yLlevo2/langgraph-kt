@@ -173,7 +173,7 @@ abstract class dev.deeptelar.telar/TelarException : kotlin/RuntimeException { //
 }
 
 final class <#A: kotlin/Any?> dev.deeptelar.telar/Checkpoint { // dev.deeptelar.telar/Checkpoint|null[0]
-    constructor <init>(#A, kotlin.collections/List<kotlin/String>, kotlin/Int = ..., kotlin/Boolean = ...) // dev.deeptelar.telar/Checkpoint.<init>|<init>(1:0;kotlin.collections.List<kotlin.String>;kotlin.Int;kotlin.Boolean){}[0]
+    constructor <init>(#A, kotlin.collections/List<kotlin/String>, kotlin/Int = ..., kotlin/Boolean = ..., kotlin.collections/Map<kotlin/String, dev.deeptelar.telar/SubgraphPosition> = ...) // dev.deeptelar.telar/Checkpoint.<init>|<init>(1:0;kotlin.collections.List<kotlin.String>;kotlin.Int;kotlin.Boolean;kotlin.collections.Map<kotlin.String,dev.deeptelar.telar.SubgraphPosition>){}[0]
 
     final val interruptedBefore // dev.deeptelar.telar/Checkpoint.interruptedBefore|{}interruptedBefore[0]
         final fun <get-interruptedBefore>(): kotlin/Boolean // dev.deeptelar.telar/Checkpoint.interruptedBefore.<get-interruptedBefore>|<get-interruptedBefore>(){}[0]
@@ -185,12 +185,15 @@ final class <#A: kotlin/Any?> dev.deeptelar.telar/Checkpoint { // dev.deeptelar.
         final fun <get-state>(): #A // dev.deeptelar.telar/Checkpoint.state.<get-state>|<get-state>(){}[0]
     final val step // dev.deeptelar.telar/Checkpoint.step|{}step[0]
         final fun <get-step>(): kotlin/Int // dev.deeptelar.telar/Checkpoint.step.<get-step>|<get-step>(){}[0]
+    final val subgraphs // dev.deeptelar.telar/Checkpoint.subgraphs|{}subgraphs[0]
+        final fun <get-subgraphs>(): kotlin.collections/Map<kotlin/String, dev.deeptelar.telar/SubgraphPosition> // dev.deeptelar.telar/Checkpoint.subgraphs.<get-subgraphs>|<get-subgraphs>(){}[0]
 
     final fun component1(): #A // dev.deeptelar.telar/Checkpoint.component1|component1(){}[0]
     final fun component2(): kotlin.collections/List<kotlin/String> // dev.deeptelar.telar/Checkpoint.component2|component2(){}[0]
     final fun component3(): kotlin/Int // dev.deeptelar.telar/Checkpoint.component3|component3(){}[0]
     final fun component4(): kotlin/Boolean // dev.deeptelar.telar/Checkpoint.component4|component4(){}[0]
-    final fun copy(#A = ..., kotlin.collections/List<kotlin/String> = ..., kotlin/Int = ..., kotlin/Boolean = ...): dev.deeptelar.telar/Checkpoint<#A> // dev.deeptelar.telar/Checkpoint.copy|copy(1:0;kotlin.collections.List<kotlin.String>;kotlin.Int;kotlin.Boolean){}[0]
+    final fun component5(): kotlin.collections/Map<kotlin/String, dev.deeptelar.telar/SubgraphPosition> // dev.deeptelar.telar/Checkpoint.component5|component5(){}[0]
+    final fun copy(#A = ..., kotlin.collections/List<kotlin/String> = ..., kotlin/Int = ..., kotlin/Boolean = ..., kotlin.collections/Map<kotlin/String, dev.deeptelar.telar/SubgraphPosition> = ...): dev.deeptelar.telar/Checkpoint<#A> // dev.deeptelar.telar/Checkpoint.copy|copy(1:0;kotlin.collections.List<kotlin.String>;kotlin.Int;kotlin.Boolean;kotlin.collections.Map<kotlin.String,dev.deeptelar.telar.SubgraphPosition>){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // dev.deeptelar.telar/Checkpoint.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // dev.deeptelar.telar/Checkpoint.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // dev.deeptelar.telar/Checkpoint.toString|toString(){}[0]
@@ -252,6 +255,7 @@ final class <#A: kotlin/Any?> dev.deeptelar.telar/StateGraph { // dev.deeptelar.
     final fun (dev.deeptelar.telar/NodeRef).then(kotlin/String): kotlin/String // dev.deeptelar.telar/StateGraph.then|then@dev.deeptelar.telar.NodeRef(kotlin.String){}[0]
     final fun (kotlin/String).then(dev.deeptelar.telar/NodeRef): dev.deeptelar.telar/NodeRef // dev.deeptelar.telar/StateGraph.then|then@kotlin.String(dev.deeptelar.telar.NodeRef){}[0]
     final fun <#A1: kotlin/Any?> node(kotlin/String, kotlin.coroutines/SuspendFunction1<#A, #A1>, kotlin.coroutines/SuspendFunction2<#A, #A1, #A>): dev.deeptelar.telar/NodeRef // dev.deeptelar.telar/StateGraph.node|node(kotlin.String;kotlin.coroutines.SuspendFunction1<1:0,0:0>;kotlin.coroutines.SuspendFunction2<1:0,0:0,1:0>){0§<kotlin.Any?>}[0]
+    final fun <#A1: kotlin/Any?> subgraph(kotlin/String, dev.deeptelar.telar/CompiledGraph<#A1>, kotlin.coroutines/SuspendFunction1<#A, #A1>, kotlin.coroutines/SuspendFunction2<#A, #A1, #A>): dev.deeptelar.telar/NodeRef // dev.deeptelar.telar/StateGraph.subgraph|subgraph(kotlin.String;dev.deeptelar.telar.CompiledGraph<0:0>;kotlin.coroutines.SuspendFunction1<1:0,0:0>;kotlin.coroutines.SuspendFunction2<1:0,0:0,1:0>){0§<kotlin.Any?>}[0]
     final fun compile(dev.deeptelar.telar/Reducer<#A>? = ...): dev.deeptelar.telar/CompiledGraph<#A> // dev.deeptelar.telar/StateGraph.compile|compile(dev.deeptelar.telar.Reducer<1:0>?){}[0]
     final fun conditionalEdge(dev.deeptelar.telar/NodeRef, kotlin.collections/Set<dev.deeptelar.telar/NodeRef>, kotlin.coroutines/SuspendFunction1<#A, dev.deeptelar.telar/NodeRef>) // dev.deeptelar.telar/StateGraph.conditionalEdge|conditionalEdge(dev.deeptelar.telar.NodeRef;kotlin.collections.Set<dev.deeptelar.telar.NodeRef>;kotlin.coroutines.SuspendFunction1<1:0,dev.deeptelar.telar.NodeRef>){}[0]
     final fun conditionalEdge(dev.deeptelar.telar/NodeRef, kotlin.collections/Set<kotlin/String>? = ..., kotlin.coroutines/SuspendFunction1<#A, kotlin/String>) // dev.deeptelar.telar/StateGraph.conditionalEdge|conditionalEdge(dev.deeptelar.telar.NodeRef;kotlin.collections.Set<kotlin.String>?;kotlin.coroutines.SuspendFunction1<1:0,kotlin.String>){}[0]
@@ -259,6 +263,7 @@ final class <#A: kotlin/Any?> dev.deeptelar.telar/StateGraph { // dev.deeptelar.
     final fun conditionalEdge(kotlin/String, kotlin.collections/Set<kotlin/String>? = ..., kotlin.coroutines/SuspendFunction1<#A, kotlin/String>) // dev.deeptelar.telar/StateGraph.conditionalEdge|conditionalEdge(kotlin.String;kotlin.collections.Set<kotlin.String>?;kotlin.coroutines.SuspendFunction1<1:0,kotlin.String>){}[0]
     final fun edge(kotlin/String, kotlin/String) // dev.deeptelar.telar/StateGraph.edge|edge(kotlin.String;kotlin.String){}[0]
     final fun node(kotlin/String, kotlin.coroutines/SuspendFunction1<#A, #A>): dev.deeptelar.telar/NodeRef // dev.deeptelar.telar/StateGraph.node|node(kotlin.String;kotlin.coroutines.SuspendFunction1<1:0,1:0>){}[0]
+    final fun subgraph(kotlin/String, dev.deeptelar.telar/CompiledGraph<#A>): dev.deeptelar.telar/NodeRef // dev.deeptelar.telar/StateGraph.subgraph|subgraph(kotlin.String;dev.deeptelar.telar.CompiledGraph<1:0>){}[0]
 }
 
 final class dev.deeptelar.telar/CheckpointCorruptedException : dev.deeptelar.telar/TelarException { // dev.deeptelar.telar/CheckpointCorruptedException|null[0]
@@ -372,6 +377,28 @@ final class dev.deeptelar.telar/ReducerException : dev.deeptelar.telar/TelarExce
 
     final val nodes // dev.deeptelar.telar/ReducerException.nodes|{}nodes[0]
         final fun <get-nodes>(): kotlin.collections/List<kotlin/String> // dev.deeptelar.telar/ReducerException.nodes.<get-nodes>|<get-nodes>(){}[0]
+}
+
+final class dev.deeptelar.telar/SubgraphPosition { // dev.deeptelar.telar/SubgraphPosition|null[0]
+    constructor <init>(kotlin.collections/List<kotlin/String>, kotlin/Int = ..., kotlin/Boolean = ..., kotlin.collections/Map<kotlin/String, dev.deeptelar.telar/SubgraphPosition> = ...) // dev.deeptelar.telar/SubgraphPosition.<init>|<init>(kotlin.collections.List<kotlin.String>;kotlin.Int;kotlin.Boolean;kotlin.collections.Map<kotlin.String,dev.deeptelar.telar.SubgraphPosition>){}[0]
+
+    final val interruptedBefore // dev.deeptelar.telar/SubgraphPosition.interruptedBefore|{}interruptedBefore[0]
+        final fun <get-interruptedBefore>(): kotlin/Boolean // dev.deeptelar.telar/SubgraphPosition.interruptedBefore.<get-interruptedBefore>|<get-interruptedBefore>(){}[0]
+    final val nextNodes // dev.deeptelar.telar/SubgraphPosition.nextNodes|{}nextNodes[0]
+        final fun <get-nextNodes>(): kotlin.collections/List<kotlin/String> // dev.deeptelar.telar/SubgraphPosition.nextNodes.<get-nextNodes>|<get-nextNodes>(){}[0]
+    final val step // dev.deeptelar.telar/SubgraphPosition.step|{}step[0]
+        final fun <get-step>(): kotlin/Int // dev.deeptelar.telar/SubgraphPosition.step.<get-step>|<get-step>(){}[0]
+    final val subgraphs // dev.deeptelar.telar/SubgraphPosition.subgraphs|{}subgraphs[0]
+        final fun <get-subgraphs>(): kotlin.collections/Map<kotlin/String, dev.deeptelar.telar/SubgraphPosition> // dev.deeptelar.telar/SubgraphPosition.subgraphs.<get-subgraphs>|<get-subgraphs>(){}[0]
+
+    final fun component1(): kotlin.collections/List<kotlin/String> // dev.deeptelar.telar/SubgraphPosition.component1|component1(){}[0]
+    final fun component2(): kotlin/Int // dev.deeptelar.telar/SubgraphPosition.component2|component2(){}[0]
+    final fun component3(): kotlin/Boolean // dev.deeptelar.telar/SubgraphPosition.component3|component3(){}[0]
+    final fun component4(): kotlin.collections/Map<kotlin/String, dev.deeptelar.telar/SubgraphPosition> // dev.deeptelar.telar/SubgraphPosition.component4|component4(){}[0]
+    final fun copy(kotlin.collections/List<kotlin/String> = ..., kotlin/Int = ..., kotlin/Boolean = ..., kotlin.collections/Map<kotlin/String, dev.deeptelar.telar/SubgraphPosition> = ...): dev.deeptelar.telar/SubgraphPosition // dev.deeptelar.telar/SubgraphPosition.copy|copy(kotlin.collections.List<kotlin.String>;kotlin.Int;kotlin.Boolean;kotlin.collections.Map<kotlin.String,dev.deeptelar.telar.SubgraphPosition>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // dev.deeptelar.telar/SubgraphPosition.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // dev.deeptelar.telar/SubgraphPosition.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // dev.deeptelar.telar/SubgraphPosition.toString|toString(){}[0]
 }
 
 final const val dev.deeptelar.telar/END // dev.deeptelar.telar/END|{}END[0]

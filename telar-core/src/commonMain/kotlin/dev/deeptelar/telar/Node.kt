@@ -1,5 +1,7 @@
 package dev.deeptelar.telar
 
+import kotlinx.coroutines.currentCoroutineContext
+
 /**
  * The work a node performs: a suspending function that takes the current state and returns the
  * updated state.
@@ -33,10 +35,12 @@ public class NodeRef internal constructor(
  *
  * @property returnsState `true` for a node that returns a whole state. Two such nodes in one step
  * need a [Reducer]. `false` for a node with a `work` and an `update`.
+ * @property subgraph the graph that this node runs, for a node added with [StateGraph.subgraph].
  */
 internal class Node<State>(
     val name: String,
     val returnsState: Boolean,
+    val subgraph: CompiledGraph<*>? = null,
     val run: suspend (State) -> NodeOutput<State>,
 )
 
@@ -67,3 +71,31 @@ internal fun <State, Result> workNode(
         val result = work(state)
         NodeOutput(update(state, result)) { update(it, result) }
     }
+
+/**
+ * A node that runs [graph] on the state that [state] reads from the state of this graph, and writes
+ * the state of [graph] back with [update]: when [graph] finishes, and when it pauses.
+ *
+ * @param returnsState `true` when [graph] has the state type of this graph, so that its result is a
+ * whole state.
+ */
+internal fun <State, Child> subgraphNode(
+    name: String,
+    graph: CompiledGraph<Child>,
+    returnsState: Boolean,
+    state: suspend (State) -> Child,
+    update: suspend (State, Child) -> State,
+): Node<State> =
+    Node(name, returnsState, subgraph = graph) { parent ->
+        val running = checkNotNull(currentCoroutineContext()[RunningNode]) { "The engine runs every node with a RunningNode" }
+        when (val end = graph.runAsSubgraph(state(parent), running)) {
+            is RunEnd.Completed -> {
+                val result = end.state
+                NodeOutput(update(parent, result), update = if (returnsState) null else { combined -> update(combined, result) })
+            }
+            // The pause goes on to the graph around this node, with the state of the subgraph in its own.
+            is RunEnd.Paused -> throw NodeInterrupt(name, update(parent, end.checkpoint.state), end.checkpoint.position())
+        }
+    }
+
+private fun Checkpoint<*>.position(): SubgraphPosition = SubgraphPosition(nextNodes, step, interruptedBefore, subgraphs)

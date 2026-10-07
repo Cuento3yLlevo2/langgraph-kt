@@ -12,7 +12,20 @@ breaking changes.
 - `interrupt(state)` pauses a run from inside a node. A node that finds out while it works that it
   needs a person saves a state with its question and stops there. `resume` writes the answer into
   the state and runs the node again from its first line. Before, a run paused only before or after
-  the nodes that `GraphConfig` names. The format of a checkpoint is the same as before.
+  the nodes that `GraphConfig` names.
+- `subgraph(name, graph, state, update)` in `StateGraph`: a compiled graph is a node of another
+  graph. `state` reads the state of the subgraph out of the state of the graph around it, and
+  `update` writes it back. When a node of the subgraph calls `interrupt`, the graph around pauses
+  too, and `resume` continues inside the subgraph, at the node that paused. A subgraph with the same
+  state type needs no mapping: `subgraph(name, graph)`. Not yet: the events of a subgraph in the
+  stream of the graph around it, and `interruptBefore` for a node of a subgraph.
+
+### Changed
+
+- `Checkpoint` has a fifth property, `subgraphs`: where a paused run stands inside its subgraphs.
+  A `Checkpointer` of your own that does not use `CheckpointCodec` has to store it with the rest.
+  `CheckpointCodec` writes a checkpoint that has it as format version 2. Every other checkpoint is
+  written as before, and the checkpoints of earlier versions are read.
 
 ## [0.1.0-alpha06] - 2026-10-07
 
