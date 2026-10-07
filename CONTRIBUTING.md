@@ -11,8 +11,8 @@ Requirements: JDK 17 or newer. Everything else (Gradle, Kotlin, Kotlin/Native to
 JS tests) is downloaded by the Gradle wrapper.
 
 ```bash
-git clone git@github.com:Cuento3yLlevo2/langgraph-kt.git
-cd langgraph-kt
+git clone git@github.com:deeptelar/telar.git
+cd telar
 ./gradlew check
 ```
 

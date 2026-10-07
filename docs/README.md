@@ -17,8 +17,8 @@ stages are the eight levels: stage 3 is level 3.
 - This repository on your computer:
 
 ```bash
-git clone https://github.com/Cuento3yLlevo2/langgraph-kt.git
-cd langgraph-kt
+git clone https://github.com/deeptelar/telar.git
+cd telar
 ./gradlew :samples:runLevel1
 ```
 

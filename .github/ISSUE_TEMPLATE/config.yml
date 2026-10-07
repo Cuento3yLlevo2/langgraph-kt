@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Question or idea
-    url: https://github.com/Cuento3yLlevo2/langgraph-kt/discussions
+    url: https://github.com/deeptelar/telar/discussions
     about: Ask how to do something or discuss an idea before opening an issue.
   - name: Security vulnerability
-    url: https://github.com/Cuento3yLlevo2/langgraph-kt/security/advisories/new
+    url: https://github.com/deeptelar/telar/security/advisories/new
     about: Report security problems privately.

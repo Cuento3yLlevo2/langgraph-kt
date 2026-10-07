@@ -10,7 +10,7 @@ Please do not open a public issue for security problems.
 
 Report them privately through GitHub: open the repository's **Security** tab and choose
 **Report a vulnerability**
-([direct link](https://github.com/Cuento3yLlevo2/langgraph-kt/security/advisories/new)).
+([direct link](https://github.com/deeptelar/telar/security/advisories/new)).
 If you cannot use GitHub's private reporting, email <mhermoso1993@gmail.com> instead.
 Include the affected version, a description of the problem and, if you can, a minimal way to
 reproduce it.

@@ -1,6 +1,6 @@
 # Telar
 
-[![CI](https://github.com/Cuento3yLlevo2/langgraph-kt/actions/workflows/ci.yml/badge.svg)](https://github.com/Cuento3yLlevo2/langgraph-kt/actions/workflows/ci.yml)
+[![CI](https://github.com/deeptelar/telar/actions/workflows/ci.yml/badge.svg)](https://github.com/deeptelar/telar/actions/workflows/ci.yml)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.cuento3yllevo2/langgraph-kt-core?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.cuento3yllevo2/langgraph-kt-core)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Kotlin](https://img.shields.io/badge/kotlin-2.4-7F52FF.svg?logo=kotlin)](https://kotlinlang.org)
@@ -752,7 +752,7 @@ extends `TelarException`:
 
 ## API reference
 
-The generated API documentation is published at <https://cuento3yllevo2.github.io/langgraph-kt/>.
+The generated API documentation is published at <https://deeptelar.github.io/telar/>.
 To build it locally, run `./gradlew dokkaGenerate` and open `build/dokka/html/index.html`.
 
 ## Samples

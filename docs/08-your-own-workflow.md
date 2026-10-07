@@ -219,6 +219,6 @@ know where an AI model goes, and how to let it call your functions. From here:
 - The other [samples](../samples/src/main/kotlin/dev/deeptelar/telar/samples) are complete programs.
 - The [demo app](https://github.com/Cuento3yLlevo2/langgraph-kt-demo) shows graphs running behind a
   user interface, in the browser and on the desktop.
-- The [API reference](https://cuento3yllevo2.github.io/langgraph-kt/) describes every function.
+- The [API reference](https://deeptelar.github.io/telar/) describes every function.
 
 [Back to level 7](07-game-over-screens.md) · [All levels](README.md)
