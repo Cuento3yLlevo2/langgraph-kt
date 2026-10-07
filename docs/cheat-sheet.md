@@ -107,7 +107,7 @@ Pauses need a checkpointer.
 
 ## An agent with tools
 
-From `langgraph-kt-agent`. [Level 6](06-the-agent.md) teaches it, and the README has the
+From `telar-agent`. [Level 6](06-the-agent.md) teaches it, and the README has the
 short version under [Agents with tools](../README.md#agents-with-tools).
 
 ```kotlin
@@ -149,7 +149,7 @@ agent.invoke(state.withUserMessage("And two?"))  // the next turn of the convers
 
 ## Errors
 
-All are `LangGraphException`s. [Level 7](07-game-over-screens.md) explains each one.
+All are `TelarException`s. [Level 7](07-game-over-screens.md) explains each one.
 
 | Exception | Meaning |
 |---|---|

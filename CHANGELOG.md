@@ -11,6 +11,17 @@ breaking changes.
 
 - A [roadmap](ROADMAP.md): what is planned before `1.0`, in which order, and what is not planned.
 
+### Changed
+
+- **The project is now called Telar.** It was langgraph-kt. To update:
+  - Dependencies: `io.github.cuento3yllevo2:langgraph-kt-<module>` becomes
+    `dev.deeptelar:telar-<module>`, for example `dev.deeptelar:telar-core`.
+  - Imports: the package `org.langgraphkt` becomes `dev.deeptelar.telar`.
+  - `LangGraphException` is now `TelarException`.
+  - `LocalStorageCheckpointer` stores its entries under `telar.checkpoint.` by default, where it
+    was `langgraph.checkpoint.`. Pass `keyPrefix = "langgraph.checkpoint."` to read the runs an
+    earlier version saved.
+
 ## [0.1.0-alpha05] - 2026-10-05
 
 ### Added

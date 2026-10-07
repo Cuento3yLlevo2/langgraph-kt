@@ -22,7 +22,7 @@ After `read` the path splits. Only one of the three dotted arrows is taken in a 
 
 ## The code
 
-[`level2/Level2.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level2/Level2.kt)
+[`level2/Level2.kt`](../samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level2/Level2.kt)
 (`Ticket` and `topicOf` are the same as in level 1)
 
 ```kotlin

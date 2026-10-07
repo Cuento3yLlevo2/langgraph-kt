@@ -1,4 +1,4 @@
-# Contributing to langgraph-kt
+# Contributing to Telar
 
 Thank you for considering a contribution. This guide covers the setup, the checks a change must
 pass, and the design rules the project follows.
@@ -21,8 +21,8 @@ Useful commands:
 | Command | What it does |
 |---|---|
 | `./gradlew check` | Compiles every target, runs all tests that can run on your OS, ktlint, and the coverage gate |
-| `./gradlew :langgraph-kt-core:jvmTest` | Fast feedback: core tests on the JVM only |
-| `./gradlew :langgraph-kt-core:jvmTest --tests "org.langgraphkt.InterruptTest"` | A single test class |
+| `./gradlew :telar-core:jvmTest` | Fast feedback: core tests on the JVM only |
+| `./gradlew :telar-core:jvmTest --tests "dev.deeptelar.telar.InterruptTest"` | A single test class |
 | `./gradlew ktlintFormat` | Fixes formatting |
 | `./gradlew apiCheck` / `apiDump` | Checks / updates the public API dumps (see below) |
 | `./gradlew :samples:runQuickStart` | Runs a sample |
@@ -31,20 +31,20 @@ Useful commands:
 Apple targets (iOS, macOS) only build and test on macOS, and the Windows target only tests on
 Windows. CI covers all of them, so you do not need every OS locally.
 
-The tests of `langgraph-kt-checkpoint-browser` need a real browser, so `check` runs them in headless
+The tests of `telar-checkpoint-browser` need a real browser, so `check` runs them in headless
 Chrome. Install Chrome or Chromium, and set `CHROME_BIN` to its path if it is not found.
 
 ## Project layout
 
 | Path | Contents |
 |---|---|
-| `langgraph-kt-core` | Graph builder, execution engine, checkpoint interfaces (multiplatform, depends only on kotlinx-coroutines) |
-| `langgraph-kt-serialization` | `KotlinxStateSerializer` (multiplatform) |
-| `langgraph-kt-checkpoint-file` | `FileCheckpointer` on kotlinx-io (multiplatform) |
-| `langgraph-kt-checkpoint-browser` | `LocalStorageCheckpointer` for web apps (JS and Wasm in a browser) |
-| `langgraph-kt-agent` | `ChatModel`, tools and the tool-calling agent loop (multiplatform) |
-| `langgraph-kt-anthropic` | `AnthropicChatModel`, Claude through Ktor (multiplatform) |
-| `langgraph-kt-langchain4j` | LangChain4j integration (JVM) |
+| `telar-core` | Graph builder, execution engine, checkpoint interfaces (multiplatform, depends only on kotlinx-coroutines) |
+| `telar-serialization` | `KotlinxStateSerializer` (multiplatform) |
+| `telar-checkpoint-file` | `FileCheckpointer` on kotlinx-io (multiplatform) |
+| `telar-checkpoint-browser` | `LocalStorageCheckpointer` for web apps (JS and Wasm in a browser) |
+| `telar-agent` | `ChatModel`, tools and the tool-calling agent loop (multiplatform) |
+| `telar-anthropic` | `AnthropicChatModel`, Claude through Ktor (multiplatform) |
+| `telar-langchain4j` | LangChain4j integration (JVM) |
 | `samples` | Runnable examples, not published. `samples/.../tutorial` holds the code of the tutorial |
 | `docs` | The tutorial, one Markdown page per level |
 | `build-logic` | Gradle convention plugins shared by all modules |
@@ -74,7 +74,7 @@ Chrome. Install Chrome or Chromium, and set `CHROME_BIN` to its path if it is no
   type, and KDoc.
 - Keep implementation details `internal`. Graphs are only created through `StateGraph`.
 - Prefer checks that fail in `compile()` over checks that fail in the middle of a run, and throw a
-  `LangGraphException` subclass rather than a generic exception.
+  `TelarException` subclass rather than a generic exception.
 - Core must stay in `commonMain` and depend only on kotlinx-coroutines. Platform- or
   library-specific code belongs in its own module.
 

@@ -1,0 +1,306 @@
+public final class dev/deeptelar/telar/agent/AgentState {
+	public static final field Companion Ldev/deeptelar/telar/agent/AgentState$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Ldev/deeptelar/telar/agent/AgentState;
+	public static synthetic fun copy$default (Ldev/deeptelar/telar/agent/AgentState;Ljava/util/List;ILjava/lang/Object;)Ldev/deeptelar/telar/agent/AgentState;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAnswer ()Ljava/lang/String;
+	public final fun getAnswerTruncated ()Z
+	public final fun getMessages ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun withUserMessage (Ljava/lang/String;)Ldev/deeptelar/telar/agent/AgentState;
+}
+
+public final synthetic class dev/deeptelar/telar/agent/AgentState$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/deeptelar/telar/agent/AgentState$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/deeptelar/telar/agent/AgentState;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/deeptelar/telar/agent/AgentState;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/deeptelar/telar/agent/AgentState$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public abstract interface class dev/deeptelar/telar/agent/ChatEvent {
+}
+
+public final class dev/deeptelar/telar/agent/ChatEvent$Completed : dev/deeptelar/telar/agent/ChatEvent {
+	public fun <init> (Ldev/deeptelar/telar/agent/ChatResponse;)V
+	public final fun component1 ()Ldev/deeptelar/telar/agent/ChatResponse;
+	public final fun copy (Ldev/deeptelar/telar/agent/ChatResponse;)Ldev/deeptelar/telar/agent/ChatEvent$Completed;
+	public static synthetic fun copy$default (Ldev/deeptelar/telar/agent/ChatEvent$Completed;Ldev/deeptelar/telar/agent/ChatResponse;ILjava/lang/Object;)Ldev/deeptelar/telar/agent/ChatEvent$Completed;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getResponse ()Ldev/deeptelar/telar/agent/ChatResponse;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/deeptelar/telar/agent/ChatEvent$TextDelta : dev/deeptelar/telar/agent/ChatEvent {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Ldev/deeptelar/telar/agent/ChatEvent$TextDelta;
+	public static synthetic fun copy$default (Ldev/deeptelar/telar/agent/ChatEvent$TextDelta;Ljava/lang/String;ILjava/lang/Object;)Ldev/deeptelar/telar/agent/ChatEvent$TextDelta;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class dev/deeptelar/telar/agent/ChatMessage {
+	public static final field Companion Ldev/deeptelar/telar/agent/ChatMessage$Companion;
+	public abstract fun getText ()Ljava/lang/String;
+}
+
+public final class dev/deeptelar/telar/agent/ChatMessage$Assistant : dev/deeptelar/telar/agent/ChatMessage {
+	public static final field Companion Ldev/deeptelar/telar/agent/ChatMessage$Assistant$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/util/List;Lkotlinx/serialization/json/JsonElement;Z)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;Lkotlinx/serialization/json/JsonElement;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Lkotlinx/serialization/json/JsonElement;
+	public final fun component4 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/util/List;Lkotlinx/serialization/json/JsonElement;Z)Ldev/deeptelar/telar/agent/ChatMessage$Assistant;
+	public static synthetic fun copy$default (Ldev/deeptelar/telar/agent/ChatMessage$Assistant;Ljava/lang/String;Ljava/util/List;Lkotlinx/serialization/json/JsonElement;ZILjava/lang/Object;)Ldev/deeptelar/telar/agent/ChatMessage$Assistant;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getProviderContent ()Lkotlinx/serialization/json/JsonElement;
+	public fun getText ()Ljava/lang/String;
+	public final fun getToolCalls ()Ljava/util/List;
+	public final fun getTruncated ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/deeptelar/telar/agent/ChatMessage$Assistant$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/deeptelar/telar/agent/ChatMessage$Assistant$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/deeptelar/telar/agent/ChatMessage$Assistant;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/deeptelar/telar/agent/ChatMessage$Assistant;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/deeptelar/telar/agent/ChatMessage$Assistant$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/deeptelar/telar/agent/ChatMessage$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/deeptelar/telar/agent/ChatMessage$ToolResult : dev/deeptelar/telar/agent/ChatMessage {
+	public static final field Companion Ldev/deeptelar/telar/agent/ChatMessage$ToolResult$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)Ldev/deeptelar/telar/agent/ChatMessage$ToolResult;
+	public static synthetic fun copy$default (Ldev/deeptelar/telar/agent/ChatMessage$ToolResult;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Ldev/deeptelar/telar/agent/ChatMessage$ToolResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getText ()Ljava/lang/String;
+	public final fun getToolCallId ()Ljava/lang/String;
+	public final fun getToolName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isError ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/deeptelar/telar/agent/ChatMessage$ToolResult$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/deeptelar/telar/agent/ChatMessage$ToolResult$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/deeptelar/telar/agent/ChatMessage$ToolResult;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/deeptelar/telar/agent/ChatMessage$ToolResult;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/deeptelar/telar/agent/ChatMessage$ToolResult$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/deeptelar/telar/agent/ChatMessage$User : dev/deeptelar/telar/agent/ChatMessage {
+	public static final field Companion Ldev/deeptelar/telar/agent/ChatMessage$User$Companion;
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Ldev/deeptelar/telar/agent/ChatMessage$User;
+	public static synthetic fun copy$default (Ldev/deeptelar/telar/agent/ChatMessage$User;Ljava/lang/String;ILjava/lang/Object;)Ldev/deeptelar/telar/agent/ChatMessage$User;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/deeptelar/telar/agent/ChatMessage$User$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/deeptelar/telar/agent/ChatMessage$User$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/deeptelar/telar/agent/ChatMessage$User;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/deeptelar/telar/agent/ChatMessage$User;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/deeptelar/telar/agent/ChatMessage$User$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/deeptelar/telar/agent/ChatMessageKt {
+	public static final fun pendingToolCalls (Ljava/util/List;)Ljava/util/List;
+}
+
+public abstract interface class dev/deeptelar/telar/agent/ChatModel {
+	public abstract fun chat (Ldev/deeptelar/telar/agent/ChatRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun stream (Ldev/deeptelar/telar/agent/ChatRequest;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class dev/deeptelar/telar/agent/ChatModel$DefaultImpls {
+	public static fun stream (Ldev/deeptelar/telar/agent/ChatModel;Ldev/deeptelar/telar/agent/ChatRequest;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class dev/deeptelar/telar/agent/ChatModelException : dev/deeptelar/telar/TelarException {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class dev/deeptelar/telar/agent/ChatModelKt {
+	public static final fun chat (Ldev/deeptelar/telar/agent/ChatModel;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun chat$default (Ldev/deeptelar/telar/agent/ChatModel;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun chatWithProgress (Ldev/deeptelar/telar/agent/ChatModel;Ldev/deeptelar/telar/agent/ChatRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun chatWithProgress (Ldev/deeptelar/telar/agent/ChatModel;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun chatWithProgress$default (Ldev/deeptelar/telar/agent/ChatModel;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun getTextDelta (Ldev/deeptelar/telar/GraphEvent;)Ljava/lang/String;
+}
+
+public final class dev/deeptelar/telar/agent/ChatRequest {
+	public fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;Ljava/lang/String;Ljava/util/List;)Ldev/deeptelar/telar/agent/ChatRequest;
+	public static synthetic fun copy$default (Ldev/deeptelar/telar/agent/ChatRequest;Ljava/util/List;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Ldev/deeptelar/telar/agent/ChatRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMessages ()Ljava/util/List;
+	public final fun getSystem ()Ljava/lang/String;
+	public final fun getTools ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/deeptelar/telar/agent/ChatResponse {
+	public fun <init> (Ldev/deeptelar/telar/agent/ChatMessage$Assistant;Ldev/deeptelar/telar/agent/TokenUsage;)V
+	public synthetic fun <init> (Ldev/deeptelar/telar/agent/ChatMessage$Assistant;Ldev/deeptelar/telar/agent/TokenUsage;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ldev/deeptelar/telar/agent/ChatMessage$Assistant;
+	public final fun component2 ()Ldev/deeptelar/telar/agent/TokenUsage;
+	public final fun copy (Ldev/deeptelar/telar/agent/ChatMessage$Assistant;Ldev/deeptelar/telar/agent/TokenUsage;)Ldev/deeptelar/telar/agent/ChatResponse;
+	public static synthetic fun copy$default (Ldev/deeptelar/telar/agent/ChatResponse;Ldev/deeptelar/telar/agent/ChatMessage$Assistant;Ldev/deeptelar/telar/agent/TokenUsage;ILjava/lang/Object;)Ldev/deeptelar/telar/agent/ChatResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMessage ()Ldev/deeptelar/telar/agent/ChatMessage$Assistant;
+	public final fun getUsage ()Ldev/deeptelar/telar/agent/TokenUsage;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface annotation class dev/deeptelar/telar/agent/Description : java/lang/annotation/Annotation {
+	public abstract fun value ()Ljava/lang/String;
+}
+
+public final synthetic class dev/deeptelar/telar/agent/Description$Impl : dev/deeptelar/telar/agent/Description {
+	public fun <init> (Ljava/lang/String;)V
+	public final synthetic fun value ()Ljava/lang/String;
+}
+
+public final class dev/deeptelar/telar/agent/TokenUsage {
+	public fun <init> (II)V
+	public final fun component1 ()I
+	public final fun component2 ()I
+	public final fun copy (II)Ldev/deeptelar/telar/agent/TokenUsage;
+	public static synthetic fun copy$default (Ldev/deeptelar/telar/agent/TokenUsage;IIILjava/lang/Object;)Ldev/deeptelar/telar/agent/TokenUsage;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getInputTokens ()I
+	public final fun getOutputTokens ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/deeptelar/telar/agent/Tool {
+	public fun <init> (Ldev/deeptelar/telar/agent/ToolSpec;Lkotlin/jvm/functions/Function2;)V
+	public final fun getExecute ()Lkotlin/jvm/functions/Function2;
+	public final fun getSpec ()Ldev/deeptelar/telar/agent/ToolSpec;
+}
+
+public final class dev/deeptelar/telar/agent/ToolCall {
+	public static final field Companion Ldev/deeptelar/telar/agent/ToolCall$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lkotlinx/serialization/json/JsonObject;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;)Ldev/deeptelar/telar/agent/ToolCall;
+	public static synthetic fun copy$default (Ldev/deeptelar/telar/agent/ToolCall;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;ILjava/lang/Object;)Ldev/deeptelar/telar/agent/ToolCall;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Ljava/lang/String;
+	public final fun getInput ()Lkotlinx/serialization/json/JsonObject;
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class dev/deeptelar/telar/agent/ToolCall$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ldev/deeptelar/telar/agent/ToolCall$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ldev/deeptelar/telar/agent/ToolCall;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ldev/deeptelar/telar/agent/ToolCall;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/deeptelar/telar/agent/ToolCall$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class dev/deeptelar/telar/agent/ToolKt {
+	public static final fun Tool (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/KSerializer;Lkotlin/jvm/functions/Function2;)Ldev/deeptelar/telar/agent/Tool;
+	public static final fun execute (Ljava/util/List;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class dev/deeptelar/telar/agent/ToolLoopKt {
+	public static final fun toolAgent (Ldev/deeptelar/telar/agent/ChatModel;Ljava/util/List;Ljava/lang/String;)Ldev/deeptelar/telar/CompiledGraph;
+	public static synthetic fun toolAgent$default (Ldev/deeptelar/telar/agent/ChatModel;Ljava/util/List;Ljava/lang/String;ILjava/lang/Object;)Ldev/deeptelar/telar/CompiledGraph;
+	public static final fun toolLoop (Ldev/deeptelar/telar/StateGraph;Ldev/deeptelar/telar/agent/ChatModel;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;Ljava/lang/String;Ldev/deeptelar/telar/NodeRef;Ljava/lang/String;Ljava/lang/String;)Ldev/deeptelar/telar/NodeRef;
+	public static synthetic fun toolLoop$default (Ldev/deeptelar/telar/StateGraph;Ldev/deeptelar/telar/agent/ChatModel;Ljava/util/List;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function1;Ljava/lang/String;Ldev/deeptelar/telar/NodeRef;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/deeptelar/telar/NodeRef;
+}
+
+public final class dev/deeptelar/telar/agent/ToolSpec {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lkotlinx/serialization/json/JsonObject;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;)Ldev/deeptelar/telar/agent/ToolSpec;
+	public static synthetic fun copy$default (Ldev/deeptelar/telar/agent/ToolSpec;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;ILjava/lang/Object;)Ldev/deeptelar/telar/agent/ToolSpec;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getInputSchema ()Lkotlinx/serialization/json/JsonObject;
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+

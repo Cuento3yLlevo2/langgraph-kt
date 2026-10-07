@@ -1,6 +1,6 @@
 # Roadmap
 
-This page lists what is planned for langgraph-kt before `1.0`. It is a plan and not a promise: there
+This page lists what is planned for Telar before `1.0`. It is a plan and not a promise: there
 are no dates, and the order can change with what users ask for. The [changelog](CHANGELOG.md) lists
 what is already released.
 
@@ -34,7 +34,7 @@ Each item has one of three states:
 
 ## 1. Finish the engine
 
-These change `langgraph-kt-core`, so they come first.
+These change `telar-core`, so they come first.
 
 | Feature | What you get | State | Issue |
 |---|---|---|---|
@@ -47,12 +47,12 @@ These change `langgraph-kt-core`, so they come first.
 
 ## 2. Around the engine
 
-New modules and additions to `langgraph-kt-agent`. They do not change the core.
+New modules and additions to `telar-agent`. They do not change the core.
 
 | Feature | What you get | State | Issue |
 |---|---|---|---|
 | Database checkpointer | Saves runs in a SQL database, for servers and for Android apps. | Planned | |
-| OpenAI and Ollama | `langgraph-kt-openai` and `langgraph-kt-ollama` on Ktor, for every platform. Today these models are reached through LangChain4j, on the JVM only. | Planned | [#37] |
+| OpenAI and Ollama | `telar-openai` and `telar-ollama` on Ktor, for every platform. Today these models are reached through LangChain4j, on the JVM only. | Planned | [#37] |
 | Typed answers from a model | Ask a model for a `@Serializable` class and get an instance of it, built on the schema generator that tools already use. | Planned | |
 | Tracing | Hooks in the engine that report every node, edge, tool call and token count, and a module that sends them to OpenTelemetry. | Planned | [#38] |
 

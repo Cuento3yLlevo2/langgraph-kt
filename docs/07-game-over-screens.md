@@ -10,7 +10,7 @@ This level makes five mistakes on purpose.
 
 ## Run it
 
-[`level7/Level7.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level7/Level7.kt)
+[`level7/Level7.kt`](../samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level7/Level7.kt)
 
 ```bash
 ./gradlew :samples:runLevel7
@@ -155,7 +155,7 @@ Without a checkpointer there is no save, and the only way to try again is `invok
 
 ## All the game over screens
 
-Every exception the library throws is a `LangGraphException`, so one `catch` can handle them all.
+Every exception the library throws is a `TelarException`, so one `catch` can handle them all.
 
 | Exception | Meaning | What to do |
 |---|---|---|

@@ -1,0 +1,19 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, linuxArm64, linuxX64, macosArm64, mingwX64, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <telar:telar-anthropic>
+final class dev.deeptelar.telar.anthropic/AnthropicChatModel : dev.deeptelar.telar.agent/ChatModel { // dev.deeptelar.telar.anthropic/AnthropicChatModel|null[0]
+    constructor <init>(io.ktor.client/HttpClient, kotlin/String, kotlin/String, kotlin/Int = ..., kotlinx.serialization.json/JsonObject = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ..., kotlin/String = ...) // dev.deeptelar.telar.anthropic/AnthropicChatModel.<init>|<init>(io.ktor.client.HttpClient;kotlin.String;kotlin.String;kotlin.Int;kotlinx.serialization.json.JsonObject;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.String){}[0]
+
+    final fun stream(dev.deeptelar.telar.agent/ChatRequest): kotlinx.coroutines.flow/Flow<dev.deeptelar.telar.agent/ChatEvent> // dev.deeptelar.telar.anthropic/AnthropicChatModel.stream|stream(dev.deeptelar.telar.agent.ChatRequest){}[0]
+    final suspend fun chat(dev.deeptelar.telar.agent/ChatRequest): dev.deeptelar.telar.agent/ChatResponse // dev.deeptelar.telar.anthropic/AnthropicChatModel.chat|chat(dev.deeptelar.telar.agent.ChatRequest){}[0]
+
+    final object Companion { // dev.deeptelar.telar.anthropic/AnthropicChatModel.Companion|null[0]
+        final const val DEFAULT_MAX_TOKENS // dev.deeptelar.telar.anthropic/AnthropicChatModel.Companion.DEFAULT_MAX_TOKENS|{}DEFAULT_MAX_TOKENS[0]
+            final fun <get-DEFAULT_MAX_TOKENS>(): kotlin/Int // dev.deeptelar.telar.anthropic/AnthropicChatModel.Companion.DEFAULT_MAX_TOKENS.<get-DEFAULT_MAX_TOKENS>|<get-DEFAULT_MAX_TOKENS>(){}[0]
+    }
+}

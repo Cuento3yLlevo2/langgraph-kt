@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-langgraph-kt is pre-1.0. Security fixes are released for the latest published version only.
+Telar is pre-1.0. Security fixes are released for the latest published version only.
 
 ## Reporting a vulnerability
 

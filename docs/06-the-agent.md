@@ -22,7 +22,7 @@ flowchart LR
 
 The model is not on the map. It is outside, and the `answer` node talks to it.
 
-[`level6/Level6.kt`](../samples/src/main/kotlin/org/langgraphkt/samples/tutorial/level6/Level6.kt)
+[`level6/Level6.kt`](../samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level6/Level6.kt)
 
 ```kotlin
 fun replyDesk(model: ChatModel): CompiledGraph<Ticket> =
@@ -39,7 +39,7 @@ fun replyDesk(model: ChatModel): CompiledGraph<Ticket> =
     }.compile()
 ```
 
-`ChatModel` is a small type from the module `langgraph-kt-agent`. It stands for any AI model, and
+`ChatModel` is a small type from the module `telar-agent`. It stands for any AI model, and
 `model.chat(...)` sends it a text and returns the text it answers. The text you send is called a
 *prompt*. `system` is a second text with standing instructions, here who the model works for.
 
@@ -260,7 +260,7 @@ helpDesk(model).stream(AgentState("How much is a cola?")).collect { event ->
 }
 ```
 
-It needs `import org.langgraphkt.agent.textDelta`. For every other event `textDelta` is `null`. The
+It needs `import dev.deeptelar.telar.agent.textDelta`. For every other event `textDelta` is `null`. The
 pretend model has nothing to write slowly, so its whole answer arrives as one piece.
 
 ### Plugging in a real model
@@ -268,10 +268,10 @@ pretend model has nothing to write slowly, so its whole answer arrives as one pi
 Build a real `ChatModel` and pass it in. Nothing else changes.
 
 ```kotlin
-// Claude, on every platform. From the module langgraph-kt-anthropic; HttpClient is the Ktor client.
+// Claude, on every platform. From the module telar-anthropic; HttpClient is the Ktor client.
 val model: ChatModel = AnthropicChatModel(HttpClient(), apiKey = System.getenv("ANTHROPIC_API_KEY"), model = "claude-opus-5-5")
 
-// Most other models, on the JVM, through LangChain4j. From the module langgraph-kt-langchain4j.
+// Most other models, on the JVM, through LangChain4j. From the module telar-langchain4j.
 val model: ChatModel = LangChain4jChatModel(OpenAiChatModel.builder().apiKey(System.getenv("OPENAI_API_KEY")).modelName("gpt-5").build())
 
 val state = helpDesk(model).invoke(AgentState("I'm Ana. Where is my pizza?")).state
@@ -279,7 +279,7 @@ val state = helpDesk(model).invoke(AgentState("I'm Ana. Where is my pizza?")).st
 
 This snippet is not part of the runnable level, because it needs an account and a key. Keep the key
 out of your source code; read it from an environment variable as shown. The
-[ToolAgent sample](../samples/src/main/kotlin/org/langgraphkt/samples/ToolAgent.kt) is this help
+[ToolAgent sample](../samples/src/main/kotlin/dev/deeptelar/telar/samples/ToolAgent.kt) is this help
 desk with Claude: it uses the real model when `ANTHROPIC_API_KEY` is set, and a pretend one when it
 is not. The README has more under [AI models](../README.md#ai-models).
 

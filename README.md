@@ -1,21 +1,21 @@
-# langgraph-kt
+# Telar
 
 [![CI](https://github.com/Cuento3yLlevo2/langgraph-kt/actions/workflows/ci.yml/badge.svg)](https://github.com/Cuento3yLlevo2/langgraph-kt/actions/workflows/ci.yml)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.cuento3yllevo2/langgraph-kt-core?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.cuento3yllevo2/langgraph-kt-core)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Kotlin](https://img.shields.io/badge/kotlin-2.4-7F52FF.svg?logo=kotlin)](https://kotlinlang.org)
 
-langgraph-kt is a Kotlin Multiplatform library for building AI agents and other multi-step
+Telar is a Kotlin Multiplatform library for building AI agents and other multi-step
 workflows. You describe the work as a **graph**: a few small steps, and arrows that say which step
 comes next. The library runs it, and takes care of loops, steps that run at the same time, live
 progress, and pausing until a person approves. A model that calls your functions as tools is one
 such graph, and it comes [ready-made](#agents-with-tools) for every platform.
 
 **[Try it in your browser](https://cuento3yllevo2.github.io/langgraph-kt-demo/):** Pixel Pizza is a
-small game in which every stage runs a langgraph-kt graph, from two nodes in a row to a full agent
+small game in which every stage runs a Telar graph, from two nodes in a row to a full agent
 workflow. No account and no API key needed.
 
-> langgraph-kt is an independent project inspired by [LangGraph](https://github.com/langchain-ai/langgraph).
+> Telar is an independent project inspired by [LangGraph](https://github.com/langchain-ai/langgraph).
 > It is not affiliated with or endorsed by LangChain, Inc.
 
 **Contents:** [The idea](#the-idea) · [Quick start](#quick-start) · [Installation](#installation) ·
@@ -52,7 +52,7 @@ flowchart LR
 ```
 
 ```kotlin
-import org.langgraphkt.*
+import dev.deeptelar.telar.*
 
 enum class Category { REFUND, TECHNICAL, ESCALATION }
 
@@ -128,7 +128,7 @@ suspend fun main() {
 }
 ```
 
-This is the [`QuickStart`](samples/src/main/kotlin/org/langgraphkt/samples/QuickStart.kt) sample. To
+This is the [`QuickStart`](samples/src/main/kotlin/dev/deeptelar/telar/samples/QuickStart.kt) sample. To
 run it from a clone of this repository:
 
 ```bash
@@ -158,17 +158,22 @@ dependencies {
 }
 ```
 
+> **The name is changing.** The project was called langgraph-kt until `0.1.0-alpha05`, the release
+> shown above. From the next release the artifacts are `dev.deeptelar:telar-*` and the package is
+> `dev.deeptelar.telar`, which the examples on this page already use. With `0.1.0-alpha05`, import
+> `org.langgraphkt` in its place.
+
 | Module | Targets | Purpose |
 |---|---|---|
-| `langgraph-kt-core` | JVM/Android, iOS, macOS, Linux, Windows, JS, Wasm | Graph builder, execution engine, checkpointing interfaces |
-| `langgraph-kt-serialization` | same as core | `KotlinxStateSerializer` for `@Serializable` states, `CheckpointCodec` for custom checkpointers |
-| `langgraph-kt-checkpoint-file` | same as core (Node.js only for JS/Wasm) | `FileCheckpointer`, one JSON file per thread |
-| `langgraph-kt-checkpoint-browser` | JS and Wasm in a browser | `LocalStorageCheckpointer`, runs that survive a page reload |
-| `langgraph-kt-agent` | same as core | `ChatModel`, `Tool`, and the tool-calling agent: `toolAgent` / `toolLoop` |
-| `langgraph-kt-anthropic` | same as core | `AnthropicChatModel`, Claude through Ktor |
-| `langgraph-kt-langchain4j` | JVM (Java 17+) | `LangChain4jChatModel` and `chatNode` / `chatMessagesNode` for LangChain4j 1.x models |
+| `telar-core` | JVM/Android, iOS, macOS, Linux, Windows, JS, Wasm | Graph builder, execution engine, checkpointing interfaces |
+| `telar-serialization` | same as core | `KotlinxStateSerializer` for `@Serializable` states, `CheckpointCodec` for custom checkpointers |
+| `telar-checkpoint-file` | same as core (Node.js only for JS/Wasm) | `FileCheckpointer`, one JSON file per thread |
+| `telar-checkpoint-browser` | JS and Wasm in a browser | `LocalStorageCheckpointer`, runs that survive a page reload |
+| `telar-agent` | same as core | `ChatModel`, `Tool`, and the tool-calling agent: `toolAgent` / `toolLoop` |
+| `telar-anthropic` | same as core | `AnthropicChatModel`, Claude through Ktor |
+| `telar-langchain4j` | JVM (Java 17+) | `LangChain4jChatModel` and `chatNode` / `chatMessagesNode` for LangChain4j 1.x models |
 
-Requires Kotlin 2.x. JVM artifacts target Java 11, except `langgraph-kt-langchain4j`, which needs
+Requires Kotlin 2.x. JVM artifacts target Java 11, except `telar-langchain4j`, which needs
 Java 17 because LangChain4j does.
 
 ### Status
@@ -254,7 +259,7 @@ val download = node("download", work = { order ->
 - With `invoke()` and `resume()` nobody collects, and the call does nothing.
 - Progress is not part of the state and is not saved in a checkpoint.
 
-The agent of `langgraph-kt-agent` uses this to show a model's answer while the model writes it; see
+The agent of `telar-agent` uses this to show a model's answer while the model writes it; see
 [Agents with tools](#agents-with-tools).
 
 ### Human-in-the-loop
@@ -304,7 +309,7 @@ when (val result = graph.invoke(RefundState(orderId = "1001", amount = 250), con
 val finished = graph.resume(config) { state -> state.copy(approved = true) }
 ```
 
-Runnable version: [`HumanInTheLoop`](samples/src/main/kotlin/org/langgraphkt/samples/HumanInTheLoop.kt).
+Runnable version: [`HumanInTheLoop`](samples/src/main/kotlin/dev/deeptelar/telar/samples/HumanInTheLoop.kt).
 
 - `invoke` always starts a new run for the thread. `resume` continues the saved one, optionally
   editing the state first.
@@ -357,7 +362,7 @@ while (result is GraphResult.Interrupted) {
 }
 ```
 
-Runnable version: [`ReviewLoop`](samples/src/main/kotlin/org/langgraphkt/samples/ReviewLoop.kt).
+Runnable version: [`ReviewLoop`](samples/src/main/kotlin/dev/deeptelar/telar/samples/ReviewLoop.kt).
 
 #### Where a thread stands
 
@@ -379,7 +384,7 @@ step that failed, even when that was the first one.
 
 #### In a browser
 
-A web app has no file system. `LocalStorageCheckpointer`, from `langgraph-kt-checkpoint-browser`,
+A web app has no file system. `LocalStorageCheckpointer`, from `telar-checkpoint-browser`,
 keeps the checkpoints in the page's `localStorage`, so a paused run is still there after the page
 is reloaded or the browser is closed:
 
@@ -452,7 +457,7 @@ val graph = StateGraph<ResearchState> {
 }.compile()
 ```
 
-Runnable version: [`ParallelResearch`](samples/src/main/kotlin/org/langgraphkt/samples/ParallelResearch.kt).
+Runnable version: [`ParallelResearch`](samples/src/main/kotlin/dev/deeptelar/telar/samples/ParallelResearch.kt).
 
 - The updates are applied in the order the nodes were added to the graph (`web`, then `docs`), each
   to the state that the previous one produced. If two nodes write the same property, the one added
@@ -521,14 +526,14 @@ A node is a `suspend` function, so it can call any AI model with any client libr
 val classify = node("classify") { email -> email.copy(category = askMyModel(email.body)) }
 ```
 
-`langgraph-kt-agent` has a small interface for the model, `ChatModel`, so that the same graph works
+`telar-agent` has a small interface for the model, `ChatModel`, so that the same graph works
 with any provider and on every platform. Pick an implementation:
 
 ```kotlin
-// Claude, on every platform (langgraph-kt-anthropic). HttpClient is the Ktor client.
+// Claude, on every platform (telar-anthropic). HttpClient is the Ktor client.
 val model: ChatModel = AnthropicChatModel(HttpClient(), apiKey = key, model = "claude-opus-5-5")
 
-// Any LangChain4j model, on the JVM (langgraph-kt-langchain4j): OpenAI, Gemini, Ollama, ...
+// Any LangChain4j model, on the JVM (telar-langchain4j): OpenAI, Gemini, Ollama, ...
 val model: ChatModel = LangChain4jChatModel(OpenAiChatModel.builder().apiKey(key).modelName("gpt-5").build())
 
 // In a test, a lambda.
@@ -569,16 +574,16 @@ graph.stream(email).collect { event ->
 LangChain4j streaming model as well: `LangChain4jChatModel(openAi, streamingModel)`. A model that
 cannot stream delivers its text in one piece, so the same code works with every model.
 
-On the JVM, `langgraph-kt-langchain4j` also builds a node straight from a
+On the JVM, `telar-langchain4j` also builds a node straight from a
 [LangChain4j](https://docs.langchain4j.dev) model with `chatNode` (one text in, one text out) and
 `chatMessagesNode` (a list of LangChain4j messages). Both run the blocking call on `Dispatchers.IO`.
-The [`ChatAgent`](samples/src/main/kotlin/org/langgraphkt/samples/ChatAgent.kt) sample uses them.
+The [`ChatAgent`](samples/src/main/kotlin/dev/deeptelar/telar/samples/ChatAgent.kt) sample uses them.
 
 ### Agents with tools
 
 An agent is a model that decides by itself which of your functions to call, and how often, before
 it answers. In a graph that is a loop of two nodes: the model answers or asks for tools, the tools
-run, and their results go back to the model. `langgraph-kt-agent` has this loop ready-made.
+run, and their results go back to the model. `telar-agent` has this loop ready-made.
 
 A **tool** is a function with a name and a description that the model reads. Its input is a
 `@Serializable` class, from which the library builds the schema the model needs:
@@ -700,7 +705,7 @@ toolLoop(
 )
 ```
 
-Runnable version: [`ToolAgent`](samples/src/main/kotlin/org/langgraphkt/samples/ToolAgent.kt). It
+Runnable version: [`ToolAgent`](samples/src/main/kotlin/dev/deeptelar/telar/samples/ToolAgent.kt). It
 runs without an API key, and with Claude when `ANTHROPIC_API_KEY` is set.
 [Level 6 of the tutorial](docs/06-the-agent.md) explains the same agent step by step.
 
@@ -721,7 +726,7 @@ topology.dynamicRoutes         // nodes whose conditional edge declares no targe
 
 Mistakes in the graph itself (an unknown node name, a node nothing leads to, two nodes that return
 a whole state in the same step without a reducer) are reported by `compile()`, before anything runs. Everything the library throws
-extends `LangGraphException`:
+extends `TelarException`:
 
 | Exception | When |
 |---|---|
@@ -733,8 +738,8 @@ extends `LangGraphException`:
 | `MaxIterationsExceededException` | The run took more steps than `GraphConfig.maxIterations` (default 25). |
 | `CheckpointNotFoundException`, `GraphAlreadyCompletedException` | `resume` had nothing to continue. |
 | `CheckpointCorruptedException` | A stored checkpoint could not be read. |
-| `LocalStorageException` | The browser refused to read or write `localStorage`: it is full, or the page may not use it. From `langgraph-kt-checkpoint-browser`. |
-| `ChatModelException` | A call to a `ChatModel` failed, or the model declined to answer. From `langgraph-kt-agent`. A run reports it as the `cause` of a `NodeExecutionException`. |
+| `LocalStorageException` | The browser refused to read or write `localStorage`: it is full, or the page may not use it. From `telar-checkpoint-browser`. |
+| `ChatModelException` | A call to a `ChatModel` failed, or the model declined to answer. From `telar-agent`. A run reports it as the `cause` of a `NodeExecutionException`. |
 
 ## Design
 
@@ -752,7 +757,7 @@ To build it locally, run `./gradlew dokkaGenerate` and open `build/dokka/html/in
 
 ## Samples
 
-Runnable examples live in [`samples/`](samples/src/main/kotlin/org/langgraphkt/samples):
+Runnable examples live in [`samples/`](samples/src/main/kotlin/dev/deeptelar/telar/samples):
 
 ```bash
 ./gradlew :samples:runQuickStart        # the email support agent of the quick start

@@ -1,0 +1,37 @@
+package dev.deeptelar.telar
+
+/**
+ * Per-run settings for a [CompiledGraph].
+ *
+ * @property threadId identifies the conversation or workflow instance whose checkpoints are stored
+ * by [checkpointer]. Use one id per independent run.
+ * @property checkpointer where checkpoints are stored. When set, a checkpoint is saved when a run
+ * starts and after every step. Required for [interruptBefore], [interruptAfter] and
+ * [CompiledGraph.resume].
+ * @property interruptBefore node names to pause before, for human-in-the-loop review.
+ * @property interruptAfter node names to pause after.
+ * @property maxIterations the maximum number of steps a single [CompiledGraph.invoke] or
+ * [CompiledGraph.resume] call may execute before [MaxIterationsExceededException] is thrown.
+ * @throws GraphValidationException if [threadId] is blank, [maxIterations] is not positive, or
+ * interrupts are configured without a [checkpointer].
+ */
+public data class GraphConfig<State>(
+    val threadId: String = "default",
+    val checkpointer: Checkpointer<State>? = null,
+    val interruptBefore: Set<String> = emptySet(),
+    val interruptAfter: Set<String> = emptySet(),
+    val maxIterations: Int = DEFAULT_MAX_ITERATIONS,
+) {
+    init {
+        if (threadId.isBlank()) throw GraphValidationException("threadId must not be blank.")
+        if (maxIterations <= 0) throw GraphValidationException("maxIterations must be positive, was $maxIterations.")
+        if (checkpointer == null && (interruptBefore.isNotEmpty() || interruptAfter.isNotEmpty())) {
+            throw GraphValidationException("interruptBefore/interruptAfter need a checkpointer to save the paused run.")
+        }
+    }
+
+    public companion object {
+        /** The default for [maxIterations]. */
+        public const val DEFAULT_MAX_ITERATIONS: Int = 25
+    }
+}
