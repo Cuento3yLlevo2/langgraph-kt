@@ -7,6 +7,8 @@ breaking changes.
 
 ## [Unreleased]
 
+## [0.1.0-alpha06] - 2026-10-07
+
 ### Added
 
 - A [roadmap](ROADMAP.md): what is planned before `1.0`, in which order, and what is not planned.
@@ -21,6 +23,9 @@ breaking changes.
   - `LocalStorageCheckpointer` stores its entries under `telar.checkpoint.` by default, where it
     was `langgraph.checkpoint.`. Pass `keyPrefix = "langgraph.checkpoint."` to read the runs an
     earlier version saved.
+- The repository moved to <https://github.com/deeptelar/telar>, and the API reference to
+  <https://deeptelar.github.io/telar/>. Links to the old repository still work; the old address
+  of the API reference does not.
 
 ## [0.1.0-alpha05] - 2026-10-05
 
@@ -184,7 +189,8 @@ First public release. Everything below is new compared with the unpublished beta
 - `START` counted toward `maxIterations`.
 - `FileCheckpointer` did not write the format version into its files.
 
-[Unreleased]: https://github.com/deeptelar/telar/compare/v0.1.0-alpha05...HEAD
+[Unreleased]: https://github.com/deeptelar/telar/compare/v0.1.0-alpha06...HEAD
+[0.1.0-alpha06]: https://github.com/deeptelar/telar/compare/v0.1.0-alpha05...v0.1.0-alpha06
 [0.1.0-alpha05]: https://github.com/deeptelar/telar/compare/v0.1.0-alpha04...v0.1.0-alpha05
 [0.1.0-alpha04]: https://github.com/deeptelar/telar/compare/v0.1.0-alpha03...v0.1.0-alpha04
 [0.1.0-alpha03]: https://github.com/deeptelar/telar/compare/v0.1.0-alpha02...v0.1.0-alpha03
