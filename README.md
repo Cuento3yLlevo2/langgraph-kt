@@ -199,6 +199,7 @@ Each guide is the short version of one feature. The tutorial explains the same f
 | Wait for a person to approve something | [Human-in-the-loop](#human-in-the-loop) |
 | Run several steps at the same time | [Parallel branches](#parallel-branches) |
 | Repeat a step until the result is good | [Loops](#loops) |
+| Use a graph as one step of another graph | [Subgraphs](#subgraphs) |
 | Let an AI model do the work of a node | [AI models](#ai-models) |
 | Let an AI model call my functions | [Agents with tools](#agents-with-tools) |
 | Draw a graph or test its shape | [Inspecting a graph](#inspecting-a-graph) |
@@ -569,6 +570,65 @@ edge can also work with node names, for a target that is computed from data:
 As a safety net, a run that takes more than `GraphConfig.maxIterations` steps (25 by default) stops
 with `MaxIterationsExceededException`.
 
+### Subgraphs
+
+A compiled graph can be a node of another graph. That keeps a large workflow in parts that are built
+and tested on their own, each with its own state class. Two functions connect the states: `state`
+reads the state of the subgraph out of the state of the graph around it, and `update` writes it back.
+
+```kotlin
+@Serializable
+data class ReturnCase(
+    val customer: String,
+    val items: List<Int>,
+    val payout: Payout? = null,   // the state of the subgraph; null until the run enters it
+    val reply: String = "",
+)
+
+// payoutGraph is the graph of "Ask from inside a node": a CompiledGraph<Payout> that asks before a large payout.
+val graph = StateGraph<ReturnCase> {
+    val check = node("check") { case -> case.copy(items = case.items.filter { it > 0 }) }
+    val payout = subgraph(
+        "payout", payoutGraph,
+        // The state the subgraph works on: the saved one, or a new one on the first visit.
+        state = { case -> case.payout ?: Payout(case.customer, case.items) },
+        // Called when the subgraph finishes, and when it pauses.
+        update = { case, payout -> case.copy(payout = payout) },
+    )
+    val reply = node("reply") { case -> case.copy(reply = "Dear ${case.customer}: ${case.payout?.log?.last()}.") }
+
+    START then check then payout then reply then END
+}.compile()
+
+// One config and one checkpointer, for the graph around. The subgraph needs none of its own.
+val config = GraphConfig(threadId = "return-7", checkpointer = MemoryCheckpointer<ReturnCase>())
+
+val paused = graph.invoke(ReturnCase("Ben", items = listOf(200, 50)), config)
+if (paused is GraphResult.Interrupted) {
+    val answer = askManager(paused.state.payout?.question)   // your UI
+    // The answer goes into the state of the subgraph, and the run continues inside it.
+    graph.resume(config) { it.copy(payout = it.payout?.copy(approved = answer)) }
+}
+```
+
+Runnable version: [`Subgraph`](samples/src/main/kotlin/dev/deeptelar/telar/samples/Subgraph.kt).
+
+- The subgraph runs from its `START` to its `END` inside one step of the graph around it. Its node
+  can run next to other nodes without a reducer, like a node with a `work` and an `update`.
+- When a node of the subgraph calls `interrupt`, the graph around pauses too. The checkpoint
+  remembers where the subgraph stands, so `resume` continues at the node that paused, and the nodes
+  of the subgraph that came before it do not run again.
+- For that, `state` has to return what `update` stored. Keep the whole state of the subgraph in a
+  property of the outer state, as `payout` above. A subgraph that never pauses can get a new state
+  on every visit and give back only its result:
+  `state = { Payout(it.customer, it.items) }, update = { case, payout -> case.copy(reply = payout.log.last()) }`.
+- A subgraph with the same state class needs no functions: `subgraph("payout", payoutGraph)`.
+- What a node of the subgraph passes to `reportProgress` arrives as progress of the subgraph's
+  node. The other events of a subgraph are not in the stream of the graph around it yet.
+- A failure inside the subgraph is the `cause` of the `NodeExecutionException` of its node.
+  `maxIterations` limits the steps of the subgraph on their own.
+- A subgraph can contain subgraphs.
+
 ### AI models
 
 A node is a `suspend` function, so it can call any AI model with any client library:
@@ -815,6 +875,7 @@ Runnable examples live in [`samples/`](samples/src/main/kotlin/dev/deeptelar/tel
 ./gradlew :samples:runHumanInTheLoop    # a refund that waits for approval, saved to disk
 ./gradlew :samples:runReviewLoop        # a reviewer approves a draft or sends it back
 ./gradlew :samples:runAskFromANode      # a payout that asks for approval only when it is large
+./gradlew :samples:runSubgraph          # the payout graph as one node of a larger graph
 ./gradlew :samples:runParallelResearch  # three lookups at the same time
 ./gradlew :samples:runChatAgent         # a chat agent built on a LangChain4j model
 ./gradlew :samples:runToolAgent         # an agent that calls tools, with or without an API key

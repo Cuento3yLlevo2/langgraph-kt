@@ -90,6 +90,32 @@ class SamplesTest {
         }
 
     @Test
+    fun `a return pauses inside its payout subgraph and continues there after a restart`() =
+        runTest {
+            val directory = Path(Files.createTempDirectory("returns").toString())
+
+            val paused = returnsGraph().invoke(ReturnCase("Ben", items = listOf(200, 0, 50)), returnsConfig(directory, "return-7"))
+            assertIs<GraphResult.Interrupted<ReturnCase>>(paused)
+            assertEquals(listOf(PAYOUT), paused.nextNodes)
+            assertEquals("Pay 250 to Ben? That is over the limit of 100.", paused.state.payout?.question)
+
+            // New graph and checkpointer instances, as after a process restart.
+            assertEquals(paused, returnsGraph().lastResult(returnsConfig(directory, "return-7")))
+            val finished =
+                returnsGraph().resume(returnsConfig(directory, "return-7")) { it.copy(payout = it.payout?.copy(approved = true)) }
+            assertIs<GraphResult.Completed<ReturnCase>>(finished)
+            assertEquals("Dear Ben: Paid 250 to Ben.", finished.state.reply)
+        }
+
+    @Test
+    fun `a small return runs through its subgraph without a pause`() =
+        runTest {
+            val result = returnsGraph().invoke(ReturnCase("Ana", items = listOf(15, 25)))
+
+            assertEquals("Dear Ana: Paid 40 to Ana.", result.state.reply)
+        }
+
+    @Test
     fun `announcement is redrafted until the reviewer approves`() =
         runTest {
             val graph = announcementGraph()
