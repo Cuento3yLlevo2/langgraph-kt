@@ -94,6 +94,17 @@ val config = GraphConfig(
 
 Pauses need a checkpointer.
 
+A node can also pause the run itself, in the middle of its work. `resume` then runs that node again
+from its first line:
+
+```kotlin
+val pay = node("pay") { ticket ->
+    // Saves this state and stops the run here. The answer comes back in the state.
+    if (ticket.approved == null) interrupt(ticket.copy(question = "Pay ${ticket.refund} euros?"))
+    ticket.copy(question = null, paid = ticket.approved)
+}
+```
+
 ## Events
 
 | Event | When |

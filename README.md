@@ -362,6 +362,59 @@ while (result is GraphResult.Interrupted) {
 
 Runnable version: [`ReviewLoop`](samples/src/main/kotlin/dev/deeptelar/telar/samples/ReviewLoop.kt).
 
+#### Ask from inside a node
+
+`interruptBefore` pauses every time, and before the node has done anything. When only the node can
+tell whether a person is needed, or which question to ask, the node pauses the run itself with
+`interrupt`:
+
+```kotlin
+@Serializable
+data class Payout(
+    val customer: String,
+    val items: List<Int>,
+    val question: String? = null,    // what the node asks; null when it asks nothing
+    val approved: Boolean? = null,   // the person's answer; null while nobody has answered
+    val log: List<String> = emptyList(),
+)
+
+val graph = StateGraph<Payout> {
+    val pay = node("pay") { payout ->
+        val total = payout.items.sum()
+        if (total > 100 && payout.approved == null) {
+            // Saves this state, with the question in it, and ends the run here.
+            interrupt(payout.copy(question = "Pay $total to ${payout.customer}?"))
+        }
+        val line = if (payout.approved == false) "Payout of $total rejected" else "Paid $total"
+        payout.copy(question = null, log = payout.log + line)
+    }
+
+    START then pay then END
+}.compile()
+
+// No interruptBefore: the node decides. The run still needs a checkpointer.
+val config = GraphConfig(threadId = "payout-2", checkpointer = MemoryCheckpointer<Payout>())
+
+val paused = graph.invoke(Payout("Ben", items = listOf(200, 50)), config)
+if (paused is GraphResult.Interrupted) {
+    val answer = askManager(paused.state.question)   // your UI
+    // Runs "pay" again from its first line, now with the answer in the state.
+    graph.resume(config) { it.copy(approved = answer) }
+}
+```
+
+Runnable version: [`AskFromANode`](samples/src/main/kotlin/dev/deeptelar/telar/samples/AskFromANode.kt).
+
+- The question and the answer are fields of the state, so they are saved with the run, and
+  `lastResult` shows the question after a restart.
+- `resume` runs the node again from its first line, and the node reads the state to see whether it
+  has an answer. Here `approved` is `null` until a person has decided.
+- What the node did before `interrupt` happens a second time. Call `interrupt` before a side effect
+  such as a payment, or make the side effect safe to repeat.
+- When other nodes run in the same step, they are cancelled, and `resume` runs the whole step again.
+- Do not put the call inside `runCatching` or a `catch (e: Throwable)`: the node would go on instead
+  of pausing. A `catch (e: Exception)` is fine.
+
 #### Where a thread stands
 
 `lastResult` reads the thread's checkpoint without running anything. It returns the same
@@ -728,7 +781,7 @@ extends `TelarException`:
 
 | Exception | When |
 |---|---|
-| `GraphValidationException` | The graph or `GraphConfig` is invalid. Thrown by `compile()` or when a run starts. |
+| `GraphValidationException` | The graph or `GraphConfig` is invalid. Thrown by `compile()` or when a run starts, and when a node calls `interrupt` in a run without a checkpointer. |
 | `NodeExecutionException` | A node threw, or a `withTimeout` inside it expired. `nodeName` and the original `cause` are available. Every exception is wrapped, also one of this table that a graph inside the node threw. |
 | `EdgeConditionException` | The function of a conditional edge threw. `from` and the original `cause` are available. |
 | `ReducerException` | The reducer threw. `nodes` (the nodes whose states it was merging) and the original `cause` are available. |
@@ -761,6 +814,7 @@ Runnable examples live in [`samples/`](samples/src/main/kotlin/dev/deeptelar/tel
 ./gradlew :samples:runQuickStart        # the email support agent of the quick start
 ./gradlew :samples:runHumanInTheLoop    # a refund that waits for approval, saved to disk
 ./gradlew :samples:runReviewLoop        # a reviewer approves a draft or sends it back
+./gradlew :samples:runAskFromANode      # a payout that asks for approval only when it is large
 ./gradlew :samples:runParallelResearch  # three lookups at the same time
 ./gradlew :samples:runChatAgent         # a chat agent built on a LangChain4j model
 ./gradlew :samples:runToolAgent         # an agent that calls tools, with or without an API key

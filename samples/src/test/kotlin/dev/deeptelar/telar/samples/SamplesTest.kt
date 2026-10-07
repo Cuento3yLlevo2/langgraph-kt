@@ -58,6 +58,38 @@ class SamplesTest {
         }
 
     @Test
+    fun `a small payout does not pause`() =
+        runTest {
+            val directory = Path(Files.createTempDirectory("payouts").toString())
+
+            val result = payoutGraph().invoke(Payout("Ana", items = listOf(15, 25)), payoutConfig(directory, "payout-1"))
+
+            assertEquals(GraphResult.Completed(Payout("Ana", items = listOf(15, 25), log = listOf("Paid 40 to Ana"))), result)
+        }
+
+    @Test
+    fun `a large payout asks from inside its node and survives a restart`() =
+        runTest {
+            val directory = Path(Files.createTempDirectory("payouts").toString())
+
+            val paused = payoutGraph().invoke(Payout("Ben", items = listOf(200, 50)), payoutConfig(directory, "payout-2"))
+            assertIs<GraphResult.Interrupted<Payout>>(paused)
+            assertEquals("Pay 250 to Ben? That is over the limit of 100.", paused.state.question)
+            assertEquals(listOf(PAY), paused.nextNodes)
+
+            // New graph and checkpointer instances, as after a process restart.
+            assertEquals(paused, payoutGraph().lastResult(payoutConfig(directory, "payout-2")))
+            val finished = payoutGraph().resume(payoutConfig(directory, "payout-2")) { it.copy(approved = true) }
+            assertEquals(listOf("Paid 250 to Ben"), finished.state.log)
+            assertEquals(null, finished.state.question)
+
+            val rejected = payoutGraph().invoke(Payout("Cleo", items = listOf(300)), payoutConfig(directory, "payout-3"))
+            assertIs<GraphResult.Interrupted<Payout>>(rejected)
+            val closed = payoutGraph().resume(payoutConfig(directory, "payout-3")) { it.copy(approved = false) }
+            assertEquals(listOf("Payout of 300 rejected"), closed.state.log)
+        }
+
+    @Test
     fun `announcement is redrafted until the reviewer approves`() =
         runTest {
             val graph = announcementGraph()

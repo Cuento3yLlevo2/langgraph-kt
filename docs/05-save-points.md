@@ -116,13 +116,17 @@ for as long as it takes.
 stopped. The function you pass edits the saved state first. That is how the human's decision gets
 into the run: `ticket.copy(approved = approved)`. Then `pay` runs with the updated ticket.
 
-### Three things to remember
+### Four things to remember
 
 - **`invoke` is "new game", `resume` is "continue".** `invoke` always starts from `START` and
   replaces the save in that slot.
 - **A save is written after every step**, not only at a pause. Level 7 uses this to retry after a
   failure.
 - **`interruptAfter`** also exists. It stops after a node has run instead of before.
+- **A node can pause by itself.** `interruptBefore` stops at a door every time. A node that only
+  needs a manager for some tickets calls `interrupt(ticket.copy(...))` in the middle of its work,
+  and `resume` runs that node again. The
+  [README](../README.md#ask-from-inside-a-node) shows how.
 
 ### Where does a thread stand?
 
