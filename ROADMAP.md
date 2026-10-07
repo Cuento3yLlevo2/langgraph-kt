@@ -7,7 +7,7 @@ what is already released.
 To ask for a feature or to move one up, add a 👍 to its issue or
 [start a discussion](https://github.com/deeptelar/telar/discussions).
 
-Last updated: 2026-10-05.
+Last updated: 2026-10-07.
 
 ## Where the project is
 
@@ -15,6 +15,9 @@ Last updated: 2026-10-05.
 branches, streaming, checkpoints, pausing for a person), checkpointers for memory, files and the
 browser, a tool-calling agent for every platform, and model modules for Claude and for LangChain4j.
 The API can still change in any release.
+
+Since that release, `main` also has `interrupt`: a node pauses the run in the middle of its work, for
+example to ask a person a question it only knows at run time.
 
 ## The way to 1.0
 
@@ -38,7 +41,6 @@ These change `telar-core`, so they come first.
 
 | Feature | What you get | State | Issue |
 |---|---|---|---|
-| Pause from inside a node | A node pauses the run in the middle of its work, for example to ask a person a question it only knows at run time. Today a run pauses only before or after a node that `GraphConfig` names. | Planned | [#36] |
 | Subgraphs | A compiled graph becomes a node of another graph, with a mapping between the two states and one thread for both. Today a node can call another graph, but the outer run cannot pause or resume inside it. | Planned | [#34] |
 | Checkpoint history and forks | A thread keeps every step, not only the last one. Read an earlier state, or continue from it on a new thread without changing the original. This changes the `Checkpointer` interface. | Planned | [#35] |
 | Fan-out over a list | One node runs once per item of a list, all at the same time, when the number of items is only known at run time. Today the edges fix how many nodes run in parallel. | Planned | |
@@ -100,7 +102,6 @@ approach can be discussed. [CONTRIBUTING.md](CONTRIBUTING.md) has the setup and 
 
 [#34]: https://github.com/deeptelar/telar/issues/34
 [#35]: https://github.com/deeptelar/telar/issues/35
-[#36]: https://github.com/deeptelar/telar/issues/36
 [#37]: https://github.com/deeptelar/telar/issues/37
 [#38]: https://github.com/deeptelar/telar/issues/38
 [#39]: https://github.com/deeptelar/telar/issues/39
