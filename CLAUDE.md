@@ -34,8 +34,8 @@ Telar is a Kotlin Multiplatform execution engine for stateful AI agent workflows
 is a directed graph: nodes transform an immutable state and edges decide what runs next.
 
 The project was called langgraph-kt until `0.1.0-alpha05`, and the changelog entries of the releases
-made under that name keep it. The repository is `deeptelar/telar`; the demo repository is still
-`Cuento3yLlevo2/langgraph-kt-demo`.
+made under that name keep it. The repository is `deeptelar/telar` and the demo is
+`deeptelar/telar-demo`.
 
 ### Modules
 

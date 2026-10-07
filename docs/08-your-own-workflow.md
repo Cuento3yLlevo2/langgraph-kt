@@ -217,7 +217,7 @@ know where an AI model goes, and how to let it call your functions. From here:
 - The [README](../README.md#guides) has shorter, denser guides, including a reviewer who can send
   work back and a chat that continues over several turns.
 - The other [samples](../samples/src/main/kotlin/dev/deeptelar/telar/samples) are complete programs.
-- The [demo app](https://github.com/Cuento3yLlevo2/langgraph-kt-demo) shows graphs running behind a
+- The [demo app](https://github.com/deeptelar/telar-demo) shows graphs running behind a
   user interface, in the browser and on the desktop.
 - The [API reference](https://deeptelar.github.io/telar/) describes every function.
 

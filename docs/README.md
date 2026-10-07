@@ -8,7 +8,7 @@ Every level builds the same thing a bit further: the help desk of a pizza shop c
 which reads a customer's message and writes a reply.
 
 Want to see where this leads first? The same help desk is a
-[game you can play in your browser](https://cuento3yllevo2.github.io/langgraph-kt-demo/). Its eight
+[game you can play in your browser](https://deeptelar.github.io/telar-demo/). Its eight
 stages are the eight levels: stage 3 is level 3.
 
 ## What you need

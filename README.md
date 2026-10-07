@@ -11,7 +11,7 @@ comes next. The library runs it, and takes care of loops, steps that run at the 
 progress, and pausing until a person approves. A model that calls your functions as tools is one
 such graph, and it comes [ready-made](#agents-with-tools) for every platform.
 
-**[Try it in your browser](https://cuento3yllevo2.github.io/langgraph-kt-demo/):** Pixel Pizza is a
+**[Try it in your browser](https://deeptelar.github.io/telar-demo/):** Pixel Pizza is a
 small game in which every stage runs a Telar graph, from two nodes in a row to a full agent
 workflow. No account and no API key needed.
 
@@ -188,7 +188,7 @@ New to agent workflows, or to graphs? The [tutorial](docs/README.md) starts from
 levels, like a game: a line of nodes, a choice, a loop, parallel work, pausing for a human, an agent
 with tools, errors, and a complete workflow. Every level is a small program you can run, for example
 `./gradlew :samples:runLevel1`, and matches a stage of the
-[Pixel Pizza game](https://cuento3yllevo2.github.io/langgraph-kt-demo/). The
+[Pixel Pizza game](https://deeptelar.github.io/telar-demo/). The
 [cheat sheet](docs/cheat-sheet.md) has every term and every call on one page.
 
 ## Guides
@@ -769,8 +769,8 @@ Runnable examples live in [`samples/`](samples/src/main/kotlin/dev/deeptelar/tel
 ./gradlew :samples:runLevel1            # ... runLevel8, the levels of the tutorial
 ```
 
-For a complete app, see [langgraph-kt-demo](https://github.com/Cuento3yLlevo2/langgraph-kt-demo),
-the source of the [Pixel Pizza game](https://cuento3yllevo2.github.io/langgraph-kt-demo/). It is a
+For a complete app, see [telar-demo](https://github.com/deeptelar/telar-demo),
+the source of the [Pixel Pizza game](https://deeptelar.github.io/telar-demo/). It is a
 Compose Multiplatform app for the browser (Kotlin/Wasm), the desktop and Android, and it uses this
 library from Maven Central.
 
