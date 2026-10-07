@@ -19,7 +19,7 @@ mavenPublishing {
         name.set(property("POM_NAME").toString())
         description.set(property("POM_DESCRIPTION").toString())
         inceptionYear.set("2026")
-        url.set("https://github.com/Cuento3yLlevo2/langgraph-kt")
+        url.set("https://github.com/deeptelar/telar")
         licenses {
             license {
                 name.set("The Apache License, Version 2.0")
@@ -35,9 +35,9 @@ mavenPublishing {
             }
         }
         scm {
-            url.set("https://github.com/Cuento3yLlevo2/langgraph-kt")
-            connection.set("scm:git:git://github.com/Cuento3yLlevo2/langgraph-kt.git")
-            developerConnection.set("scm:git:ssh://git@github.com/Cuento3yLlevo2/langgraph-kt.git")
+            url.set("https://github.com/deeptelar/telar")
+            connection.set("scm:git:git://github.com/deeptelar/telar.git")
+            developerConnection.set("scm:git:ssh://git@github.com/deeptelar/telar.git")
         }
     }
 }

@@ -5,7 +5,7 @@ are no dates, and the order can change with what users ask for. The [changelog](
 what is already released.
 
 To ask for a feature or to move one up, add a 👍 to its issue or
-[start a discussion](https://github.com/Cuento3yLlevo2/langgraph-kt/discussions).
+[start a discussion](https://github.com/deeptelar/telar/discussions).
 
 Last updated: 2026-10-05.
 
@@ -98,11 +98,11 @@ Ideas without a place in the plan yet. Say so in the issue or in a discussion if
 To build something on this page, comment on its issue first, or open one if it has none, so the
 approach can be discussed. [CONTRIBUTING.md](CONTRIBUTING.md) has the setup and the design rules.
 
-[#34]: https://github.com/Cuento3yLlevo2/langgraph-kt/issues/34
-[#35]: https://github.com/Cuento3yLlevo2/langgraph-kt/issues/35
-[#36]: https://github.com/Cuento3yLlevo2/langgraph-kt/issues/36
-[#37]: https://github.com/Cuento3yLlevo2/langgraph-kt/issues/37
-[#38]: https://github.com/Cuento3yLlevo2/langgraph-kt/issues/38
-[#39]: https://github.com/Cuento3yLlevo2/langgraph-kt/issues/39
-[#40]: https://github.com/Cuento3yLlevo2/langgraph-kt/issues/40
-[#41]: https://github.com/Cuento3yLlevo2/langgraph-kt/issues/41
+[#34]: https://github.com/deeptelar/telar/issues/34
+[#35]: https://github.com/deeptelar/telar/issues/35
+[#36]: https://github.com/deeptelar/telar/issues/36
+[#37]: https://github.com/deeptelar/telar/issues/37
+[#38]: https://github.com/deeptelar/telar/issues/38
+[#39]: https://github.com/deeptelar/telar/issues/39
+[#40]: https://github.com/deeptelar/telar/issues/40
+[#41]: https://github.com/deeptelar/telar/issues/41
