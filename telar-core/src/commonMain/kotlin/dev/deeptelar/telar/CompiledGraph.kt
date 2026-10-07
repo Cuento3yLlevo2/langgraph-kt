@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.last
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.EmptyCoroutineContext
 
 /**
@@ -34,6 +35,13 @@ import kotlin.coroutines.EmptyCoroutineContext
  * Nodes run in the coroutine context of the caller. If a node fails, the other nodes of that step
  * are cancelled and the failure is rethrown as [NodeExecutionException]. A failure of the reducer or
  * of the condition of an edge is rethrown as [ReducerException] or [EdgeConditionException].
+ *
+ * ## Pauses
+ *
+ * A run pauses before or after the nodes that [GraphConfig.interruptBefore] and
+ * [GraphConfig.interruptAfter] name, and wherever a node calls [interrupt]. It then ends with
+ * [GraphResult.Interrupted], and [resume] continues it. A step in which a node calls [interrupt] is
+ * not saved: the state the node passed is, and [resume] runs the nodes of that step again.
  *
  * ## Failures and retries
  *
@@ -80,7 +88,8 @@ public class CompiledGraph<State> internal constructor(
      * thread is replaced by one that holds [input], before the first node runs. Use [resume] to
      * continue a paused run, or to retry one that failed.
      *
-     * @throws GraphValidationException if [config] names interrupt nodes that are not in the graph.
+     * @throws GraphValidationException if [config] names interrupt nodes that are not in the graph, or
+     * if a node calls [interrupt] and [config] has no checkpointer.
      * @throws MaxIterationsExceededException if the run needs more than [GraphConfig.maxIterations] steps.
      * @throws NodeExecutionException if a node throws.
      * @throws ReducerException if the reducer throws.
@@ -198,7 +207,23 @@ public class CompiledGraph<State> internal constructor(
             executedSteps++
             step++
 
-            state = runStep(step, activeNodes, state, progress)
+            state =
+                try {
+                    runStep(step, activeNodes, state, progress)
+                } catch (pause: NodeInterrupt) {
+                    val checkpointer =
+                        config.checkpointer ?: throw GraphValidationException(
+                            "Node '${pause.node}' called interrupt(), which needs a GraphConfig with a checkpointer to save the paused run.",
+                        )
+
+                    @Suppress("UNCHECKED_CAST")
+                    val asked = pause.state as State
+                    // The step did not finish, so it keeps its number, and resume runs its nodes again
+                    // without pausing before them a second time.
+                    checkpointer.save(config.threadId, Checkpoint(asked, activeNodes, step - 1, interruptedBefore = true))
+                    emit(GraphEvent.Interrupted(asked, activeNodes))
+                    return
+                }
             val nextNodes = resolveNextNodes(activeNodes, state)
             checkpoint(nextNodes)
             emit(GraphEvent.StepCompleted(step, activeNodes, state))
@@ -316,7 +341,9 @@ public class CompiledGraph<State> internal constructor(
     }
 
     private suspend fun runNode(node: Node<State>, state: State): NodeOutput<State> =
-        wrapFailure({ NodeExecutionException(node.name, it) }) { node.run(state) }
+        withContext(RunningNode(node.name)) {
+            wrapFailure({ NodeExecutionException(node.name, it) }) { node.run(state) }
+        }
 
     /**
      * Runs [block], which calls code of the application (a node, the condition of an edge or the

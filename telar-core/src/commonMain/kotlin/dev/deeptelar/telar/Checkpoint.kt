@@ -12,9 +12,10 @@ import kotlinx.coroutines.sync.withLock
  * @property step the number of steps the thread has executed so far. `0` for the checkpoint that is
  * saved when a run starts.
  * @property interruptedBefore `true` when the run paused before [nextNodes] because of
- * [GraphConfig.interruptBefore]. [CompiledGraph.resume] then runs those nodes without pausing before
- * them again. A checkpoint saved for any other reason is `false`, so resuming it still pauses before
- * a node listed in [GraphConfig.interruptBefore].
+ * [GraphConfig.interruptBefore], or because one of them called [interrupt] when it ran.
+ * [CompiledGraph.resume] then runs those nodes without pausing before them again. A checkpoint saved
+ * for any other reason is `false`, so resuming it still pauses before a node listed in
+ * [GraphConfig.interruptBefore].
  */
 public data class Checkpoint<State>(
     val state: State,

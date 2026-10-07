@@ -10,7 +10,8 @@ import kotlinx.coroutines.flow.map
  * For every executed step a stream emits a [NodeStarted] for each node of the step, a
  * [NodeCompleted] as each of them finishes, and then one [StepCompleted]. While a node runs, it can
  * add [NodeProgress] events of its own. A stream always ends with exactly one [Completed] or
- * [Interrupted].
+ * [Interrupted]. When a node calls [interrupt], [Interrupted] comes right after the events of the
+ * nodes that had started, without a [StepCompleted].
  */
 public sealed interface GraphEvent<out State> {
     /** The graph state at the time of the event. */
@@ -65,7 +66,10 @@ public sealed interface GraphEvent<out State> {
         override val state: State,
     ) : GraphEvent<State>
 
-    /** The run paused at an interrupt. [nextNodes] run when the thread is resumed. */
+    /**
+     * The run paused at an interrupt. [nextNodes] run when the thread is resumed. After an [interrupt]
+     * from a node, [state] is the state that node passed.
+     */
     public data class Interrupted<out State>(
         override val state: State,
         val nextNodes: List<String>,

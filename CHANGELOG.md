@@ -7,6 +7,13 @@ breaking changes.
 
 ## [Unreleased]
 
+### Added
+
+- `interrupt(state)` pauses a run from inside a node. A node that finds out while it works that it
+  needs a person saves a state with its question and stops there. `resume` writes the answer into
+  the state and runs the node again from its first line. Before, a run paused only before or after
+  the nodes that `GraphConfig` names. The format of a checkpoint is the same as before.
+
 ## [0.1.0-alpha06] - 2026-10-07
 
 ### Added
