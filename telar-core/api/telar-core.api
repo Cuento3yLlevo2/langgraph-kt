@@ -196,6 +196,25 @@ public final class dev/deeptelar/telar/GraphEvent$StepCompleted : dev/deeptelar/
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class dev/deeptelar/telar/GraphEvent$SubgraphEvent : dev/deeptelar/telar/GraphEvent {
+	public fun <init> (ILjava/lang/String;Ldev/deeptelar/telar/GraphEvent;Ljava/lang/Object;)V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ldev/deeptelar/telar/GraphEvent;
+	public final fun component4 ()Ljava/lang/Object;
+	public final fun copy (ILjava/lang/String;Ldev/deeptelar/telar/GraphEvent;Ljava/lang/Object;)Ldev/deeptelar/telar/GraphEvent$SubgraphEvent;
+	public static synthetic fun copy$default (Ldev/deeptelar/telar/GraphEvent$SubgraphEvent;ILjava/lang/String;Ldev/deeptelar/telar/GraphEvent;Ljava/lang/Object;ILjava/lang/Object;)Ldev/deeptelar/telar/GraphEvent$SubgraphEvent;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEvent ()Ldev/deeptelar/telar/GraphEvent;
+	public final fun getInnermost ()Ldev/deeptelar/telar/GraphEvent;
+	public final fun getNode ()Ljava/lang/String;
+	public final fun getPath ()Ljava/util/List;
+	public fun getState ()Ljava/lang/Object;
+	public final fun getStep ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class dev/deeptelar/telar/GraphEventKt {
 	public static final fun states (Lkotlinx/coroutines/flow/Flow;)Lkotlinx/coroutines/flow/Flow;
 }

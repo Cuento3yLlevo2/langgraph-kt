@@ -47,7 +47,8 @@ import kotlin.coroutines.EmptyCoroutineContext
  *
  * A node added with [StateGraph.subgraph] runs another graph. That graph takes its own steps inside
  * one step of this graph. When one of its nodes calls [interrupt], this run pauses as well, and
- * [resume] continues inside the subgraph, at the node that paused.
+ * [resume] continues inside the subgraph, at the node that paused. A stream of this graph has the
+ * events of the subgraph too, each inside a [GraphEvent.SubgraphEvent].
  *
  * ## Failures and retries
  *
@@ -144,8 +145,8 @@ public class CompiledGraph<State> internal constructor(
      * Like [invoke], but returns a cold [Flow] that emits a [GraphEvent] as each node starts and
      * finishes and after every step, and ends with [GraphEvent.Completed] or
      * [GraphEvent.Interrupted]. What a node passes to [reportProgress] while it runs arrives as a
-     * [GraphEvent.NodeProgress]. Nothing runs until the flow is collected, and each collection is a
-     * new run.
+     * [GraphEvent.NodeProgress], and what happens inside a subgraph as a [GraphEvent.SubgraphEvent].
+     * Nothing runs until the flow is collected, and each collection is a new run.
      */
     public fun stream(input: State, config: GraphConfig<State> = GraphConfig()): Flow<GraphEvent<State>> =
         events(input, config, progress = true)
@@ -200,9 +201,11 @@ public class CompiledGraph<State> internal constructor(
             } else {
                 RunStart(state, position.nextNodes, position.step, position.interruptedBefore, position.subgraphs)
             }
-        // What the nodes of this graph report still reaches the collector of the run around it, as
-        // progress of [parent]. The events of this graph have no collector yet.
-        return FlowCollector<GraphEvent<State>> { }.run(config, start, progress = false, canPause = parent.canPause)
+        // The node of this subgraph has a reporter when the run around it is collected. The events of
+        // this graph go to that collector through it, like what a node reports.
+        val reporter = currentCoroutineContext()[ProgressReporter]
+        val events = FlowCollector<GraphEvent<State>> { event -> reporter?.report(SubgraphReport(event)) }
+        return events.run(config, start, progress = reporter != null, canPause = parent.canPause)
     }
 
     /**
@@ -327,7 +330,14 @@ public class CompiledGraph<State> internal constructor(
                     while (running > 0) {
                         when (val signal = signals.receive()) {
                             is NodeSignal.Progress -> {
-                                emit(GraphEvent.NodeProgress(step, signal.node, signal.value, state))
+                                val value = signal.value
+                                emit(
+                                    if (value is SubgraphReport) {
+                                        GraphEvent.SubgraphEvent(step, signal.node, value.event, state)
+                                    } else {
+                                        GraphEvent.NodeProgress(step, signal.node, value, state)
+                                    },
+                                )
                                 signal.emitted.complete(Unit)
                             }
                             is NodeSignal.Finished -> {
@@ -469,8 +479,12 @@ public class CompiledGraph<State> internal constructor(
         when (this) {
             is GraphEvent.Completed -> GraphResult.Completed(state)
             is GraphEvent.Interrupted -> GraphResult.Interrupted(state, nextNodes)
-            is GraphEvent.NodeStarted, is GraphEvent.NodeProgress, is GraphEvent.NodeCompleted, is GraphEvent.StepCompleted ->
-                error("A graph stream always ends with Completed or Interrupted")
+            is GraphEvent.NodeStarted,
+            is GraphEvent.NodeProgress,
+            is GraphEvent.SubgraphEvent,
+            is GraphEvent.NodeCompleted,
+            is GraphEvent.StepCompleted,
+            -> error("A graph stream always ends with Completed or Interrupted")
         }
 }
 
@@ -485,3 +499,8 @@ internal sealed interface RunEnd<out State> {
         val checkpoint: Checkpoint<State>,
     ) : RunEnd<State>
 }
+
+/** An event of a subgraph on its way to the collector of the run around it, sent like the progress of a node. */
+internal class SubgraphReport(
+    val event: GraphEvent<*>,
+)
