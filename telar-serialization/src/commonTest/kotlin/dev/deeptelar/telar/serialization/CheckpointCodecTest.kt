@@ -3,6 +3,7 @@ package dev.deeptelar.telar.serialization
 import dev.deeptelar.telar.Checkpoint
 import dev.deeptelar.telar.CheckpointCorruptedException
 import dev.deeptelar.telar.StateSerializer
+import dev.deeptelar.telar.SubgraphPosition
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -22,6 +23,39 @@ class CheckpointCodecTest {
     @Test
     fun `writes the format version`() {
         assertTrue(codec.encode(Checkpoint(ChatState(), emptyList())).startsWith("""{"version":1,"""))
+    }
+
+    @Test
+    fun `a checkpoint without subgraphs is written as before`() {
+        val checkpoint = Checkpoint(ChatState(turn = 4), listOf("a"), step = 2, interruptedBefore = true)
+
+        assertEquals(
+            """{"version":1,"state":"{\"turn\":4}","nextNodes":["a"],"step":2,"interruptedBefore":true}""",
+            codec.encode(checkpoint),
+        )
+    }
+
+    @Test
+    fun `round-trips where a run stands inside its subgraphs`() {
+        val inner = SubgraphPosition(listOf("ask"), step = 1, interruptedBefore = true)
+        val outer = SubgraphPosition(listOf("inner"), step = 2, interruptedBefore = true, subgraphs = mapOf("inner" to inner))
+        val checkpoint =
+            Checkpoint(
+                ChatState(turn = 4),
+                listOf("outer"),
+                step = 3,
+                interruptedBefore = true,
+                subgraphs =
+                    mapOf(
+                        "outer" to outer,
+                    ),
+            )
+
+        val encoded = codec.encode(checkpoint)
+
+        // An older library leaves out what it does not know, so it must not read this one.
+        assertTrue(encoded.startsWith("""{"version":2,"""))
+        assertEquals(checkpoint, codec.decode("t", encoded))
     }
 
     @Test

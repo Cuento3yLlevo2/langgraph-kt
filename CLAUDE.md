@@ -64,8 +64,10 @@ made under that name keep it. The repository is `deeptelar/telar` and the demo i
 
 1. **Define** with the `StateGraph<State> { ... }` DSL. `node(name) { ... }` returns a whole state;
    `node(name, work) { state, result -> ... }` splits a node into slow work and a state update, for
-   nodes that run in parallel. Both return a `NodeRef`; connect nodes with
-   `START then a then b then END`, `edge(from, to)`, or `conditionalEdge(from, targets) { ... }`.
+   nodes that run in parallel. `subgraph(name, graph, state, update)` adds a compiled graph as a
+   node, with the two functions mapping its state out of and into this graph's. All return a
+   `NodeRef`; connect nodes with `START then a then b then END`, `edge(from, to)`, or
+   `conditionalEdge(from, targets) { ... }`.
 2. **Compile** with `.compile()`, which validates the graph and returns a `CompiledGraph<State>`. It
    needs a `reducer` only when two nodes that return a whole state can run in the same step.
 3. **Execute** with `invoke(input, config)` (returns `GraphResult.Completed` or `.Interrupted`) or
@@ -92,7 +94,7 @@ next active nodes. A checkpoint is saved after every step when a checkpointer is
 | `GraphResult<State>` / `GraphEvent<State>` | Outcome of `invoke`/`resume`, and events from `stream` (per node and per step) |
 | `GraphTopology` | Nodes and edges of a compiled graph, from `CompiledGraph.topology` |
 | `Checkpointer<State>` | `save` / `load` / `delete` per thread |
-| `Checkpoint<State>` | `state`, `nextNodes` (empty when complete), `step`, `interruptedBefore` |
+| `Checkpoint<State>` | `state`, `nextNodes` (empty when complete), `step`, `interruptedBefore`, `subgraphs` (a `SubgraphPosition` per subgraph the run paused in) |
 | `TelarException` | Base of all library exceptions (see `Exceptions.kt`) |
 
 ### Key Design Rules

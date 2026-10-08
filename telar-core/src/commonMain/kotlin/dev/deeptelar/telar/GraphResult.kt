@@ -22,8 +22,10 @@ public sealed interface GraphResult<out State> {
     /**
      * The run paused at an interrupt and was checkpointed. Call [CompiledGraph.resume] to continue
      * with [nextNodes]. When a node paused the run with [interrupt], [state] is the state the node
-     * passed and [nextNodes] are the nodes of its step, which run again. [CompiledGraph.lastResult]
-     * also returns it for a run that stopped between two steps without reaching an interrupt.
+     * passed and [nextNodes] are the nodes of its step, which run again. When that node is inside a
+     * subgraph, [nextNodes] has the node of the subgraph, and [state] holds the state of the subgraph
+     * where the mapping of [StateGraph.subgraph] put it. [CompiledGraph.lastResult] also returns it for
+     * a run that stopped between two steps without reaching an interrupt.
      */
     public data class Interrupted<out State>(
         override val state: State,

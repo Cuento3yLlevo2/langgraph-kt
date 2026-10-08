@@ -45,12 +45,22 @@ public suspend fun <State> interrupt(state: State): Nothing {
     val node =
         currentCoroutineContext()[RunningNode]
             ?: throw GraphValidationException("interrupt() can only be called from a node of a running graph.")
-    throw NodeInterrupt(node.name, state)
+    throw NodeInterrupt(node.name, state, position = null)
 }
 
-/** Marks the coroutine of a running node, so that [interrupt] knows which node called it. */
+/**
+ * Marks the coroutine of a running node, so that [interrupt] knows which node called it, and tells
+ * the node of a subgraph what it needs from the run around it.
+ *
+ * @property canPause `true` when the run is saved by a checkpointer, so that it can pause.
+ * @property position where the run stands inside the subgraph of this node, when it paused there.
+ */
 internal class RunningNode(
     val name: String,
+    val threadId: String,
+    val canPause: Boolean,
+    val maxIterations: Int,
+    val position: SubgraphPosition?,
 ) : AbstractCoroutineContextElement(Key) {
     companion object Key : CoroutineContext.Key<RunningNode>
 }
@@ -58,8 +68,12 @@ internal class RunningNode(
 /**
  * Carries an [interrupt] from the node that called it to the engine. It is not an `Exception`, so
  * that a `catch (e: Exception)` in the node does not stop it on the way.
+ *
+ * @property position where the run stands inside the subgraph of [node], when the pause comes from
+ * there. `null` when the node called [interrupt] itself.
  */
 internal class NodeInterrupt(
     val node: String,
     val state: Any?,
+    val position: SubgraphPosition?,
 ) : Throwable("Node '$node' called interrupt(). The engine pauses the run with this; do not catch it.")

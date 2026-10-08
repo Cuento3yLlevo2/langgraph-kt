@@ -59,6 +59,20 @@ val graph = StateGraph<Ticket> {
 | An arrow by name | `edge("a", "b")` |
 | A choice by name | `conditionalEdge("a", targets = setOf("b", END)) { state -> "b" }` |
 
+## A graph inside a graph
+
+```kotlin
+// payoutGraph is a CompiledGraph<Payout>. It runs from its START to its END as one node of this graph.
+val payout = subgraph(
+    "payout", payoutGraph,
+    state = { ticket -> ticket.payout },                             // the subgraph's state, read from this graph's
+    update = { ticket, payout -> ticket.copy(payout = payout) },     // and written back
+)
+```
+
+A node of the subgraph can pause the run with `interrupt`, and `resume` continues inside the
+subgraph. With the same state class on both sides: `subgraph("payout", payoutGraph)`.
+
 ## Running a graph
 
 | Call | What it does |
