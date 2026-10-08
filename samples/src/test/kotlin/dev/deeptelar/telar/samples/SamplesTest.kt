@@ -90,6 +90,19 @@ class SamplesTest {
         }
 
     @Test
+    fun `a decision model routes an email and an unsure decision goes to a person`() =
+        runTest {
+            val graph = routedSupport(scriptedDecisions)
+
+            val categories =
+                listOf("I would like a refund.", "The app shows an error.", "This is unacceptable!!").map {
+                    graph.invoke(SupportEmail(sender = "Ana", body = it)).state.category
+                }
+
+            assertEquals(listOf(Category.REFUND, Category.TECHNICAL, Category.ESCALATION), categories)
+        }
+
+    @Test
     fun `a return pauses inside its payout subgraph and continues there after a restart`() =
         runTest {
             val directory = Path(Files.createTempDirectory("returns").toString())
