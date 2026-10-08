@@ -7,7 +7,7 @@ what is already released.
 To ask for a feature or to move one up, add a 👍 to its issue or
 [start a discussion](https://github.com/deeptelar/telar/discussions).
 
-Last updated: 2026-10-07.
+Last updated: 2026-10-08.
 
 ## Where the project is
 
@@ -41,7 +41,7 @@ These change `telar-core`, so they come first.
 
 | Feature | What you get | State | Issue |
 |---|---|---|---|
-| Subgraphs | A compiled graph becomes a node of another graph, with a mapping between the two states and one thread for both. On `main`: `subgraph`, and a run that pauses inside a subgraph and resumes there. Still to come: the events of a subgraph in the stream of the graph around it, the subgraph in `topology`, `interruptBefore` for a node of a subgraph, and a retry after a failure that continues inside the subgraph. | In progress | [#34] |
+| Subgraphs | A compiled graph becomes a node of another graph, with a mapping between the two states and one thread for both. On `main`: `subgraph`, a run that pauses inside a subgraph and resumes there, the events of a subgraph in the stream of the graph around it, and the subgraph in `topology`. Still to come: `interruptBefore` for a node of a subgraph, and a retry after a failure that continues inside the subgraph. | In progress | [#34] |
 | Checkpoint history and forks | A thread keeps every step, not only the last one. Read an earlier state, or continue from it on a new thread without changing the original. This changes the `Checkpointer` interface. | Planned | [#35] |
 | Fan-out over a list | One node runs once per item of a list, all at the same time, when the number of items is only known at run time. Today the edges fix how many nodes run in parallel. | Planned | |
 | Retry and time limit for a node | A node says how often it may be tried again and how long it may take. Today a failed run is retried by hand with `resume`. | Planned | |

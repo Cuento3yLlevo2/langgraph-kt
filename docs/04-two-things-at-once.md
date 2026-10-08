@@ -140,6 +140,7 @@ fun describe(event: GraphEvent<Ticket>): String =
     when (event) {
         is GraphEvent.NodeStarted -> "step ${event.step}: ${event.node} started"
         is GraphEvent.NodeProgress -> "step ${event.step}: ${event.node} reports ${event.value}"
+        is GraphEvent.SubgraphEvent -> "step ${event.step}: inside ${event.node}: ${event.event}"
         is GraphEvent.NodeCompleted -> "step ${event.step}: ${event.node} finished"
         is GraphEvent.StepCompleted -> "step ${event.step} done, facts so far: ${event.state.facts.size}"
         is GraphEvent.Completed -> "finished: ${event.state.reply}"
@@ -156,12 +157,13 @@ about everything on the way. It returns a Kotlin `Flow`, which is a sequence of 
 over time. `collect { ... }` runs your code for each one, so the lines appear one by one as things
 happen.
 
-The values are **events**. There are six kinds:
+The values are **events**. There are seven kinds:
 
 | Event | When | What it carries |
 |---|---|---|
 | `NodeStarted` | A node is about to run | `step`, `node`, the state the node receives |
 | `NodeProgress` | A running node has something to show | `step`, `node`, the `value` the node reported |
+| `SubgraphEvent` | Something happened in a graph that a node runs | `step`, `node`, and the `event` of that graph. A graph can be a node of another graph; this tutorial does not use that. |
 | `NodeCompleted` | A node finished | `step`, `node`, the state the node returned |
 | `StepCompleted` | All nodes of a step finished | `step`, `nodes`, the state after the step, with the results of all its nodes |
 | `Completed` | The run reached `END` | The final state. Always the last event. |
@@ -173,9 +175,9 @@ In the output you can see the fan-out at work: both lookups start before either 
 share step 1. `kitchen finished` and `driver finished` may swap places, because the two nodes
 finish at almost the same moment.
 
-Because `when` covers all six kinds, the Kotlin compiler would complain if you forgot one. That is
-why `describe` handles `Interrupted` and `NodeProgress` even though this graph never pauses and its
-nodes report nothing.
+Because `when` covers all seven kinds, the Kotlin compiler would complain if you forgot one. That is
+why `describe` handles `Interrupted`, `NodeProgress` and `SubgraphEvent` even though this graph
+never pauses, its nodes report nothing, and none of them runs another graph.
 
 Three more things to know:
 

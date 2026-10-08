@@ -73,7 +73,8 @@ made under that name keep it. The repository is `deeptelar/telar` and the demo i
 3. **Execute** with `invoke(input, config)` (returns `GraphResult.Completed` or `.Interrupted`) or
    `stream(input, config)` (a `Flow<GraphEvent<State>>`). A node calls `reportProgress(value)` to
    send a `GraphEvent.NodeProgress` to a stream while it runs; `toolLoop` reports the model's text
-   that way (`ChatModel.stream`, `chatWithProgress`, `GraphEvent.textDelta`). A node pauses the run
+   that way (`ChatModel.stream`, `chatWithProgress`, `GraphEvent.textDelta`). The events of a
+   subgraph arrive wrapped in `GraphEvent.SubgraphEvent`. A node pauses the run
    from inside with `interrupt(state)`: the state it passes is saved and its step runs again.
    Continue a paused run with `resume(config) { state -> ... }` / `streamResume`.
    `lastResult(config)` reads where a thread stopped without running it.

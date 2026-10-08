@@ -216,6 +216,8 @@ graph.stream(SupportEmail(sender = "Ana", body = "I would like a refund.")).coll
         is GraphEvent.NodeStarted -> println("${event.node} started")
         // A running node reported something with reportProgress(). See below.
         is GraphEvent.NodeProgress -> println("${event.node} reports ${event.value}")
+        // A node that runs another graph passes on what happens in it. See "Subgraphs".
+        is GraphEvent.SubgraphEvent -> println("inside ${event.node}: ${event.event}")
         // A node has returned its updated state.
         is GraphEvent.NodeCompleted -> println("${event.node} finished")
         // A step is over: every node that ran at the same time has finished.
@@ -623,8 +625,22 @@ Runnable version: [`Subgraph`](samples/src/main/kotlin/dev/deeptelar/telar/sampl
   on every visit and give back only its result:
   `state = { Payout(it.customer, it.items) }, update = { case, payout -> case.copy(reply = payout.log.last()) }`.
 - A subgraph with the same state class needs no functions: `subgraph("payout", payoutGraph)`.
-- What a node of the subgraph passes to `reportProgress` arrives as progress of the subgraph's
-  node. The other events of a subgraph are not in the stream of the graph around it yet.
+- A stream of the graph around has the events of the subgraph too, each inside a
+  `GraphEvent.SubgraphEvent` that names the subgraph's node. They are the events a stream of the
+  subgraph alone would have, with the state of the subgraph:
+
+  ```kotlin
+  graph.stream(case, config).collect { event ->
+      if (event is GraphEvent.SubgraphEvent) {
+          val inside = event.event                    // a GraphEvent of payoutGraph
+          if (inside is GraphEvent.NodeStarted) println("${event.node} > ${inside.node} started")
+      }
+  }
+  ```
+
+  For a subgraph inside a subgraph, `event.event` is a `SubgraphEvent` again; `event.path` lists the
+  subgraph nodes from the outside in, and `event.innermost` is the event at the end. `textDelta`
+  reads a model's text from any depth.
 - A failure inside the subgraph is the `cause` of the `NodeExecutionException` of its node.
   `maxIterations` limits the steps of the subgraph on their own.
 - A subgraph can contain subgraphs.
@@ -831,6 +847,7 @@ topology.nodes                 // [web, docs, summarize]
 topology.successors(START)     // [web, docs]: what can run after START
 topology.edges                 // GraphEdge(from, to, isConditional) for every known arrow
 topology.dynamicRoutes         // nodes whose conditional edge declares no targets
+topology.subgraphs             // the topology of the graph behind each subgraph node, by its name
 ```
 
 ## Errors

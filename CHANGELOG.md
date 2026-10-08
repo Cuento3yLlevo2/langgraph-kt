@@ -17,8 +17,14 @@ breaking changes.
   graph. `state` reads the state of the subgraph out of the state of the graph around it, and
   `update` writes it back. When a node of the subgraph calls `interrupt`, the graph around pauses
   too, and `resume` continues inside the subgraph, at the node that paused. A subgraph with the same
-  state type needs no mapping: `subgraph(name, graph)`. Not yet: the events of a subgraph in the
-  stream of the graph around it, and `interruptBefore` for a node of a subgraph.
+  state type needs no mapping: `subgraph(name, graph)`. Not yet: `interruptBefore` for a node of a
+  subgraph.
+- `GraphEvent.SubgraphEvent`: a stream of a graph has the events of its subgraphs. Each one holds
+  an event of the subgraph, with the subgraph's state, and names the node that runs it. `path` and
+  `innermost` read an event of a subgraph inside a subgraph. **A `when` over every kind of
+  `GraphEvent` needs a branch for it.**
+- `GraphTopology.subgraphs`: the nodes and edges of the graph behind each subgraph node.
+- `textDelta` also reads the text of a model that runs inside a subgraph.
 
 ### Changed
 
