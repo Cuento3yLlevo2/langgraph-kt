@@ -19,7 +19,7 @@ Every word and every move of the [tutorial](README.md) on one page.
 | Step | One round of the engine: run the current nodes, then follow their arrows | [3](03-loops.md) |
 | Fan-out | Several ordinary arrows from one place. Their nodes run at the same time, in one step. | [4](04-two-things-at-once.md) |
 | `work` and `update` | The two parts of a node that can run next to others: `work` returns a result, `update` writes it into the state | [4](04-two-things-at-once.md) |
-| Reducer | A function that merges whole states. Only needed when two nodes that each return a whole state run at the same time. | [7](07-game-over-screens.md) |
+| Reducer | A function that merges whole states. Only needed when two nodes that each return a whole state run at the same time. `mergeRules { append(...); replace(...) }` builds one from a rule for each property. | [7](07-game-over-screens.md) |
 | Event | A message about a run in progress: a node started, a step finished, ... | [4](04-two-things-at-once.md) |
 | Checkpoint | A save: the state, and which nodes come next | [5](05-save-points.md) |
 | Checkpointer | Where checkpoints are stored (memory, files, a browser, your own storage) | [5](05-save-points.md) |

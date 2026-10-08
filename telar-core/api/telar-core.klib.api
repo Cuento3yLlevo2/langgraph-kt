@@ -274,6 +274,12 @@ final class <#A: kotlin/Any?> dev.deeptelar.telar/MemoryCheckpointer : dev.deept
     final suspend fun save(kotlin/String, dev.deeptelar.telar/Checkpoint<#A>) // dev.deeptelar.telar/MemoryCheckpointer.save|save(kotlin.String;dev.deeptelar.telar.Checkpoint<1:0>){}[0]
 }
 
+final class <#A: kotlin/Any?> dev.deeptelar.telar/MergeRules { // dev.deeptelar.telar/MergeRules|null[0]
+    final fun <#A1: kotlin/Any?> append(kotlin.reflect/KProperty1<#A, kotlin.collections/List<#A1>>, kotlin/Function2<#A, kotlin.collections/List<#A1>, #A>) // dev.deeptelar.telar/MergeRules.append|append(kotlin.reflect.KProperty1<1:0,kotlin.collections.List<0:0>>;kotlin.Function2<1:0,kotlin.collections.List<0:0>,1:0>){0§<kotlin.Any?>}[0]
+    final fun <#A1: kotlin/Any?> merge(kotlin.reflect/KProperty1<#A, #A1>, kotlin/Function2<#A1, kotlin.collections/List<#A1>, #A1>, kotlin/Function2<#A, #A1, #A>) // dev.deeptelar.telar/MergeRules.merge|merge(kotlin.reflect.KProperty1<1:0,0:0>;kotlin.Function2<0:0,kotlin.collections.List<0:0>,0:0>;kotlin.Function2<1:0,0:0,1:0>){0§<kotlin.Any?>}[0]
+    final fun <#A1: kotlin/Any?> replace(kotlin.reflect/KProperty1<#A, #A1>, kotlin/Function2<#A, #A1, #A>) // dev.deeptelar.telar/MergeRules.replace|replace(kotlin.reflect.KProperty1<1:0,0:0>;kotlin.Function2<1:0,0:0,1:0>){0§<kotlin.Any?>}[0]
+}
+
 final class <#A: kotlin/Any?> dev.deeptelar.telar/StateGraph { // dev.deeptelar.telar/StateGraph|null[0]
     constructor <init>() // dev.deeptelar.telar/StateGraph.<init>|<init>(){}[0]
 
@@ -382,6 +388,10 @@ final class dev.deeptelar.telar/MaxIterationsExceededException : dev.deeptelar.t
         final fun <get-maxIterations>(): kotlin/Int // dev.deeptelar.telar/MaxIterationsExceededException.maxIterations.<get-maxIterations>|<get-maxIterations>(){}[0]
 }
 
+final class dev.deeptelar.telar/MergeRuleException : dev.deeptelar.telar/TelarException { // dev.deeptelar.telar/MergeRuleException|null[0]
+    constructor <init>(kotlin/String) // dev.deeptelar.telar/MergeRuleException.<init>|<init>(kotlin.String){}[0]
+}
+
 final class dev.deeptelar.telar/NodeExecutionException : dev.deeptelar.telar/TelarException { // dev.deeptelar.telar/NodeExecutionException|null[0]
     constructor <init>(kotlin/String, kotlin/Throwable) // dev.deeptelar.telar/NodeExecutionException.<init>|<init>(kotlin.String;kotlin.Throwable){}[0]
 
@@ -437,6 +447,7 @@ final const val dev.deeptelar.telar/START // dev.deeptelar.telar/START|{}START[0
 
 final fun <#A: kotlin/Any?> (kotlinx.coroutines.flow/Flow<dev.deeptelar.telar/GraphEvent<#A>>).dev.deeptelar.telar/states(): kotlinx.coroutines.flow/Flow<#A> // dev.deeptelar.telar/states|states@kotlinx.coroutines.flow.Flow<dev.deeptelar.telar.GraphEvent<0:0>>(){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> dev.deeptelar.telar/StateGraph(kotlin/Function1<dev.deeptelar.telar/StateGraph<#A>, kotlin/Unit>): dev.deeptelar.telar/StateGraph<#A> // dev.deeptelar.telar/StateGraph|StateGraph(kotlin.Function1<dev.deeptelar.telar.StateGraph<0:0>,kotlin.Unit>){0§<kotlin.Any?>}[0]
+final fun <#A: kotlin/Any?> dev.deeptelar.telar/mergeRules(kotlin/Function1<dev.deeptelar.telar/MergeRules<#A>, kotlin/Unit>): dev.deeptelar.telar/Reducer<#A> // dev.deeptelar.telar/mergeRules|mergeRules(kotlin.Function1<dev.deeptelar.telar.MergeRules<0:0>,kotlin.Unit>){0§<kotlin.Any?>}[0]
 final suspend fun <#A: kotlin/Any?> dev.deeptelar.telar/interrupt(#A): kotlin/Nothing // dev.deeptelar.telar/interrupt|interrupt(0:0){0§<kotlin.Any?>}[0]
 final suspend fun dev.deeptelar.telar/isProgressCollected(): kotlin/Boolean // dev.deeptelar.telar/isProgressCollected|isProgressCollected(){}[0]
 final suspend fun dev.deeptelar.telar/reportProgress(kotlin/Any) // dev.deeptelar.telar/reportProgress|reportProgress(kotlin.Any){}[0]

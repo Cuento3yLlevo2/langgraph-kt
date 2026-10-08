@@ -72,6 +72,15 @@ public class ReducerException(
 ) : TelarException("Reducer failed to merge the results of $nodes: ${cause.message}", cause)
 
 /**
+ * A reducer built with [mergeRules] could not merge the states of a step: a node changed a property
+ * that has no rule, or two nodes changed a property in ways its rule cannot combine. It is the
+ * `cause` of the [ReducerException] the run fails with.
+ */
+public class MergeRuleException(
+    message: String,
+) : TelarException(message)
+
+/**
  * [CompiledGraph.resume] was called for [threadId], but the checkpointer has no checkpoint for it.
  */
 public class CheckpointNotFoundException(
