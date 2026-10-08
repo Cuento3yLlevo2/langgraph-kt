@@ -1,4 +1,9 @@
-# Telar
+<h1>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/telar-lockup-on-dark.svg">
+    <img alt="Telar" src="docs/brand/telar-lockup.svg" width="340">
+  </picture>
+</h1>
 
 [![CI](https://github.com/deeptelar/telar/actions/workflows/ci.yml/badge.svg)](https://github.com/deeptelar/telar/actions/workflows/ci.yml)
 [![Maven Central](https://img.shields.io/maven-central/v/dev.deeptelar/telar-core?label=Maven%20Central)](https://central.sonatype.com/artifact/dev.deeptelar/telar-core)
