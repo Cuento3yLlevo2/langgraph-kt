@@ -1,0 +1,466 @@
+package dev.deeptelar.telar.openai
+
+import dev.deeptelar.telar.agent.ChatEvent
+import dev.deeptelar.telar.agent.ChatMessage
+import dev.deeptelar.telar.agent.ChatModel
+import dev.deeptelar.telar.agent.ChatModelException
+import dev.deeptelar.telar.agent.ChatRequest
+import dev.deeptelar.telar.agent.ChatResponse
+import dev.deeptelar.telar.agent.TokenUsage
+import dev.deeptelar.telar.agent.ToolCall
+import io.ktor.client.HttpClient
+import io.ktor.client.request.HttpRequestBuilder
+import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.preparePost
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsChannel
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
+import io.ktor.utils.io.readLine
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.addJsonObject
+import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.put
+import kotlinx.serialization.json.putJsonArray
+import kotlinx.serialization.json.putJsonObject
+
+/**
+ * A [ChatModel] that calls a model through the Chat Completions API of OpenAI. Many other servers
+ * have the same API, among them Ollama, LM Studio, vLLM, Groq and OpenRouter, so this one class
+ * reaches the models of OpenAI and models that run on your own machine. It is built on Ktor, so it
+ * runs on every Kotlin target.
+ *
+ * ```kotlin
+ * val client = HttpClient()
+ *
+ * // OpenAI
+ * val model = OpenAiChatModel(client, apiKey = System.getenv("OPENAI_API_KEY"), model = "gpt-5")
+ *
+ * // A model of Ollama on this machine. It needs no key.
+ * val local = OpenAiChatModel.ollama(client, model = "llama3.2")
+ *
+ * // Any other server with this API: give the address that ends before "/chat/completions".
+ * val hosted = OpenAiChatModel(client, apiKey = key, model = "llama-3.3-70b-versatile", baseUrl = "https://api.groq.com/openai/v1")
+ *
+ * val agent = toolAgent(model, tools = listOf(forecast))
+ * ```
+ *
+ * `HttpClient()` uses the Ktor engine among your dependencies, for example `ktor-client-okhttp` on
+ * Android, `ktor-client-darwin` on iOS or `ktor-client-js` in a browser. The client is yours: share
+ * one between models, and close it when your app is done with it.
+ *
+ * [chat] returns when the model has finished, and [stream] delivers the text while the model
+ * writes it. A `toolAgent` uses [stream] when its run is collected with `stream`.
+ *
+ * Tools need a model that can call them. A small local model may answer in text where a larger one
+ * would call a tool.
+ *
+ * Never ship an app that contains a key of yours: a key in an app can be read by everyone who has
+ * the app. Send the requests through a server of your own, or let each user enter their key.
+ *
+ * @param client the Ktor client that sends the requests.
+ * @param apiKey the key, sent as a bearer token. `null` for a server that needs none.
+ * @param model the id of the model, for example `gpt-5`.
+ * @param parameters more fields for the body of every request, such as `temperature`,
+ * `max_completion_tokens`, `reasoning_effort` or `tool_choice`. A field given here replaces the one
+ * this class would send.
+ * @param headers more headers for every request, such as `OpenAI-Organization`.
+ * @param baseUrl where the API lives, up to and including the version: this class adds
+ * `/chat/completions` to it.
+ */
+public class OpenAiChatModel(
+    private val client: HttpClient,
+    private val apiKey: String?,
+    private val model: String,
+    private val parameters: JsonObject = JsonObject(emptyMap()),
+    private val headers: Map<String, String> = emptyMap(),
+    private val baseUrl: String = OPENAI_BASE_URL,
+) : ChatModel {
+    /**
+     * Sends [request] to the Chat Completions API and returns the model's answer.
+     *
+     * @throws ChatModelException when the API cannot be reached, when it returns an error, and when
+     * the model declines the request.
+     */
+    override suspend fun chat(request: ChatRequest): ChatResponse {
+        val status: Int
+        val text: String
+        try {
+            val response = client.post(url) { completion(body(request)) }
+            status = response.status.value
+            text = response.bodyAsText()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            throw unreachable(e)
+        }
+
+        if (status !in 200..299) throw apiError(status, text)
+        return response(parse(text) ?: throw ChatModelException("The API at $baseUrl returned a response that is not a JSON object."))
+    }
+
+    /**
+     * Sends [request] to the Chat Completions API with `stream` set, and returns the model's answer
+     * as it arrives: the text piece by piece, then the whole answer. The whole answer is the one
+     * [chat] returns for the same request, with its tool calls and usage.
+     *
+     * The request asks for the usage with `stream_options`. A server that does not know the field
+     * ignores it, and the answer then has no usage.
+     *
+     * The flow fails with a [ChatModelException] when the API cannot be reached, when it returns an
+     * error, when the connection ends before the answer does, and when the model declines the
+     * request.
+     */
+    override fun stream(request: ChatRequest): Flow<ChatEvent> =
+        flow {
+            val answer = StreamedCompletion()
+            var failure: ChatModelException? = null
+            coroutineScope {
+                // A flow may only emit from the coroutine that collects it, and Ktor reads a streamed
+                // body in a context of its own on some targets. So the reader hands each piece over a
+                // channel, and keeps a failure until the pieces that came before it are emitted.
+                val pieces = Channel<String>(Channel.BUFFERED)
+                launch {
+                    try {
+                        client.preparePost(url) { completion(body(request, streamed = true)) }.execute { response ->
+                            val status = response.status.value
+                            if (status !in 200..299) throw apiError(status, response.bodyAsText())
+                            val lines = response.bodyAsChannel()
+                            do {
+                                val line = lines.readLine()
+                                // The end of the body completes an event that has no empty line after it.
+                                answer.add(line.orEmpty())?.let { pieces.send(it) }
+                            } while (line != null)
+                        }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: ChatModelException) {
+                        failure = e
+                    } catch (e: Exception) {
+                        failure = unreachable(e)
+                    }
+                    pieces.close()
+                }
+                for (piece in pieces) emit(ChatEvent.TextDelta(piece))
+            }
+            failure?.let { throw it }
+            emit(ChatEvent.Completed(response(answer.body())))
+        }
+
+    private val url: String get() = "${baseUrl.trimEnd('/')}/chat/completions"
+
+    private fun HttpRequestBuilder.completion(body: JsonObject) {
+        apiKey?.let { header("Authorization", "Bearer $it") }
+        this@OpenAiChatModel.headers.forEach { (name, value) -> header(name, value) }
+        contentType(ContentType.Application.Json)
+        setBody(body.toString())
+    }
+
+    private fun unreachable(cause: Exception): ChatModelException =
+        ChatModelException("Could not reach the API at $baseUrl: ${cause.message ?: cause::class.simpleName}", cause)
+
+    private fun apiError(status: Int, text: String): ChatModelException =
+        ChatModelException("API error $status ${describe(parse(text)?.get("error"), text)}")
+
+    private fun body(request: ChatRequest, streamed: Boolean = false): JsonObject {
+        val body =
+            buildJsonObject {
+                put("model", model)
+                put("messages", messages(request))
+                if (request.tools.isNotEmpty()) {
+                    putJsonArray("tools") {
+                        request.tools.forEach { tool ->
+                            addJsonObject {
+                                put("type", "function")
+                                putJsonObject("function") {
+                                    put("name", tool.name)
+                                    put("description", tool.description)
+                                    put("parameters", tool.inputSchema)
+                                }
+                            }
+                        }
+                    }
+                }
+                if (streamed) {
+                    put("stream", true)
+                    putJsonObject("stream_options") { put("include_usage", true) }
+                }
+            }
+        return JsonObject(body + parameters)
+    }
+
+    private fun response(body: JsonObject): ChatResponse {
+        val choice =
+            (body["choices"] as? JsonArray).orEmpty().firstOrNull() as? JsonObject
+                ?: throw ChatModelException("The API at $baseUrl returned a response without an answer.")
+        val finishReason = choice.string("finish_reason")
+        val answer = choice["message"] as? JsonObject
+        // A refusal is a successful response, so check for one before reading the content.
+        answer.string("refusal")?.takeIf { it.isNotBlank() }?.let { throw ChatModelException("The model declined this request: $it") }
+        if (finishReason == "content_filter") throw ChatModelException("A content filter stopped the model's answer.")
+
+        val message =
+            ChatMessage.Assistant(
+                text = text(answer?.get("content")),
+                toolCalls =
+                    (answer?.get("tool_calls") as? JsonArray).orEmpty().filterIsInstance<JsonObject>().mapIndexed { index, call ->
+                        val function = call["function"] as? JsonObject
+                        ToolCall(
+                            // A result names its call by this id, so a call that came without one gets one.
+                            call.string("id")?.takeIf { it.isNotEmpty() } ?: "call_$index",
+                            function.string("name").orEmpty(),
+                            input(function?.get("arguments")),
+                        )
+                    },
+                truncated = finishReason == "length",
+            )
+        val usage =
+            (body["usage"] as? JsonObject)?.let {
+                TokenUsage(
+                    inputTokens = it.int("prompt_tokens"),
+                    outputTokens = it.int("completion_tokens"),
+                )
+            }
+        return ChatResponse(message, usage)
+    }
+
+    public companion object {
+        /** The address of the API of OpenAI, the default for `baseUrl`. */
+        public const val OPENAI_BASE_URL: String = "https://api.openai.com/v1"
+
+        /** The address at which Ollama serves this API on the machine it runs on. */
+        public const val OLLAMA_BASE_URL: String = "http://localhost:11434/v1"
+
+        /**
+         * Returns a model that calls [model] on an Ollama server, which needs no key. Pull the model
+         * first (`ollama pull llama3.2`), and choose one that supports tools for an agent with tools.
+         *
+         * @param baseUrl where Ollama serves the API. Change it when Ollama runs on another machine;
+         * an Android emulator reaches the machine it runs on at `http://10.0.2.2:11434/v1`.
+         */
+        public fun ollama(
+            client: HttpClient,
+            model: String,
+            parameters: JsonObject = JsonObject(emptyMap()),
+            baseUrl: String = OLLAMA_BASE_URL,
+        ): OpenAiChatModel = OpenAiChatModel(client, apiKey = null, model = model, parameters = parameters, baseUrl = baseUrl)
+    }
+}
+
+/**
+ * Puts the chunks of a streamed answer together into the body the Chat Completions API returns for
+ * the same answer without streaming, so that both kinds of answer are read by the same code.
+ */
+private class StreamedCompletion {
+    /** The `data` lines of the event that is being read. An empty line ends an event. */
+    private val data = mutableListOf<String>()
+    private val content = StringBuilder()
+    private val refusal = StringBuilder()
+    private val calls = mutableListOf<Call>()
+
+    /** The place in [calls] of the call that the chunks name by an index. */
+    private val positions = mutableMapOf<Int, Int>()
+    private var usage: JsonObject? = null
+    private var finishReason: String? = null
+    private var done = false
+
+    private class Call(
+        val id: String?,
+    ) {
+        var name = ""
+
+        /** The input of a tool call arrives as pieces of JSON text. */
+        val arguments = StringBuilder()
+    }
+
+    /**
+     * Takes the next line of the event stream. Returns the piece of text the model wrote when [line]
+     * completes an event that carries one, and `null` otherwise.
+     *
+     * @throws ChatModelException when the event is an error of the API.
+     */
+    fun add(line: String): String? {
+        if (line.startsWith("data:")) data += line.removePrefix("data:").removePrefix(" ")
+        if (line.isNotEmpty() || data.isEmpty()) return null
+        val text = data.joinToString("\n")
+        data.clear()
+        if (text.trim() == "[DONE]") {
+            done = true
+            return null
+        }
+        return parse(text)?.let(::apply)
+    }
+
+    private fun apply(chunk: JsonObject): String? {
+        chunk["error"]?.takeIf { it !is JsonNull }?.let { throw ChatModelException("API error ${describe(it, "no message")}") }
+        // The chunk with the usage has no choices.
+        (chunk["usage"] as? JsonObject)?.let { usage = it }
+        val choice = (chunk["choices"] as? JsonArray).orEmpty().firstOrNull() as? JsonObject ?: return null
+        choice.string("finish_reason")?.let { finishReason = it }
+        val delta = choice["delta"] as? JsonObject ?: return null
+        delta.string("refusal")?.let { refusal.append(it) }
+        (delta["tool_calls"] as? JsonArray).orEmpty().filterIsInstance<JsonObject>().forEach(::addCall)
+        return delta.string("content")?.takeIf { it.isNotEmpty() }?.also { content.append(it) }
+    }
+
+    /**
+     * The first chunk of a call has its id and its name, and the later ones only its index and the
+     * next piece of its input. Some servers give every call the same index, or none: there, a chunk
+     * with another id starts another call.
+     */
+    private fun addCall(piece: JsonObject) {
+        val index = (piece["index"] as? JsonPrimitive)?.intOrNull ?: 0
+        val id = piece.string("id")?.takeIf { it.isNotEmpty() }
+        val known = positions[index]?.let { calls[it] }?.takeIf { id == null || it.id == null || it.id == id }
+        val call =
+            known ?: Call(id).also {
+                positions[index] = calls.size
+                calls += it
+            }
+        val function = piece["function"] as? JsonObject
+        function.string("name")?.let { call.name += it }
+        when (val arguments = function?.get("arguments")) {
+            is JsonObject -> call.arguments.append(arguments.toString())
+            else -> call.arguments.append(function.string("arguments").orEmpty())
+        }
+    }
+
+    /** @throws ChatModelException when the stream ended before the model's answer did. */
+    fun body(): JsonObject {
+        if (!done && finishReason == null) throw ChatModelException("The API ended its answer before it was complete.")
+        return buildJsonObject {
+            putJsonArray("choices") {
+                addJsonObject {
+                    finishReason?.let { put("finish_reason", it) }
+                    putJsonObject("message") {
+                        put("content", content.toString())
+                        if (refusal.isNotEmpty()) put("refusal", refusal.toString())
+                        putJsonArray("tool_calls") {
+                            calls.forEach { call ->
+                                addJsonObject {
+                                    call.id?.let { put("id", it) }
+                                    putJsonObject("function") {
+                                        put("name", call.name)
+                                        put("arguments", call.arguments.toString())
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            usage?.let { put("usage", it) }
+        }
+    }
+}
+
+/** Returns [text] as a JSON object, or `null` when it is not one. */
+private fun parse(text: String): JsonObject? =
+    try {
+        Json.parseToJsonElement(text) as? JsonObject
+    } catch (_: SerializationException) {
+        null
+    }
+
+/** Describes the `error` of a response: its type or code and its message, or [fallback] when it has neither. */
+private fun describe(error: JsonElement?, fallback: String): String {
+    val details = error as? JsonObject
+    val kind = details.string("type") ?: details.string("code") ?: "unknown"
+    val message = details.string("message") ?: (error as? JsonPrimitive)?.contentOrNull ?: fallback
+    return "($kind): $message"
+}
+
+/**
+ * Returns the conversation of [request] as the messages of the Chat Completions API: the
+ * instructions first, as a system message, and every tool result as a message of its own.
+ */
+private fun messages(request: ChatRequest): JsonArray =
+    buildJsonArray {
+        request.system?.let { system ->
+            addJsonObject {
+                put("role", "system")
+                put("content", system)
+            }
+        }
+        for (message in request.messages) {
+            when (message) {
+                is ChatMessage.User ->
+                    addJsonObject {
+                        put("role", "user")
+                        put("content", message.text)
+                    }
+                is ChatMessage.Assistant -> {
+                    // The API rejects an assistant message that says nothing and asks for nothing.
+                    if (message.text.isEmpty() && message.toolCalls.isEmpty()) continue
+                    addJsonObject {
+                        put("role", "assistant")
+                        // A message that only asks for tools has no text, which the API writes as null.
+                        put("content", if (message.text.isEmpty()) JsonNull else JsonPrimitive(message.text))
+                        if (message.toolCalls.isNotEmpty()) {
+                            putJsonArray("tool_calls") {
+                                message.toolCalls.forEach { call ->
+                                    addJsonObject {
+                                        put("id", call.id)
+                                        put("type", "function")
+                                        putJsonObject("function") {
+                                            put("name", call.name)
+                                            // The API takes the input as JSON in a string.
+                                            put("arguments", call.input.toString())
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                is ChatMessage.ToolResult ->
+                    addJsonObject {
+                        put("role", "tool")
+                        put("tool_call_id", message.toolCallId)
+                        put("content", message.text)
+                    }
+            }
+        }
+    }
+
+/** The text of a message: a string, or for some servers a list of parts with a `text` each. */
+private fun text(content: JsonElement?): String =
+    when (content) {
+        is JsonPrimitive -> content.contentOrNull.orEmpty()
+        is JsonArray -> content.filterIsInstance<JsonObject>().joinToString("") { it.string("text").orEmpty() }
+        else -> ""
+    }
+
+/**
+ * The input of a tool call: JSON in a string, or for some servers a JSON object. A call that was
+ * cut off has input that is not JSON yet, and gets an empty input.
+ */
+private fun input(arguments: JsonElement?): JsonObject =
+    when (arguments) {
+        is JsonObject -> arguments
+        is JsonPrimitive -> arguments.contentOrNull?.let(::parse) ?: JsonObject(emptyMap())
+        else -> JsonObject(emptyMap())
+    }
+
+private fun JsonObject?.string(key: String): String? = (this?.get(key) as? JsonPrimitive)?.contentOrNull
+
+private fun JsonObject.int(key: String): Int = (this[key] as? JsonPrimitive)?.intOrNull ?: 0
+
+private fun JsonArray?.orEmpty(): List<JsonElement> = this ?: emptyList()

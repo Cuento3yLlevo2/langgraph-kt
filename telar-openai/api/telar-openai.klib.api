@@ -1,0 +1,23 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, linuxArm64, linuxX64, macosArm64, mingwX64, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <telar:telar-openai>
+final class dev.deeptelar.telar.openai/OpenAiChatModel : dev.deeptelar.telar.agent/ChatModel { // dev.deeptelar.telar.openai/OpenAiChatModel|null[0]
+    constructor <init>(io.ktor.client/HttpClient, kotlin/String?, kotlin/String, kotlinx.serialization.json/JsonObject = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ..., kotlin/String = ...) // dev.deeptelar.telar.openai/OpenAiChatModel.<init>|<init>(io.ktor.client.HttpClient;kotlin.String?;kotlin.String;kotlinx.serialization.json.JsonObject;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.String){}[0]
+
+    final fun stream(dev.deeptelar.telar.agent/ChatRequest): kotlinx.coroutines.flow/Flow<dev.deeptelar.telar.agent/ChatEvent> // dev.deeptelar.telar.openai/OpenAiChatModel.stream|stream(dev.deeptelar.telar.agent.ChatRequest){}[0]
+    final suspend fun chat(dev.deeptelar.telar.agent/ChatRequest): dev.deeptelar.telar.agent/ChatResponse // dev.deeptelar.telar.openai/OpenAiChatModel.chat|chat(dev.deeptelar.telar.agent.ChatRequest){}[0]
+
+    final object Companion { // dev.deeptelar.telar.openai/OpenAiChatModel.Companion|null[0]
+        final const val OLLAMA_BASE_URL // dev.deeptelar.telar.openai/OpenAiChatModel.Companion.OLLAMA_BASE_URL|{}OLLAMA_BASE_URL[0]
+            final fun <get-OLLAMA_BASE_URL>(): kotlin/String // dev.deeptelar.telar.openai/OpenAiChatModel.Companion.OLLAMA_BASE_URL.<get-OLLAMA_BASE_URL>|<get-OLLAMA_BASE_URL>(){}[0]
+        final const val OPENAI_BASE_URL // dev.deeptelar.telar.openai/OpenAiChatModel.Companion.OPENAI_BASE_URL|{}OPENAI_BASE_URL[0]
+            final fun <get-OPENAI_BASE_URL>(): kotlin/String // dev.deeptelar.telar.openai/OpenAiChatModel.Companion.OPENAI_BASE_URL.<get-OPENAI_BASE_URL>|<get-OPENAI_BASE_URL>(){}[0]
+
+        final fun ollama(io.ktor.client/HttpClient, kotlin/String, kotlinx.serialization.json/JsonObject = ..., kotlin/String = ...): dev.deeptelar.telar.openai/OpenAiChatModel // dev.deeptelar.telar.openai/OpenAiChatModel.Companion.ollama|ollama(io.ktor.client.HttpClient;kotlin.String;kotlinx.serialization.json.JsonObject;kotlin.String){}[0]
+    }
+}
