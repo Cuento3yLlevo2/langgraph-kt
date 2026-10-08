@@ -1,5 +1,6 @@
 package dev.deeptelar.telar.agent
 
+import dev.deeptelar.telar.END
 import dev.deeptelar.telar.GraphEvent
 import dev.deeptelar.telar.NodeExecutionException
 import dev.deeptelar.telar.START
@@ -159,4 +160,20 @@ class ChatStreamTest {
         assertNull(GraphEvent.NodeProgress(1, "download", "2 of 5", state).textDelta)
         assertNull(GraphEvent.NodeStarted(1, "model", state).textDelta)
     }
+
+    @Test
+    fun `the text of an agent that runs as a subgraph is read from the stream around it`() =
+        runTest {
+            val agent = toolAgent(PiecewiseModel(pieces("5 ", "minutes")))
+            val around =
+                StateGraph<AgentState> {
+                    START then subgraph("agent", agent) then END
+                }.compile()
+
+            val events = around.stream(AgentState("Where is my pizza?")).toList()
+
+            assertEquals(listOf("5 ", "minutes"), events.mapNotNull { it.textDelta })
+            assertEquals(setOf("agent"), events.filterIsInstance<GraphEvent.SubgraphEvent<AgentState>>().map { it.node }.toSet())
+            assertNull(GraphEvent.SubgraphEvent(1, "agent", GraphEvent.NodeStarted(1, "model", AgentState()), AgentState()).textDelta)
+        }
 }

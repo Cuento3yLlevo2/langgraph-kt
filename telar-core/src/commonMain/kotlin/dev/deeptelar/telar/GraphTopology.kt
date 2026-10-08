@@ -9,11 +9,14 @@ package dev.deeptelar.telar
  * targets of conditional edges, and an edge to [END] for each node that has no outgoing edge.
  * @property dynamicRoutes the nodes whose conditional edge declares no targets. Such a node can
  * route to any node or to [END], so it has no entries in [edges].
+ * @property subgraphs the structure of the graph that a node added with [StateGraph.subgraph] runs,
+ * by the name of that node. The node is in [nodes] and [edges] like any other.
  */
 public data class GraphTopology(
     val nodes: List<String>,
     val edges: List<GraphEdge>,
     val dynamicRoutes: Set<String>,
+    val subgraphs: Map<String, GraphTopology> = emptyMap(),
 ) {
     /** The nodes (or [END]) that [node] can lead to according to [edges]. */
     public fun successors(node: String): List<String> = edges.filter { it.from == node }.map { it.to }

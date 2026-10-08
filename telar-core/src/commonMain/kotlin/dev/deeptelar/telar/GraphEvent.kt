@@ -9,7 +9,8 @@ import kotlinx.coroutines.flow.map
  *
  * For every executed step a stream emits a [NodeStarted] for each node of the step, a
  * [NodeCompleted] as each of them finishes, and then one [StepCompleted]. While a node runs, it can
- * add [NodeProgress] events of its own. A stream always ends with exactly one [Completed] or
+ * add [NodeProgress] events of its own, and a node that runs a subgraph adds a [SubgraphEvent] for
+ * every event of that graph. A stream always ends with exactly one [Completed] or
  * [Interrupted]. When a node calls [interrupt], [Interrupted] comes right after the events of the
  * nodes that had started, without a [StepCompleted].
  */
@@ -42,6 +43,43 @@ public sealed interface GraphEvent<out State> {
         val value: Any,
         override val state: State,
     ) : GraphEvent<State>
+
+    /**
+     * [event] happened inside the subgraph that [node] runs in [step]. A subgraph sends every event
+     * that a stream of its own would have, from the [NodeStarted] of its first node to its
+     * [Completed] or [Interrupted], and they arrive after the [NodeStarted] of [node] and before
+     * its [NodeCompleted]. The steps inside [event] are those of the subgraph, which start at 1 on
+     * every visit.
+     *
+     * ```kotlin
+     * graph.stream(case, config).collect { event ->
+     *     if (event is GraphEvent.SubgraphEvent) {
+     *         val inside = event.event
+     *         if (inside is GraphEvent.NodeStarted) println("${event.node} > ${inside.node} started")
+     *     }
+     * }
+     * ```
+     *
+     * When the subgraph has a subgraph of its own, [event] is a [SubgraphEvent] again. [innermost]
+     * and [path] read through the layers.
+     *
+     * @property event what happened in the subgraph. Its state is the state of the subgraph.
+     * @property state the state the node received, in the type of this graph.
+     */
+    public data class SubgraphEvent<out State>(
+        val step: Int,
+        val node: String,
+        val event: GraphEvent<*>,
+        override val state: State,
+    ) : GraphEvent<State> {
+        /** The nodes that lead to [innermost], from [node] inwards: one name for each subgraph. */
+        public val path: List<String>
+            get() = generateSequence<SubgraphEvent<*>>(this) { it.event as? SubgraphEvent<*> }.map { it.node }.toList()
+
+        /** The event that is not a [SubgraphEvent]: [event], or the one inside it when subgraphs are nested. */
+        public val innermost: GraphEvent<*>
+            get() = generateSequence<SubgraphEvent<*>>(this) { it.event as? SubgraphEvent<*> }.last().event
+    }
 
     /**
      * [node] finished in [step]. [state] is what the node returned, or for a node with a `work` and

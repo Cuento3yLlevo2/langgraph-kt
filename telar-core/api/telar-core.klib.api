@@ -132,6 +132,32 @@ sealed interface <#A: out kotlin/Any?> dev.deeptelar.telar/GraphEvent { // dev.d
         final fun hashCode(): kotlin/Int // dev.deeptelar.telar/GraphEvent.StepCompleted.hashCode|hashCode(){}[0]
         final fun toString(): kotlin/String // dev.deeptelar.telar/GraphEvent.StepCompleted.toString|toString(){}[0]
     }
+
+    final class <#A1: out kotlin/Any?> SubgraphEvent : dev.deeptelar.telar/GraphEvent<#A1> { // dev.deeptelar.telar/GraphEvent.SubgraphEvent|null[0]
+        constructor <init>(kotlin/Int, kotlin/String, dev.deeptelar.telar/GraphEvent<*>, #A1) // dev.deeptelar.telar/GraphEvent.SubgraphEvent.<init>|<init>(kotlin.Int;kotlin.String;dev.deeptelar.telar.GraphEvent<*>;1:0){}[0]
+
+        final val event // dev.deeptelar.telar/GraphEvent.SubgraphEvent.event|{}event[0]
+            final fun <get-event>(): dev.deeptelar.telar/GraphEvent<*> // dev.deeptelar.telar/GraphEvent.SubgraphEvent.event.<get-event>|<get-event>(){}[0]
+        final val innermost // dev.deeptelar.telar/GraphEvent.SubgraphEvent.innermost|{}innermost[0]
+            final fun <get-innermost>(): dev.deeptelar.telar/GraphEvent<*> // dev.deeptelar.telar/GraphEvent.SubgraphEvent.innermost.<get-innermost>|<get-innermost>(){}[0]
+        final val node // dev.deeptelar.telar/GraphEvent.SubgraphEvent.node|{}node[0]
+            final fun <get-node>(): kotlin/String // dev.deeptelar.telar/GraphEvent.SubgraphEvent.node.<get-node>|<get-node>(){}[0]
+        final val path // dev.deeptelar.telar/GraphEvent.SubgraphEvent.path|{}path[0]
+            final fun <get-path>(): kotlin.collections/List<kotlin/String> // dev.deeptelar.telar/GraphEvent.SubgraphEvent.path.<get-path>|<get-path>(){}[0]
+        final val state // dev.deeptelar.telar/GraphEvent.SubgraphEvent.state|{}state[0]
+            final fun <get-state>(): #A1 // dev.deeptelar.telar/GraphEvent.SubgraphEvent.state.<get-state>|<get-state>(){}[0]
+        final val step // dev.deeptelar.telar/GraphEvent.SubgraphEvent.step|{}step[0]
+            final fun <get-step>(): kotlin/Int // dev.deeptelar.telar/GraphEvent.SubgraphEvent.step.<get-step>|<get-step>(){}[0]
+
+        final fun component1(): kotlin/Int // dev.deeptelar.telar/GraphEvent.SubgraphEvent.component1|component1(){}[0]
+        final fun component2(): kotlin/String // dev.deeptelar.telar/GraphEvent.SubgraphEvent.component2|component2(){}[0]
+        final fun component3(): dev.deeptelar.telar/GraphEvent<*> // dev.deeptelar.telar/GraphEvent.SubgraphEvent.component3|component3(){}[0]
+        final fun component4(): #A1 // dev.deeptelar.telar/GraphEvent.SubgraphEvent.component4|component4(){}[0]
+        final fun copy(kotlin/Int = ..., kotlin/String = ..., dev.deeptelar.telar/GraphEvent<*> = ..., #A1 = ...): dev.deeptelar.telar/GraphEvent.SubgraphEvent<#A1> // dev.deeptelar.telar/GraphEvent.SubgraphEvent.copy|copy(kotlin.Int;kotlin.String;dev.deeptelar.telar.GraphEvent<*>;1:0){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // dev.deeptelar.telar/GraphEvent.SubgraphEvent.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // dev.deeptelar.telar/GraphEvent.SubgraphEvent.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // dev.deeptelar.telar/GraphEvent.SubgraphEvent.toString|toString(){}[0]
+    }
 }
 
 sealed interface <#A: out kotlin/Any?> dev.deeptelar.telar/GraphResult { // dev.deeptelar.telar/GraphResult|null[0]
@@ -314,7 +340,7 @@ final class dev.deeptelar.telar/GraphEdge { // dev.deeptelar.telar/GraphEdge|nul
 }
 
 final class dev.deeptelar.telar/GraphTopology { // dev.deeptelar.telar/GraphTopology|null[0]
-    constructor <init>(kotlin.collections/List<kotlin/String>, kotlin.collections/List<dev.deeptelar.telar/GraphEdge>, kotlin.collections/Set<kotlin/String>) // dev.deeptelar.telar/GraphTopology.<init>|<init>(kotlin.collections.List<kotlin.String>;kotlin.collections.List<dev.deeptelar.telar.GraphEdge>;kotlin.collections.Set<kotlin.String>){}[0]
+    constructor <init>(kotlin.collections/List<kotlin/String>, kotlin.collections/List<dev.deeptelar.telar/GraphEdge>, kotlin.collections/Set<kotlin/String>, kotlin.collections/Map<kotlin/String, dev.deeptelar.telar/GraphTopology> = ...) // dev.deeptelar.telar/GraphTopology.<init>|<init>(kotlin.collections.List<kotlin.String>;kotlin.collections.List<dev.deeptelar.telar.GraphEdge>;kotlin.collections.Set<kotlin.String>;kotlin.collections.Map<kotlin.String,dev.deeptelar.telar.GraphTopology>){}[0]
 
     final val dynamicRoutes // dev.deeptelar.telar/GraphTopology.dynamicRoutes|{}dynamicRoutes[0]
         final fun <get-dynamicRoutes>(): kotlin.collections/Set<kotlin/String> // dev.deeptelar.telar/GraphTopology.dynamicRoutes.<get-dynamicRoutes>|<get-dynamicRoutes>(){}[0]
@@ -322,11 +348,14 @@ final class dev.deeptelar.telar/GraphTopology { // dev.deeptelar.telar/GraphTopo
         final fun <get-edges>(): kotlin.collections/List<dev.deeptelar.telar/GraphEdge> // dev.deeptelar.telar/GraphTopology.edges.<get-edges>|<get-edges>(){}[0]
     final val nodes // dev.deeptelar.telar/GraphTopology.nodes|{}nodes[0]
         final fun <get-nodes>(): kotlin.collections/List<kotlin/String> // dev.deeptelar.telar/GraphTopology.nodes.<get-nodes>|<get-nodes>(){}[0]
+    final val subgraphs // dev.deeptelar.telar/GraphTopology.subgraphs|{}subgraphs[0]
+        final fun <get-subgraphs>(): kotlin.collections/Map<kotlin/String, dev.deeptelar.telar/GraphTopology> // dev.deeptelar.telar/GraphTopology.subgraphs.<get-subgraphs>|<get-subgraphs>(){}[0]
 
     final fun component1(): kotlin.collections/List<kotlin/String> // dev.deeptelar.telar/GraphTopology.component1|component1(){}[0]
     final fun component2(): kotlin.collections/List<dev.deeptelar.telar/GraphEdge> // dev.deeptelar.telar/GraphTopology.component2|component2(){}[0]
     final fun component3(): kotlin.collections/Set<kotlin/String> // dev.deeptelar.telar/GraphTopology.component3|component3(){}[0]
-    final fun copy(kotlin.collections/List<kotlin/String> = ..., kotlin.collections/List<dev.deeptelar.telar/GraphEdge> = ..., kotlin.collections/Set<kotlin/String> = ...): dev.deeptelar.telar/GraphTopology // dev.deeptelar.telar/GraphTopology.copy|copy(kotlin.collections.List<kotlin.String>;kotlin.collections.List<dev.deeptelar.telar.GraphEdge>;kotlin.collections.Set<kotlin.String>){}[0]
+    final fun component4(): kotlin.collections/Map<kotlin/String, dev.deeptelar.telar/GraphTopology> // dev.deeptelar.telar/GraphTopology.component4|component4(){}[0]
+    final fun copy(kotlin.collections/List<kotlin/String> = ..., kotlin.collections/List<dev.deeptelar.telar/GraphEdge> = ..., kotlin.collections/Set<kotlin/String> = ..., kotlin.collections/Map<kotlin/String, dev.deeptelar.telar/GraphTopology> = ...): dev.deeptelar.telar/GraphTopology // dev.deeptelar.telar/GraphTopology.copy|copy(kotlin.collections.List<kotlin.String>;kotlin.collections.List<dev.deeptelar.telar.GraphEdge>;kotlin.collections.Set<kotlin.String>;kotlin.collections.Map<kotlin.String,dev.deeptelar.telar.GraphTopology>){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // dev.deeptelar.telar/GraphTopology.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // dev.deeptelar.telar/GraphTopology.hashCode|hashCode(){}[0]
     final fun successors(kotlin/String): kotlin.collections/List<kotlin/String> // dev.deeptelar.telar/GraphTopology.successors|successors(kotlin.String){}[0]

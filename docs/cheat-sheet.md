@@ -71,7 +71,8 @@ val payout = subgraph(
 ```
 
 A node of the subgraph can pause the run with `interrupt`, and `resume` continues inside the
-subgraph. With the same state class on both sides: `subgraph("payout", payoutGraph)`.
+subgraph. A stream has the events of the subgraph as `GraphEvent.SubgraphEvent`, and
+`topology.subgraphs` has its nodes and edges. With the same state class on both sides: `subgraph("payout", payoutGraph)`.
 
 ## Running a graph
 
@@ -125,6 +126,7 @@ val pay = node("pay") { ticket ->
 |---|---|
 | `GraphEvent.NodeStarted` | A node is about to run |
 | `GraphEvent.NodeProgress` | A running node called `reportProgress(value)` |
+| `GraphEvent.SubgraphEvent` | Something happened in the subgraph a node runs: `event.event` is the event of that graph |
 | `GraphEvent.NodeCompleted` | A node finished |
 | `GraphEvent.StepCompleted` | All nodes of a step finished |
 | `GraphEvent.Interrupted` | The run paused. Last event. |

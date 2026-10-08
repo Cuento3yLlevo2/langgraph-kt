@@ -88,7 +88,8 @@ class SubgraphTest {
                     GraphEvent.StepCompleted(1, listOf("research"), Request("wasm", reply = "found wasm, approved")),
                     GraphEvent.Completed(Request("wasm", reply = "found wasm, approved")),
                 ),
-                quick.stream(Request("wasm")).toList(),
+                // The three steps of the subgraph are one step here.
+                quick.stream(Request("wasm")).toList().filterNot { it is GraphEvent.SubgraphEvent },
             )
         }
 
@@ -137,42 +138,175 @@ class SubgraphTest {
         }
 
     @Test
-    fun `a stream of the graph around ends with Interrupted`() =
-        runTest {
-            val events = app.stream(Request("wasm"), config).toList()
-
-            assertEquals(
-                listOf(
-                    GraphEvent.NodeStarted(2, "research", Request("wasm", research = Study("wasm"))),
-                    GraphEvent.Interrupted(Request("wasm", research = asked), listOf("research")),
-                ),
-                events.takeLast(2),
-            )
-        }
-
-    @Test
-    fun `what a node of the subgraph reports is progress of the subgraph node`() =
+    fun `a stream has the events of the subgraph between the start and the end of its node`() =
         runTest {
             val reporting =
                 StateGraph<TestState> {
-                    START then
+                    val count =
                         node("count") {
                             reportProgress("counting")
                             it.copy(count = it.count + 1)
-                        } then END
+                        }
+                    val double = node("double") { it.copy(count = it.count * 2) }
+
+                    START then count then double then END
                 }.compile()
             val around = StateGraph<TestState> { START then subgraph("inner", reporting) then END }.compile()
+
+            fun inside(event: GraphEvent<TestState>) = GraphEvent.SubgraphEvent(1, "inner", event, TestState(0))
 
             assertEquals(
                 listOf(
                     GraphEvent.NodeStarted(1, "inner", TestState(0)),
-                    GraphEvent.NodeProgress(1, "inner", "counting", TestState(0)),
-                    GraphEvent.NodeCompleted(1, "inner", TestState(1)),
-                    GraphEvent.StepCompleted(1, listOf("inner"), TestState(1)),
-                    GraphEvent.Completed(TestState(1)),
+                    inside(GraphEvent.NodeStarted(1, "count", TestState(0))),
+                    inside(GraphEvent.NodeProgress(1, "count", "counting", TestState(0))),
+                    inside(GraphEvent.NodeCompleted(1, "count", TestState(1))),
+                    inside(GraphEvent.StepCompleted(1, listOf("count"), TestState(1))),
+                    inside(GraphEvent.NodeStarted(2, "double", TestState(1))),
+                    inside(GraphEvent.NodeCompleted(2, "double", TestState(2))),
+                    inside(GraphEvent.StepCompleted(2, listOf("double"), TestState(2))),
+                    inside(GraphEvent.Completed(TestState(2))),
+                    GraphEvent.NodeCompleted(1, "inner", TestState(2)),
+                    GraphEvent.StepCompleted(1, listOf("inner"), TestState(2)),
+                    GraphEvent.Completed(TestState(2)),
                 ),
                 around.stream(TestState(0)).toList(),
             )
+        }
+
+    @Test
+    fun `the events of a subgraph carry its own state type`() =
+        runTest {
+            val events = app.stream(Request("wasm"), config).toList()
+            val received = Request("wasm", research = Study("wasm"))
+
+            assertEquals(
+                listOf(
+                    GraphEvent.NodeStarted(2, "research", received),
+                    GraphEvent.SubgraphEvent(2, "research", GraphEvent.NodeStarted(1, "search", Study("wasm")), received),
+                ),
+                events.filter { (it as? GraphEvent.NodeStarted)?.node == "research" || it is GraphEvent.SubgraphEvent }.take(2),
+            )
+        }
+
+    @Test
+    fun `a pause inside a subgraph ends its events and then the stream with Interrupted`() =
+        runTest {
+            val events = app.stream(Request("wasm"), config).toList()
+            val received = Request("wasm", research = Study("wasm"))
+
+            assertEquals(
+                listOf(
+                    GraphEvent.SubgraphEvent(2, "research", GraphEvent.NodeStarted(2, "ask", asked.copy(question = null)), received),
+                    GraphEvent.SubgraphEvent(2, "research", GraphEvent.Interrupted(asked, listOf("ask")), received),
+                    GraphEvent.Interrupted(Request("wasm", research = asked), listOf("research")),
+                ),
+                events.takeLast(3),
+            )
+        }
+
+    @Test
+    fun `a resumed stream has the events of the subgraph from the node that paused`() =
+        runTest {
+            app.invoke(Request("wasm"), config)
+
+            val events = app.streamResume(config) { it.copy(research = it.research.copy(approved = true)) }.toList()
+
+            assertEquals(
+                listOf("ask", "sum"),
+                events
+                    .filterIsInstance<GraphEvent.SubgraphEvent<Request>>()
+                    .mapNotNull { (it.event as? GraphEvent.NodeStarted)?.node },
+            )
+            assertEquals(1, searches)
+        }
+
+    @Test
+    fun `the events of subgraphs that run in the same step each name their node`() =
+        runTest {
+            val one = StateGraph<TestState> { START then node("work") { it.copy(count = it.count + 1) } then END }.compile()
+            val around =
+                StateGraph<TestState> {
+                    val left =
+                        subgraph("left", one, state = { it }, update = { state, result ->
+                            state.copy(
+                                count =
+                                    state.count + result.count,
+                            )
+                        })
+                    val right =
+                        subgraph("right", one, state = { it }, update = { state, result ->
+                            state.copy(
+                                count =
+                                    state.count + result.count,
+                            )
+                        })
+
+                    START then left
+                    START then right
+                }.compile()
+
+            val events = around.stream(TestState(0)).toList()
+
+            for (name in listOf("left", "right")) {
+                assertEquals(
+                    listOf(
+                        GraphEvent.NodeStarted(1, "work", TestState(0)),
+                        GraphEvent.NodeCompleted(1, "work", TestState(1)),
+                        GraphEvent.StepCompleted(1, listOf("work"), TestState(1)),
+                        GraphEvent.Completed(TestState(1)),
+                    ),
+                    events.filterIsInstance<GraphEvent.SubgraphEvent<TestState>>().filter { it.node == name }.map { it.event },
+                )
+            }
+            assertEquals(GraphEvent.Completed(TestState(2)), events.last())
+        }
+
+    @Test
+    fun `the events of a nested subgraph are wrapped once for every graph around it`() =
+        runTest {
+            val inner = StateGraph<TestState> { START then node("leaf") { it.copy(count = it.count + 1) } then END }.compile()
+            val middle = StateGraph<TestState> { START then subgraph("inner", inner) then END }.compile()
+            val outer = StateGraph<TestState> { START then subgraph("middle", middle) then END }.compile()
+
+            val nested =
+                outer
+                    .stream(TestState(0))
+                    .toList()
+                    .filterIsInstance<GraphEvent.SubgraphEvent<TestState>>()
+                    .first { it.innermost == GraphEvent.NodeStarted(1, "leaf", TestState(0)) }
+
+            assertEquals(
+                GraphEvent.SubgraphEvent(
+                    1,
+                    "middle",
+                    GraphEvent.SubgraphEvent(1, "inner", GraphEvent.NodeStarted(1, "leaf", TestState(0)), TestState(0)),
+                    TestState(0),
+                ),
+                nested,
+            )
+            assertEquals(listOf("middle", "inner"), nested.path)
+        }
+
+    @Test
+    fun `a subgraph that is not streamed runs without events`() =
+        runTest {
+            var collected: Boolean? = null
+            val inner =
+                StateGraph<TestState> {
+                    START then
+                        node("look") {
+                            collected = isProgressCollected()
+                            it
+                        } then END
+                }.compile()
+            val around = StateGraph<TestState> { START then subgraph("inner", inner) then END }.compile()
+
+            around.invoke(TestState(0))
+            assertEquals(false, collected)
+
+            around.stream(TestState(0)).toList()
+            assertEquals(true, collected)
         }
 
     @Test

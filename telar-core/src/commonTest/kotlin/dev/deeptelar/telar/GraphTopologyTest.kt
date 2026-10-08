@@ -82,4 +82,26 @@ class GraphTopologyTest {
         assertEquals(listOf("join"), topology.successors("a"))
         assertEquals(listOf("join"), topology.successors("b"))
     }
+
+    @Test
+    fun `a subgraph is a node with the topology of its graph`() {
+        val inner =
+            StateGraph<TestState> {
+                val a = node("a") { it }
+                val b = node("b") { it }
+                START then a then b then END
+            }.compile()
+        val middle = StateGraph<TestState> { START then subgraph("inner", inner) then END }.compile()
+        val topology =
+            StateGraph<TestState> {
+                val first = node("first") { it }
+                START then first then subgraph("middle", middle) then END
+            }.compile().topology
+
+        assertEquals(listOf("first", "middle"), topology.nodes)
+        assertEquals(listOf(GraphEdge(START, "first"), GraphEdge("first", "middle"), GraphEdge("middle", END)), topology.edges)
+        assertEquals(setOf("middle"), topology.subgraphs.keys)
+        assertEquals(mapOf("inner" to inner.topology), topology.subgraphs.getValue("middle").subgraphs)
+        assertEquals(emptyMap(), inner.topology.subgraphs)
+    }
 }

@@ -119,14 +119,20 @@ public suspend fun ChatModel.chatWithProgress(prompt: String, system: String? = 
 
 /**
  * The piece of text a model wrote, when this event is a node's report of one, and `null` for every
- * other event. [toolLoop] and [chatWithProgress] report these.
+ * other event. [toolLoop] and [chatWithProgress] report these. A report from inside a subgraph is
+ * read as well.
  *
  * ```kotlin
  * agent.stream(AgentState("Where is my pizza?")).collect { event -> event.textDelta?.let(::print) }
  * ```
  */
 public val GraphEvent<*>.textDelta: String?
-    get() = ((this as? GraphEvent.NodeProgress<*>)?.value as? ChatEvent.TextDelta)?.text
+    get() =
+        when (this) {
+            is GraphEvent.NodeProgress<*> -> (value as? ChatEvent.TextDelta)?.text
+            is GraphEvent.SubgraphEvent<*> -> innermost.textDelta
+            else -> null
+        }
 
 /**
  * Sends [prompt] as a single user message and returns the text of the answer, for a node that only
