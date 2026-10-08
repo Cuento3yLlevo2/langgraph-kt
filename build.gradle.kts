@@ -9,11 +9,13 @@ dependencies {
     dokka(project(":telar-checkpoint-browser"))
     dokka(project(":telar-agent"))
     dokka(project(":telar-anthropic"))
+    dokka(project(":telar-openai"))
     dokka(project(":telar-langchain4j"))
     kover(project(":telar-core"))
     kover(project(":telar-serialization"))
     kover(project(":telar-checkpoint-file"))
     kover(project(":telar-agent"))
     kover(project(":telar-anthropic"))
+    kover(project(":telar-openai"))
     kover(project(":telar-langchain4j"))
 }

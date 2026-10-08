@@ -22,7 +22,8 @@ dependencies {
     implementation(project(":telar-langchain4j"))
     implementation(project(":telar-agent"))
     implementation(project(":telar-anthropic"))
-    // The Ktor engine that AnthropicChatModel sends its requests with.
+    implementation(project(":telar-openai"))
+    // The Ktor engine that AnthropicChatModel and OpenAiChatModel send their requests with.
     implementation(libs.ktor.client.cio)
 
     testImplementation(kotlin("test"))

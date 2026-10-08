@@ -154,7 +154,7 @@ agent.invoke(state.withUserMessage("And two?"))  // the next turn of the convers
 
 | You want | You write |
 |---|---|
-| A model | `AnthropicChatModel(...)`, `LangChain4jChatModel(...)`, or `ChatModel { request -> ... }` |
+| A model | `AnthropicChatModel(...)`, `OpenAiChatModel(...)`, `OpenAiChatModel.ollama(...)`, `LangChain4jChatModel(...)`, or `ChatModel { request -> ... }` |
 | One text from a model, in any node | `model.chat("...")` |
 | The agent inside your own graph | `toolLoop(model, tools, messages = { ... }, append = { state, new -> ... })` |
 | A conversation that starts from other fields of the state | `toolLoop(..., firstMessage = { state -> "..." })` |

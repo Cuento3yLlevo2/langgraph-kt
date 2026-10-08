@@ -271,17 +271,24 @@ Build a real `ChatModel` and pass it in. Nothing else changes.
 // Claude, on every platform. From the module telar-anthropic; HttpClient is the Ktor client.
 val model: ChatModel = AnthropicChatModel(HttpClient(), apiKey = System.getenv("ANTHROPIC_API_KEY"), model = "claude-opus-5-5")
 
+// OpenAI, on every platform. From the module telar-openai.
+val model: ChatModel = OpenAiChatModel(HttpClient(), apiKey = System.getenv("OPENAI_API_KEY"), model = "gpt-5")
+
+// A model that Ollama runs on your own machine. No account and no key. Also from telar-openai.
+val model: ChatModel = OpenAiChatModel.ollama(HttpClient(), model = "llama3.2")
+
 // Most other models, on the JVM, through LangChain4j. From the module telar-langchain4j.
-val model: ChatModel = LangChain4jChatModel(OpenAiChatModel.builder().apiKey(System.getenv("OPENAI_API_KEY")).modelName("gpt-5").build())
+val model: ChatModel = LangChain4jChatModel(GoogleAiGeminiChatModel.builder().apiKey(System.getenv("GEMINI_API_KEY")).modelName("gemini-2.5-flash").build())
 
 val state = helpDesk(model).invoke(AgentState("I'm Ana. Where is my pizza?")).state
 ```
 
-This snippet is not part of the runnable level, because it needs an account and a key. Keep the key
-out of your source code; read it from an environment variable as shown. The
+This snippet is not part of the runnable level, because it needs an account and a key, or a model
+on your machine. Keep the key out of your source code; read it from an environment variable as
+shown. The
 [ToolAgent sample](../samples/src/main/kotlin/dev/deeptelar/telar/samples/ToolAgent.kt) is this help
-desk with Claude: it uses the real model when `ANTHROPIC_API_KEY` is set, and a pretend one when it
-is not. The README has more under [AI models](../README.md#ai-models).
+desk with a real model: Claude when `ANTHROPIC_API_KEY` is set, OpenAI when `OPENAI_API_KEY` is set,
+a model of Ollama when `OLLAMA_MODEL` names one, and a pretend one otherwise. The README has more under [AI models](../README.md#ai-models).
 
 ### What changes when the model is real
 

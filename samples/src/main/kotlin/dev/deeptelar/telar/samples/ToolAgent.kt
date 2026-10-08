@@ -13,6 +13,7 @@ import dev.deeptelar.telar.agent.pendingToolCalls
 import dev.deeptelar.telar.agent.textDelta
 import dev.deeptelar.telar.agent.toolAgent
 import dev.deeptelar.telar.anthropic.AnthropicChatModel
+import dev.deeptelar.telar.openai.OpenAiChatModel
 import io.ktor.client.HttpClient
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.buildJsonObject
@@ -53,7 +54,8 @@ const val HELP_DESK: String =
  * A help desk agent: the model answers the customer, and looks up orders and prices with the tools
  * as often as it needs to.
  *
- * Pass any [ChatModel]: `AnthropicChatModel` on every platform, or `LangChain4jChatModel` on the JVM.
+ * Pass any [ChatModel]: `AnthropicChatModel` or `OpenAiChatModel` on every platform, or
+ * `LangChain4jChatModel` on the JVM.
  */
 fun helpDeskAgent(model: ChatModel): CompiledGraph<AgentState> =
     toolAgent(model, tools = listOf(orderStatus, menuPrice), system = HELP_DESK)
@@ -83,12 +85,27 @@ val scriptedModel: ChatModel =
         )
     }
 
-/** Set ANTHROPIC_API_KEY to let Claude answer. Without it, the scripted model does. */
+/**
+ * The model that the environment asks for: Claude with ANTHROPIC_API_KEY, OpenAI with OPENAI_API_KEY
+ * (OPENAI_MODEL names another model than gpt-5), or the model of a local Ollama that OLLAMA_MODEL
+ * names. Without any of them, the scripted model answers.
+ */
+fun modelFor(client: HttpClient, environment: Map<String, String> = System.getenv()): ChatModel {
+    fun setting(name: String): String? = environment[name]?.takeIf { it.isNotBlank() }
+    val claudeKey = setting("ANTHROPIC_API_KEY")
+    val openAiKey = setting("OPENAI_API_KEY")
+    val ollamaModel = setting("OLLAMA_MODEL")
+    return when {
+        claudeKey != null -> AnthropicChatModel(client, apiKey = claudeKey, model = "claude-opus-5-5")
+        openAiKey != null -> OpenAiChatModel(client, apiKey = openAiKey, model = setting("OPENAI_MODEL") ?: "gpt-5")
+        ollamaModel != null -> OpenAiChatModel.ollama(client, model = ollamaModel)
+        else -> scriptedModel
+    }
+}
+
 suspend fun main() {
-    val key = System.getenv("ANTHROPIC_API_KEY")
     val client = HttpClient()
-    val model = if (key.isNullOrBlank()) scriptedModel else AnthropicChatModel(client, apiKey = key, model = "claude-opus-5-5")
-    val agent = helpDeskAgent(model)
+    val agent = helpDeskAgent(modelFor(client))
 
     for (question in listOf("I'm Ana. Where is my pizza, and how much is a cola?", "Do you sell tiramisu?")) {
         println("Customer: $question")

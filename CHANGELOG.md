@@ -26,6 +26,12 @@ breaking changes.
 - `GraphTopology.subgraphs`: the nodes and edges of the graph behind each subgraph node.
 - `textDelta` also reads the text of a model that runs inside a subgraph.
 
+- `telar-openai`, a new module for every target. `OpenAiChatModel` calls a model through the Chat
+  Completions API, with tools and streaming. OpenAI is the default, `OpenAiChatModel.ollama` calls a
+  model that Ollama runs on your machine, and `baseUrl` reaches any other server with this API, such
+  as LM Studio, vLLM, Groq or OpenRouter. Before, these models were reached through LangChain4j, on
+  the JVM only.
+
 ### Changed
 
 - `Checkpoint` has a fifth property, `subgraphs`: where a paused run stands inside its subgraphs.

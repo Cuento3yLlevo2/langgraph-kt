@@ -44,6 +44,7 @@ Chrome. Install Chrome or Chromium, and set `CHROME_BIN` to its path if it is no
 | `telar-checkpoint-browser` | `LocalStorageCheckpointer` for web apps (JS and Wasm in a browser) |
 | `telar-agent` | `ChatModel`, tools and the tool-calling agent loop (multiplatform) |
 | `telar-anthropic` | `AnthropicChatModel`, Claude through Ktor (multiplatform) |
+| `telar-openai` | `OpenAiChatModel`, the Chat Completions API of OpenAI, Ollama and others through Ktor (multiplatform) |
 | `telar-langchain4j` | LangChain4j integration (JVM) |
 | `samples` | Runnable examples, not published. `samples/.../tutorial` holds the code of the tutorial |
 | `docs` | The tutorial, one Markdown page per level |

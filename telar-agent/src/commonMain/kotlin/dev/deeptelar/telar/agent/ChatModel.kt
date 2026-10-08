@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.flow
  * needs from a model provider, so a graph written against it runs on every Kotlin target and with
  * any provider.
  *
- * Use an implementation from an integration module (`telar-anthropic`,
+ * Use an implementation from an integration module (`telar-anthropic`, `telar-openai`,
  * `telar-langchain4j`), or write one. In a test, a lambda is enough:
  *
  * ```kotlin

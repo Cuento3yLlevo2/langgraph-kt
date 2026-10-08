@@ -5,7 +5,10 @@ import dev.deeptelar.telar.GraphResult
 import dev.deeptelar.telar.MemoryCheckpointer
 import dev.deeptelar.telar.agent.AgentState
 import dev.deeptelar.telar.agent.ChatMessage
+import dev.deeptelar.telar.anthropic.AnthropicChatModel
+import dev.deeptelar.telar.openai.OpenAiChatModel
 import dev.langchain4j.data.message.UserMessage
+import io.ktor.client.HttpClient
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
@@ -15,6 +18,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 /** Keeps the samples (and the README snippets based on them) working. */
@@ -180,6 +184,18 @@ class SamplesTest {
             )
             assertEquals(2, state.messages.filterIsInstance<ChatMessage.ToolResult>().size)
         }
+
+    @Test
+    fun `the tool agent sample picks its model from the environment`() {
+        val client = HttpClient()
+
+        assertSame(scriptedModel, modelFor(client, emptyMap()))
+        assertSame(scriptedModel, modelFor(client, mapOf("OPENAI_API_KEY" to " ")))
+        assertIs<AnthropicChatModel>(modelFor(client, mapOf("ANTHROPIC_API_KEY" to "a", "OPENAI_API_KEY" to "b")))
+        assertIs<OpenAiChatModel>(modelFor(client, mapOf("OPENAI_API_KEY" to "b", "OPENAI_MODEL" to "gpt-5-mini")))
+        assertIs<OpenAiChatModel>(modelFor(client, mapOf("OLLAMA_MODEL" to "llama3.2")))
+        client.close()
+    }
 
     @Test
     fun `help desk agent continues a conversation from the last result`() =

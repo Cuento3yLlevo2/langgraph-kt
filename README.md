@@ -169,6 +169,7 @@ dependencies {
 | `telar-checkpoint-browser` | JS and Wasm in a browser | `LocalStorageCheckpointer`, runs that survive a page reload |
 | `telar-agent` | same as core | `ChatModel`, `Tool`, and the tool-calling agent: `toolAgent` / `toolLoop` |
 | `telar-anthropic` | same as core | `AnthropicChatModel`, Claude through Ktor |
+| `telar-openai` | same as core | `OpenAiChatModel`: OpenAI, Ollama and other servers with the Chat Completions API, through Ktor. Not released yet: it comes with the version after `0.1.0-alpha06`. |
 | `telar-langchain4j` | JVM (Java 17+) | `LangChain4jChatModel` and `chatNode` / `chatMessagesNode` for LangChain4j 1.x models |
 
 Requires Kotlin 2.x. JVM artifacts target Java 11, except `telar-langchain4j`, which needs
@@ -660,8 +661,14 @@ with any provider and on every platform. Pick an implementation:
 // Claude, on every platform (telar-anthropic). HttpClient is the Ktor client.
 val model: ChatModel = AnthropicChatModel(HttpClient(), apiKey = key, model = "claude-opus-5-5")
 
-// Any LangChain4j model, on the JVM (telar-langchain4j): OpenAI, Gemini, Ollama, ...
-val model: ChatModel = LangChain4jChatModel(OpenAiChatModel.builder().apiKey(key).modelName("gpt-5").build())
+// OpenAI, on every platform (telar-openai).
+val model: ChatModel = OpenAiChatModel(HttpClient(), apiKey = key, model = "gpt-5")
+
+// A model that Ollama runs on your machine, without a key (telar-openai).
+val model: ChatModel = OpenAiChatModel.ollama(HttpClient(), model = "llama3.2")
+
+// Any LangChain4j model, on the JVM (telar-langchain4j): Gemini, Bedrock, Mistral, ...
+val model: ChatModel = LangChain4jChatModel(GoogleAiGeminiChatModel.builder().apiKey(key).modelName("gemini-2.5-flash").build())
 
 // In a test, a lambda.
 val model = ChatModel { request -> ChatResponse(ChatMessage.Assistant("Thanks for your email!")) }
@@ -697,9 +704,23 @@ graph.stream(email).collect { event ->
 }
 ```
 
-`AnthropicChatModel` streams on every platform. `LangChain4jChatModel` streams when you give it a
-LangChain4j streaming model as well: `LangChain4jChatModel(openAi, streamingModel)`. A model that
-cannot stream delivers its text in one piece, so the same code works with every model.
+`AnthropicChatModel` and `OpenAiChatModel` stream on every platform. `LangChain4jChatModel` streams
+when you give it a LangChain4j streaming model as well: `LangChain4jChatModel(gemini, streamingModel)`.
+A model that cannot stream delivers its text in one piece, so the same code works with every model.
+
+`OpenAiChatModel` speaks the Chat Completions API, which many servers besides OpenAI have. Give it
+their address as `baseUrl`, up to the part before `/chat/completions`:
+
+```kotlin
+// Groq, OpenRouter, LM Studio, vLLM, a gateway of your company, ...
+val model = OpenAiChatModel(client, apiKey = key, model = "llama-3.3-70b-versatile", baseUrl = "https://api.groq.com/openai/v1")
+
+// More fields for every request go in `parameters`.
+val careful = OpenAiChatModel(client, apiKey = key, model = "gpt-5", parameters = buildJsonObject { put("reasoning_effort", "high") })
+```
+
+An agent with tools needs a model that can call tools. With Ollama, pick one that lists "tools"
+among what it can do.
 
 On the JVM, `telar-langchain4j` also builds a node straight from a
 [LangChain4j](https://docs.langchain4j.dev) model with `chatNode` (one text in, one text out) and
@@ -833,7 +854,8 @@ toolLoop(
 ```
 
 Runnable version: [`ToolAgent`](samples/src/main/kotlin/dev/deeptelar/telar/samples/ToolAgent.kt). It
-runs without an API key, and with Claude when `ANTHROPIC_API_KEY` is set.
+runs without an API key, with Claude when `ANTHROPIC_API_KEY` is set, with OpenAI when
+`OPENAI_API_KEY` is set, and with a model of Ollama when `OLLAMA_MODEL` names one.
 [Level 6 of the tutorial](docs/06-the-agent.md) explains the same agent step by step.
 
 ### Inspecting a graph
