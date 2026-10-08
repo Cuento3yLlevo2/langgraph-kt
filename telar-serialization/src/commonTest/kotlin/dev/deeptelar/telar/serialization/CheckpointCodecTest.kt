@@ -73,6 +73,58 @@ class CheckpointCodecTest {
     }
 
     @Test
+    fun `append keeps one checkpoint for each step on a line of its own`() {
+        val start = Checkpoint(ChatState(), listOf("a"), step = 0)
+        val first = Checkpoint(ChatState(listOf("line one\nline two"), turn = 1), listOf("b"), step = 1)
+        val paused = first.copy(interruptedBefore = true)
+        val second = Checkpoint(ChatState(turn = 2), emptyList(), step = 2)
+
+        val history = listOf(start, first, paused, second).fold(null as String?) { stored, checkpoint -> codec.append(stored, checkpoint) }
+
+        assertEquals(3, history?.lines()?.size)
+        assertEquals(listOf(start, paused, second), codec.decodeHistory("t", history.orEmpty()))
+        assertEquals(second, codec.decode("t", history.orEmpty()))
+        assertEquals(codec.encode(start), codec.append(null, start))
+    }
+
+    @Test
+    fun `append drops the steps after the one it saves and keeps the last of maxHistory`() {
+        val steps = (0..4).map { Checkpoint(ChatState(turn = it), listOf("a"), step = it) }
+        val all = steps.fold(null as String?) { stored, checkpoint -> codec.append(stored, checkpoint) }
+
+        val rewound = codec.append(all, Checkpoint(ChatState(turn = 20), listOf("a"), step = 2))
+        val lastTwo = steps.fold(null as String?) { stored, checkpoint -> codec.append(stored, checkpoint, maxHistory = 2) }
+        val latest = codec.append(all, Checkpoint(ChatState(turn = 5), listOf("a"), step = 5), maxHistory = 1)
+
+        assertEquals(listOf(0, 1, 20), codec.decodeHistory("t", rewound).map { it.state.turn })
+        assertEquals(listOf(3, 4), codec.decodeHistory("t", lastTwo.orEmpty()).map { it.step })
+        assertEquals(listOf(5), codec.decodeHistory("t", latest).map { it.step })
+    }
+
+    @Test
+    fun `append reads what a version without a history stored and leaves out lines that are no checkpoints`() {
+        val old = """{"version":1,"state":"{\"turn\":4}","nextNodes":["a"],"step":2,"interruptedBefore":true}"""
+        val next = Checkpoint(ChatState(turn = 5), listOf("b"), step = 3)
+
+        val history = codec.append("damaged\n$old\n\n", next)
+
+        assertEquals(
+            listOf(Checkpoint(ChatState(turn = 4), listOf("a"), step = 2, interruptedBefore = true), next),
+            codec.decodeHistory("t", history),
+        )
+    }
+
+    @Test
+    fun `a damaged checkpoint in a history is reported when the history is read`() {
+        val history = "damaged\n" + codec.encode(Checkpoint(ChatState(), listOf("a")))
+
+        assertEquals(Checkpoint(ChatState(), listOf("a")), codec.decode("t", history))
+        assertFailsWith<CheckpointCorruptedException> { codec.decodeHistory("t", history) }
+        assertFailsWith<CheckpointCorruptedException> { codec.decode("t", "") }
+        assertEquals(emptyList(), codec.decodeHistory("t", ""))
+    }
+
+    @Test
     fun `a newer format version is rejected`() {
         assertFailsWith<CheckpointCorruptedException> { codec.decode("t", """{"version":99,"state":"{}","nextNodes":[]}""") }
     }

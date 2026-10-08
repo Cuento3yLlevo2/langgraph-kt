@@ -1,6 +1,9 @@
 public final class dev/deeptelar/telar/serialization/CheckpointCodec {
 	public fun <init> (Ldev/deeptelar/telar/StateSerializer;)V
+	public final fun append (Ljava/lang/String;Ldev/deeptelar/telar/Checkpoint;I)Ljava/lang/String;
+	public static synthetic fun append$default (Ldev/deeptelar/telar/serialization/CheckpointCodec;Ljava/lang/String;Ldev/deeptelar/telar/Checkpoint;IILjava/lang/Object;)Ljava/lang/String;
 	public final fun decode (Ljava/lang/String;Ljava/lang/String;)Ldev/deeptelar/telar/Checkpoint;
+	public final fun decodeHistory (Ljava/lang/String;Ljava/lang/String;)Ljava/util/List;
 	public final fun encode (Ldev/deeptelar/telar/Checkpoint;)Ljava/lang/String;
 }
 

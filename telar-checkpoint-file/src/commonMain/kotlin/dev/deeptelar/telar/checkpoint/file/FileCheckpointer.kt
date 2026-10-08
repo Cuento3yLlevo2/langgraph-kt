@@ -2,6 +2,7 @@ package dev.deeptelar.telar.checkpoint.file
 
 import dev.deeptelar.telar.Checkpoint
 import dev.deeptelar.telar.Checkpointer
+import dev.deeptelar.telar.GraphValidationException
 import dev.deeptelar.telar.StateSerializer
 import dev.deeptelar.telar.serialization.CheckpointCodec
 import kotlinx.coroutines.sync.Mutex
@@ -15,53 +16,61 @@ import kotlinx.io.readString
 import kotlinx.io.writeString
 
 /**
- * A persistent [Checkpointer] that stores the latest checkpoint of each thread as one JSON file
- * inside [directory].
+ * A persistent [Checkpointer] that stores the checkpoints of each thread in one file inside
+ * [directory]: one line of JSON for each step of the thread, oldest first.
  *
  * Works on every target that has a file system: JVM/Android, Apple, Linux and Windows native, and
  * JS/Wasm running on Node.js. It is not available in browsers.
  *
  * Writes are atomic: a checkpoint is written to a temporary file and then moved into place, so a
- * crash in the middle of a save leaves the previous checkpoint intact. One instance is safe to share
- * between coroutines; do not point several instances or processes at the same directory.
+ * crash in the middle of a save leaves the previous checkpoints intact. One instance is safe to
+ * share between coroutines; do not point several instances or processes at the same directory.
+ *
+ * A save writes the file of its thread again, with the whole history. Give a thread that runs for
+ * hundreds of steps a [maxHistory].
  *
  * @param directory where checkpoint files are stored. Created if it does not exist.
  * @param serializer converts the graph state to and from a string.
  * @param fileSystem the file system to use; replaceable in tests.
+ * @param maxHistory how many checkpoints a thread keeps, counted from the latest. The default keeps
+ * all of them; `1` keeps only the latest.
+ * @throws GraphValidationException if [maxHistory] is not positive.
  */
 public class FileCheckpointer<State>(
     private val directory: Path,
     serializer: StateSerializer<State>,
     private val fileSystem: FileSystem = SystemFileSystem,
+    private val maxHistory: Int = Int.MAX_VALUE,
 ) : Checkpointer<State> {
     private val codec = CheckpointCodec(serializer)
     private val writeLock = Mutex()
 
     init {
+        if (maxHistory <= 0) throw GraphValidationException("maxHistory must be positive, was $maxHistory.")
         fileSystem.createDirectories(directory)
     }
 
     override suspend fun save(threadId: String, checkpoint: Checkpoint<State>) {
-        val json = codec.encode(checkpoint)
         val target = fileFor(threadId)
         val temporary = Path(directory, "${target.name}.tmp")
 
         writeLock.withLock {
             withContext(ioDispatcher) {
-                fileSystem.sink(temporary).buffered().use { it.writeString(json) }
+                val history = codec.append(read(target), checkpoint, maxHistory)
+                fileSystem.sink(temporary).buffered().use { it.writeString(history) }
                 fileSystem.atomicMove(temporary, target)
             }
         }
     }
 
-    override suspend fun load(threadId: String): Checkpoint<State>? {
-        val json =
-            withContext(ioDispatcher) {
-                val file = fileFor(threadId)
-                if (fileSystem.exists(file)) fileSystem.source(file).buffered().use { it.readString() } else null
-            } ?: return null
-        return codec.decode(threadId, json)
-    }
+    override suspend fun load(threadId: String): Checkpoint<State>? =
+        withContext(ioDispatcher) { read(fileFor(threadId)) }?.let { codec.decode(threadId, it) }
+
+    override suspend fun history(threadId: String): List<Checkpoint<State>> =
+        withContext(ioDispatcher) { read(fileFor(threadId)) }?.let { codec.decodeHistory(threadId, it) }.orEmpty()
+
+    private fun read(file: Path): String? =
+        if (fileSystem.exists(file)) fileSystem.source(file).buffered().use { it.readString() } else null
 
     override suspend fun delete(threadId: String) {
         writeLock.withLock {
