@@ -96,6 +96,15 @@ public class GraphAlreadyCompletedException(
 ) : TelarException("Thread '$threadId' already ran to completion, so there is nothing to resume.")
 
 /**
+ * [CompiledGraph.fork] was asked to start the thread [threadId], which already has a checkpoint. A
+ * fork starts a thread of its own, so that it cannot overwrite a run. Choose another id, or delete
+ * the thread first.
+ */
+public class ThreadAlreadyExistsException(
+    public val threadId: String,
+) : TelarException("Thread '$threadId' already has a checkpoint. fork() starts a new thread: choose another id, or delete this one first.")
+
+/**
  * The stored checkpoint of [threadId] could not be read, for example because the file is damaged or
  * was written in a newer format. [Checkpointer] implementations throw this from [Checkpointer.load].
  */

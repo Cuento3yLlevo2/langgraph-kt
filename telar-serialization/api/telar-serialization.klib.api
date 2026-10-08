@@ -9,7 +9,9 @@
 final class <#A: kotlin/Any?> dev.deeptelar.telar.serialization/CheckpointCodec { // dev.deeptelar.telar.serialization/CheckpointCodec|null[0]
     constructor <init>(dev.deeptelar.telar/StateSerializer<#A>) // dev.deeptelar.telar.serialization/CheckpointCodec.<init>|<init>(dev.deeptelar.telar.StateSerializer<1:0>){}[0]
 
+    final fun append(kotlin/String?, dev.deeptelar.telar/Checkpoint<#A>, kotlin/Int = ...): kotlin/String // dev.deeptelar.telar.serialization/CheckpointCodec.append|append(kotlin.String?;dev.deeptelar.telar.Checkpoint<1:0>;kotlin.Int){}[0]
     final fun decode(kotlin/String, kotlin/String): dev.deeptelar.telar/Checkpoint<#A> // dev.deeptelar.telar.serialization/CheckpointCodec.decode|decode(kotlin.String;kotlin.String){}[0]
+    final fun decodeHistory(kotlin/String, kotlin/String): kotlin.collections/List<dev.deeptelar.telar/Checkpoint<#A>> // dev.deeptelar.telar.serialization/CheckpointCodec.decodeHistory|decodeHistory(kotlin.String;kotlin.String){}[0]
     final fun encode(dev.deeptelar.telar/Checkpoint<#A>): kotlin/String // dev.deeptelar.telar.serialization/CheckpointCodec.encode|encode(dev.deeptelar.telar.Checkpoint<1:0>){}[0]
 }
 

@@ -5,6 +5,7 @@ import dev.deeptelar.telar.CheckpointCorruptedException
 import dev.deeptelar.telar.END
 import dev.deeptelar.telar.GraphConfig
 import dev.deeptelar.telar.GraphResult
+import dev.deeptelar.telar.GraphValidationException
 import dev.deeptelar.telar.START
 import dev.deeptelar.telar.StateGraph
 import dev.deeptelar.telar.serialization.KotlinxStateSerializer
@@ -51,6 +52,73 @@ class FileCheckpointerTest {
 
             assertEquals(listOf("thread-x.json"), files())
             assertEquals(checkpoint, checkpointer.load("thread-x"))
+        }
+
+    @Test
+    fun `a thread keeps the checkpoint of every step in its file`() =
+        runTest {
+            val checkpointer = newCheckpointer()
+            assertEquals(emptyList(), checkpointer.history("thread-x"))
+            val steps = (0..2).map { Checkpoint(SerializableState(it), listOf("node$it"), step = it) }
+
+            steps.forEach { checkpointer.save("thread-x", it) }
+            // A pause at the last step is saved again, in its place.
+            checkpointer.save("thread-x", steps.last().copy(interruptedBefore = true))
+
+            assertEquals(steps.dropLast(1) + steps.last().copy(interruptedBefore = true), checkpointer.history("thread-x"))
+            assertEquals(steps.last().copy(interruptedBefore = true), checkpointer.load("thread-x"))
+            // Another instance, as after a restart, reads the same history.
+            assertEquals(3, newCheckpointer().history("thread-x").size)
+            assertEquals(listOf("thread-x.json"), files())
+
+            checkpointer.delete("thread-x")
+            assertEquals(emptyList(), checkpointer.history("thread-x"))
+        }
+
+    @Test
+    fun `maxHistory limits how many checkpoints a file keeps`() =
+        runTest {
+            val lastTwo = FileCheckpointer(tempDir, serializer, maxHistory = 2)
+
+            repeat(4) { lastTwo.save("thread-x", Checkpoint(SerializableState(it), listOf("a"), step = it)) }
+
+            assertEquals(listOf(2, 3), lastTwo.history("thread-x").map { it.step })
+            assertFailsWith<GraphValidationException> { FileCheckpointer(tempDir, serializer, maxHistory = 0) }
+        }
+
+    @Test
+    fun `a file of a version without a history is read and continued`() =
+        runTest {
+            SystemFileSystem.createDirectories(tempDir)
+            SystemFileSystem.sink(Path(tempDir, "old.json")).buffered().use {
+                it.writeString("""{"version":1,"state":"{\"count\":4}","nextNodes":["a"],"step":2}""")
+            }
+            val checkpointer = newCheckpointer()
+
+            assertEquals(Checkpoint(SerializableState(4), listOf("a"), step = 2), checkpointer.load("old"))
+            checkpointer.save("old", Checkpoint(SerializableState(5), emptyList(), step = 3))
+
+            assertEquals(listOf(2, 3), checkpointer.history("old").map { it.step })
+        }
+
+    @Test
+    fun `a run saved to files can be forked from an earlier step`() =
+        runTest {
+            val graph =
+                StateGraph<SerializableState> {
+                    val add = node("add") { it.copy(count = it.count + 1) }
+                    val double = node("double") { it.copy(count = it.count * 2) }
+                    START then add then double then END
+                }.compile()
+            val config = GraphConfig(threadId = "sum", checkpointer = newCheckpointer())
+            graph.invoke(SerializableState(1), config)
+
+            val afterAdd = graph.history(config).first { it.nextNodes == listOf("double") }
+            val forked = graph.fork(afterAdd, config.copy(threadId = "sum-2")) { it.copy(count = 10) }
+
+            assertEquals(GraphResult.Completed(SerializableState(20)), forked)
+            assertEquals(GraphResult.Completed(SerializableState(4)), graph.lastResult(config))
+            assertEquals(listOf("sum-2.json", "sum.json"), files())
         }
 
     @Test

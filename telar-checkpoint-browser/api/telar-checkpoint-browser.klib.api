@@ -7,9 +7,10 @@
 
 // Library unique name: <telar:telar-checkpoint-browser>
 final class <#A: kotlin/Any?> dev.deeptelar.telar.checkpoint.browser/LocalStorageCheckpointer : dev.deeptelar.telar/Checkpointer<#A> { // dev.deeptelar.telar.checkpoint.browser/LocalStorageCheckpointer|null[0]
-    constructor <init>(dev.deeptelar.telar/StateSerializer<#A>, kotlin/String = ...) // dev.deeptelar.telar.checkpoint.browser/LocalStorageCheckpointer.<init>|<init>(dev.deeptelar.telar.StateSerializer<1:0>;kotlin.String){}[0]
+    constructor <init>(dev.deeptelar.telar/StateSerializer<#A>, kotlin/String = ..., kotlin/Int = ...) // dev.deeptelar.telar.checkpoint.browser/LocalStorageCheckpointer.<init>|<init>(dev.deeptelar.telar.StateSerializer<1:0>;kotlin.String;kotlin.Int){}[0]
 
     final suspend fun delete(kotlin/String) // dev.deeptelar.telar.checkpoint.browser/LocalStorageCheckpointer.delete|delete(kotlin.String){}[0]
+    final suspend fun history(kotlin/String): kotlin.collections/List<dev.deeptelar.telar/Checkpoint<#A>> // dev.deeptelar.telar.checkpoint.browser/LocalStorageCheckpointer.history|history(kotlin.String){}[0]
     final suspend fun load(kotlin/String): dev.deeptelar.telar/Checkpoint<#A>? // dev.deeptelar.telar.checkpoint.browser/LocalStorageCheckpointer.load|load(kotlin.String){}[0]
     final suspend fun save(kotlin/String, dev.deeptelar.telar/Checkpoint<#A>) // dev.deeptelar.telar.checkpoint.browser/LocalStorageCheckpointer.save|save(kotlin.String;dev.deeptelar.telar.Checkpoint<1:0>){}[0]
 }

@@ -7,6 +7,7 @@ import dev.deeptelar.telar.CheckpointCorruptedException
 import dev.deeptelar.telar.END
 import dev.deeptelar.telar.GraphConfig
 import dev.deeptelar.telar.GraphResult
+import dev.deeptelar.telar.GraphValidationException
 import dev.deeptelar.telar.START
 import dev.deeptelar.telar.StateGraph
 import dev.deeptelar.telar.StateSerializer
@@ -65,6 +66,30 @@ class LocalStorageCheckpointerTest {
 
             // A page that was reloaded creates its checkpointer again.
             assertEquals(paused, checkpointer().load("ticket-42"))
+        }
+
+    @Test
+    fun aThreadKeepsOnlyItsLatestCheckpointUnlessAskedForMore() =
+        runTest {
+            val latestOnly = checkpointer()
+            val lastTwo = LocalStorageCheckpointer(KotlinxStateSerializer<Ticket>(), "history.", maxHistory = 2)
+            val steps = (0..3).map { Checkpoint(Ticket("Ana", refund = it), nextNodes = listOf("pay"), step = it) }
+            assertEquals(emptyList(), lastTwo.history("ticket-42"))
+
+            steps.forEach {
+                latestOnly.save("ticket-42", it)
+                lastTwo.save("ticket-42", it)
+            }
+            // A pause at the last step is saved again, in its place.
+            lastTwo.save("ticket-42", steps.last().copy(interruptedBefore = true))
+
+            assertEquals(listOf(steps.last()), latestOnly.history("ticket-42"))
+            assertEquals(listOf(steps[2], steps.last().copy(interruptedBefore = true)), lastTwo.history("ticket-42"))
+            assertEquals(steps.last().copy(interruptedBefore = true), lastTwo.load("ticket-42"))
+
+            lastTwo.delete("ticket-42")
+            assertEquals(emptyList(), lastTwo.history("ticket-42"))
+            assertFailsWith<GraphValidationException> { LocalStorageCheckpointer(KotlinxStateSerializer<Ticket>(), maxHistory = 0) }
         }
 
     @Test
