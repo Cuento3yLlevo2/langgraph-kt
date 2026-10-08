@@ -26,6 +26,18 @@ breaking changes.
   A `Checkpointer` of your own that does not use `CheckpointCodec` has to store it with the rest.
   `CheckpointCodec` writes a checkpoint that has it as format version 2. Every other checkpoint is
   written as before, and the checkpoints of earlier versions are read.
+- **A thread keeps the checkpoint of every step**, where it kept only the last one.
+  `CompiledGraph.history(config)` returns them, oldest first, and `fork(checkpoint, config)`
+  continues from one of them on a new thread without changing the thread it comes from
+  (`streamFork` for the events). A fork onto a thread that has a checkpoint fails with the new
+  `ThreadAlreadyExistsException`.
+- `Checkpointer` has a fourth function, `history`. Its default returns the latest checkpoint, so a
+  `Checkpointer` of your own compiles and works as before, with a history of one. To keep more,
+  store what `CheckpointCodec.append` returns and read it with `decodeHistory`.
+- `MemoryCheckpointer` and `FileCheckpointer` keep every step and take a `maxHistory`.
+  `LocalStorageCheckpointer` keeps the latest checkpoint unless it gets a `maxHistory`. A file or an
+  entry with a history has one line of JSON for each checkpoint. What an earlier version stored is
+  read, but **an earlier version cannot read a thread that has more than one checkpoint**.
 
 ## [0.1.0-alpha06] - 2026-10-07
 

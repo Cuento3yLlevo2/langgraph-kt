@@ -108,6 +108,10 @@ val config = GraphConfig(
 
 Pauses need a checkpointer.
 
+A thread keeps the checkpoint of every step. `graph.history(config)` lists them, and
+`graph.fork(checkpoint, config.copy(threadId = "another")) { it.copy(...) }` continues from one on a
+new thread.
+
 A node can also pause the run itself, in the middle of its work. `resume` then runs that node again
 from its first line:
 

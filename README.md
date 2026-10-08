@@ -434,6 +434,39 @@ A run that stopped because a node failed is reported as `Interrupted` as well. T
 saved when it starts and its state after every finished step, so `resume(config)` retries from the
 step that failed, even when that was the first one.
 
+#### Going back to an earlier step
+
+A thread keeps the checkpoint of every step, not only the last one. `history` reads them, oldest
+first: the one saved when the run started, and one for each step that finished.
+
+```kotlin
+graph.history(config).forEach { checkpoint ->
+    println("after step ${checkpoint.step}: next ${checkpoint.nextNodes}, state ${checkpoint.state}")
+}
+```
+
+`fork` continues from one of them on a **new thread**, and the thread it comes from stays as it is.
+That answers "what if the reviewer had said no?" without running the steps before the review again,
+and it lets you repeat a step after you fixed its node:
+
+```kotlin
+// The checkpoint at which the run waited for the review.
+val atReview = graph.history(config).first { it.nextNodes == listOf("review") }
+
+// The same run from there, with the other answer, on a thread of its own.
+val rejected = graph.fork(atReview, config.copy(threadId = "ticket-42-rejected")) { it.copy(approved = false) }
+```
+
+- The new thread must not have a checkpoint yet, so a fork cannot overwrite a run. It fails with a
+  `ThreadAlreadyExistsException` otherwise.
+- A run that paused has the state it paused with in the checkpoint of its last step: a thread has
+  one checkpoint for each step.
+- `invoke` starts the history of its thread again.
+- `MemoryCheckpointer` and `FileCheckpointer` keep every step. Give them a `maxHistory` for a thread
+  that runs for hundreds of steps. `LocalStorageCheckpointer` keeps only the latest checkpoint
+  unless you give it one, because a browser has little room.
+- `streamFork` is `fork` with the events of the run.
+
 #### In a browser
 
 A web app has no file system. `LocalStorageCheckpointer`, from `telar-checkpoint-browser`,
@@ -459,18 +492,22 @@ browser can read `localStorage`, so do not keep secrets in the state.
 #### Storing checkpoints somewhere else
 
 To store checkpoints in a database, in the preferences of a phone or on a server, implement the
-three-method `Checkpointer` interface. `CheckpointCodec` turns a checkpoint into a string and back,
-so only the storage calls are left to write:
+`Checkpointer` interface. `CheckpointCodec` turns the checkpoints of a thread into a string and
+back, so only the storage calls are left to write:
 
 ```kotlin
 class DatabaseCheckpointer<State>(private val runs: RunTable, private val codec: CheckpointCodec<State>) : Checkpointer<State> {
-    // Called after every step. encode() turns the checkpoint into a JSON string.
+    // Called after every step. append() adds the checkpoint to the history that is stored.
     override suspend fun save(threadId: String, checkpoint: Checkpoint<State>) =
-        runs.upsert(threadId, codec.encode(checkpoint))
+        runs.upsert(threadId, codec.append(runs.find(threadId), checkpoint, maxHistory = 50))
 
     // Called by resume() and lastResult(). Returns null if this thread has no saved run.
     override suspend fun load(threadId: String): Checkpoint<State>? =
         runs.find(threadId)?.let { codec.decode(threadId, it) }
+
+    // Called by history(). Leave it out to keep only the latest checkpoint: save() then stores codec.encode(checkpoint).
+    override suspend fun history(threadId: String): List<Checkpoint<State>> =
+        runs.find(threadId)?.let { codec.decodeHistory(threadId, it) }.orEmpty()
 
     override suspend fun delete(threadId: String) = runs.delete(threadId)
 }
@@ -848,6 +885,7 @@ extends `TelarException`:
 | `InvalidRouteException` | A conditional edge returned a node that does not exist or is not a declared target. |
 | `MaxIterationsExceededException` | The run took more steps than `GraphConfig.maxIterations` (default 25). |
 | `CheckpointNotFoundException`, `GraphAlreadyCompletedException` | `resume` had nothing to continue. |
+| `ThreadAlreadyExistsException` | `fork` was given a thread that already has a checkpoint. |
 | `CheckpointCorruptedException` | A stored checkpoint could not be read. |
 | `LocalStorageException` | The browser refused to read or write `localStorage`: it is full, or the page may not use it. From `telar-checkpoint-browser`. |
 | `ChatModelException` | A call to a `ChatModel` failed, or the model declined to answer. From `telar-agent`. A run reports it as the `cause` of a `NodeExecutionException`. |

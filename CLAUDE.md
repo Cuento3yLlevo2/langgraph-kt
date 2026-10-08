@@ -93,7 +93,7 @@ next active nodes. A checkpoint is saved after every step when a checkpointer is
 | `GraphConfig<State>` | `threadId`, `checkpointer`, `interruptBefore/After` (sets), `maxIterations` |
 | `GraphResult<State>` / `GraphEvent<State>` | Outcome of `invoke`/`resume`, and events from `stream` (per node and per step) |
 | `GraphTopology` | Nodes and edges of a compiled graph, from `CompiledGraph.topology` |
-| `Checkpointer<State>` | `save` / `load` / `delete` per thread |
+| `Checkpointer<State>` | `save` / `load` / `delete` per thread, and `history` (one checkpoint per step; the default returns only the latest). `CompiledGraph.history` reads it and `fork` continues from an earlier checkpoint on a new thread |
 | `Checkpoint<State>` | `state`, `nextNodes` (empty when complete), `step`, `interruptedBefore`, `subgraphs` (a `SubgraphPosition` per subgraph the run paused in) |
 | `TelarException` | Base of all library exceptions (see `Exceptions.kt`) |
 
