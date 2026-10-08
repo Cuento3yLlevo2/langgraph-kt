@@ -20,6 +20,12 @@ breaking changes.
   state type needs no mapping: `subgraph(name, graph)`. Not yet: the events of a subgraph in the
   stream of the graph around it, and `interruptBefore` for a node of a subgraph.
 
+- `telar-openai`, a new module for every target. `OpenAiChatModel` calls a model through the Chat
+  Completions API, with tools and streaming. OpenAI is the default, `OpenAiChatModel.ollama` calls a
+  model that Ollama runs on your machine, and `baseUrl` reaches any other server with this API, such
+  as LM Studio, vLLM, Groq or OpenRouter. Before, these models were reached through LangChain4j, on
+  the JVM only.
+
 ### Changed
 
 - `Checkpoint` has a fifth property, `subgraphs`: where a paused run stands inside its subgraphs.

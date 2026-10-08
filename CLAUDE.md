@@ -52,6 +52,9 @@ made under that name keep it. The repository is `deeptelar/telar` and the demo i
   loop as a graph over `AgentState`
 - **`telar-anthropic`** (KMP): `AnthropicChatModel`, the Claude Messages API on Ktor client
   core. The app supplies the `HttpClient` and its engine
+- **`telar-openai`** (KMP): `OpenAiChatModel`, the Chat Completions API on Ktor client core. One
+  class for OpenAI, Ollama (`OpenAiChatModel.ollama`) and every other server with that API, chosen
+  by `baseUrl`
 - **`telar-langchain4j`** (JVM): `LangChain4jChatModel` adapts a LangChain4j 1.x model to
   `ChatModel`; `chatNode` / `chatMessagesNode` build a node straight from a LangChain4j model
 - **`samples`**: runnable examples with tests; not published. `samples/.../tutorial/levelN` is the

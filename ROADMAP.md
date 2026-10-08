@@ -7,7 +7,7 @@ what is already released.
 To ask for a feature or to move one up, add a 👍 to its issue or
 [start a discussion](https://github.com/deeptelar/telar/discussions).
 
-Last updated: 2026-10-07.
+Last updated: 2026-10-08.
 
 ## Where the project is
 
@@ -17,7 +17,9 @@ browser, a tool-calling agent for every platform, and model modules for Claude a
 The API can still change in any release.
 
 Since that release, `main` also has `interrupt`: a node pauses the run in the middle of its work, for
-example to ask a person a question it only knows at run time.
+example to ask a person a question it only knows at run time. And it has `telar-openai`, a model
+module for every platform that calls OpenAI, Ollama and the other servers with the Chat Completions
+API.
 
 ## The way to 1.0
 
@@ -54,7 +56,6 @@ New modules and additions to `telar-agent`. They do not change the core.
 | Feature | What you get | State | Issue |
 |---|---|---|---|
 | Database checkpointer | Saves runs in a SQL database, for servers and for Android apps. | Planned | |
-| OpenAI and Ollama | `telar-openai` and `telar-ollama` on Ktor, for every platform. Today these models are reached through LangChain4j, on the JVM only. | Planned | [#37] |
 | Typed answers from a model | Ask a model for a `@Serializable` class and get an instance of it, built on the schema generator that tools already use. | Planned | |
 | Tracing | Hooks in the engine that report every node, edge, tool call and token count, and a module that sends them to OpenTelemetry. | Planned | [#38] |
 
@@ -102,7 +103,6 @@ approach can be discussed. [CONTRIBUTING.md](CONTRIBUTING.md) has the setup and 
 
 [#34]: https://github.com/deeptelar/telar/issues/34
 [#35]: https://github.com/deeptelar/telar/issues/35
-[#37]: https://github.com/deeptelar/telar/issues/37
 [#38]: https://github.com/deeptelar/telar/issues/38
 [#39]: https://github.com/deeptelar/telar/issues/39
 [#40]: https://github.com/deeptelar/telar/issues/40
