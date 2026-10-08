@@ -248,16 +248,19 @@ public final class dev/deeptelar/telar/GraphResult$Interrupted : dev/deeptelar/t
 }
 
 public final class dev/deeptelar/telar/GraphTopology {
-	public fun <init> (Ljava/util/List;Ljava/util/List;Ljava/util/Set;)V
+	public fun <init> (Ljava/util/List;Ljava/util/List;Ljava/util/Set;Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/util/List;Ljava/util/Set;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/util/List;
 	public final fun component2 ()Ljava/util/List;
 	public final fun component3 ()Ljava/util/Set;
-	public final fun copy (Ljava/util/List;Ljava/util/List;Ljava/util/Set;)Ldev/deeptelar/telar/GraphTopology;
-	public static synthetic fun copy$default (Ldev/deeptelar/telar/GraphTopology;Ljava/util/List;Ljava/util/List;Ljava/util/Set;ILjava/lang/Object;)Ldev/deeptelar/telar/GraphTopology;
+	public final fun component4 ()Ljava/util/Map;
+	public final fun copy (Ljava/util/List;Ljava/util/List;Ljava/util/Set;Ljava/util/Map;)Ldev/deeptelar/telar/GraphTopology;
+	public static synthetic fun copy$default (Ldev/deeptelar/telar/GraphTopology;Ljava/util/List;Ljava/util/List;Ljava/util/Set;Ljava/util/Map;ILjava/lang/Object;)Ldev/deeptelar/telar/GraphTopology;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getDynamicRoutes ()Ljava/util/Set;
 	public final fun getEdges ()Ljava/util/List;
 	public final fun getNodes ()Ljava/util/List;
+	public final fun getSubgraphs ()Ljava/util/Map;
 	public fun hashCode ()I
 	public final fun successors (Ljava/lang/String;)Ljava/util/List;
 	public fun toString ()Ljava/lang/String;

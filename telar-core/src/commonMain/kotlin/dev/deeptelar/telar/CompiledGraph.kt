@@ -86,6 +86,7 @@ public class CompiledGraph<State> internal constructor(
                     .filter { it.targets == null }
                     .map { it.from }
                     .toSet(),
+            subgraphs = nodes.values.mapNotNull { node -> node.subgraph?.let { node.name to it.topology } }.toMap(),
         )
 
     /**
