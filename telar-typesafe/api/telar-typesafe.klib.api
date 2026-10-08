@@ -1,0 +1,18 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, linuxArm64, linuxX64, macosArm64, mingwX64, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <telar:telar-typesafe>
+final class dev.deeptelar.telar.typesafe/TypeSafeDecisionModel : dev.deeptelar.telar.agent/DecisionModel { // dev.deeptelar.telar.typesafe/TypeSafeDecisionModel|null[0]
+    constructor <init>(io.ktor.client/HttpClient, kotlin/String, kotlin/String = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ..., kotlin/String = ...) // dev.deeptelar.telar.typesafe/TypeSafeDecisionModel.<init>|<init>(io.ktor.client.HttpClient;kotlin.String;kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.String){}[0]
+
+    final suspend fun decide(dev.deeptelar.telar.agent/DecisionRequest): dev.deeptelar.telar.agent/DecisionResponse // dev.deeptelar.telar.typesafe/TypeSafeDecisionModel.decide|decide(dev.deeptelar.telar.agent.DecisionRequest){}[0]
+
+    final object Companion { // dev.deeptelar.telar.typesafe/TypeSafeDecisionModel.Companion|null[0]
+        final const val DEFAULT_MODEL // dev.deeptelar.telar.typesafe/TypeSafeDecisionModel.Companion.DEFAULT_MODEL|{}DEFAULT_MODEL[0]
+            final fun <get-DEFAULT_MODEL>(): kotlin/String // dev.deeptelar.telar.typesafe/TypeSafeDecisionModel.Companion.DEFAULT_MODEL.<get-DEFAULT_MODEL>|<get-DEFAULT_MODEL>(){}[0]
+    }
+}

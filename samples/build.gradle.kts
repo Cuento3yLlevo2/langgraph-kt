@@ -19,6 +19,7 @@ dependencies {
     implementation(project(":telar-core"))
     implementation(project(":telar-serialization"))
     implementation(project(":telar-checkpoint-file"))
+    implementation(project(":telar-typesafe"))
     implementation(project(":telar-langchain4j"))
     implementation(project(":telar-agent"))
     implementation(project(":telar-anthropic"))
@@ -36,6 +37,7 @@ tasks.test {
 
 listOf(
     "QuickStart",
+    "DecisionRouter",
     "HumanInTheLoop",
     "ReviewLoop",
     "AskFromANode",

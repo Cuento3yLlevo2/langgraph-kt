@@ -11,6 +11,7 @@ dependencies {
     dokka(project(":telar-anthropic"))
     dokka(project(":telar-openai"))
     dokka(project(":telar-langchain4j"))
+    dokka(project(":telar-typesafe"))
     kover(project(":telar-core"))
     kover(project(":telar-serialization"))
     kover(project(":telar-checkpoint-file"))
@@ -18,4 +19,5 @@ dependencies {
     kover(project(":telar-anthropic"))
     kover(project(":telar-openai"))
     kover(project(":telar-langchain4j"))
+    kover(project(":telar-typesafe"))
 }

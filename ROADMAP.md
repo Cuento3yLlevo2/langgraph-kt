@@ -116,5 +116,4 @@ approach can be discussed. [CONTRIBUTING.md](CONTRIBUTING.md) has the setup and 
 [#35]: https://github.com/deeptelar/telar/issues/35
 [#38]: https://github.com/deeptelar/telar/issues/38
 [#39]: https://github.com/deeptelar/telar/issues/39
-[#40]: https://github.com/deeptelar/telar/issues/40
 [#41]: https://github.com/deeptelar/telar/issues/41

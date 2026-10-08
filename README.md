@@ -171,6 +171,7 @@ dependencies {
 | `telar-anthropic` | same as core | `AnthropicChatModel`, Claude through Ktor |
 | `telar-openai` | same as core | `OpenAiChatModel`: OpenAI, Ollama and other servers with the Chat Completions API, through Ktor. Not released yet: it comes with the version after `0.1.0-alpha06`. |
 | `telar-langchain4j` | JVM (Java 17+) | `LangChain4jChatModel` and `chatNode` / `chatMessagesNode` for LangChain4j 1.x models |
+| `telar-typesafe` | same as core | `TypeSafeDecisionModel`: Jev, the decision model of TypeSafe AI, through Ktor. Not released yet: it comes with the version after `0.1.0-alpha06`. |
 
 Requires Kotlin 2.x. JVM artifacts target Java 11, except `telar-langchain4j`, which needs
 Java 17 because LangChain4j does.
@@ -202,6 +203,7 @@ Each guide is the short version of one feature. The tutorial explains the same f
 | Repeat a step until the result is good | [Loops](#loops) |
 | Use a graph as one step of another graph | [Subgraphs](#subgraphs) |
 | Let an AI model do the work of a node | [AI models](#ai-models) |
+| Let a fast model pick the next step | [Decision models](#decision-models) |
 | Let an AI model call my functions | [Agents with tools](#agents-with-tools) |
 | Draw a graph or test its shape | [Inspecting a graph](#inspecting-a-graph) |
 
@@ -727,6 +729,69 @@ On the JVM, `telar-langchain4j` also builds a node straight from a
 `chatMessagesNode` (a list of LangChain4j messages). Both run the blocking call on `Dispatchers.IO`.
 The [`ChatAgent`](samples/src/main/kotlin/dev/deeptelar/telar/samples/ChatAgent.kt) sample uses them.
 
+### Decision models
+
+A chat model writes. A **decision model** decides: it picks one of the options you give it, answers
+yes or no, or rates on a scale, and says how sure it is. It answers in a fraction of the time and
+the price of a chat model, and its answer has a fixed type. That fits the places where a graph
+decides: which node runs next, whether a draft is good enough, whether a person has to look.
+
+`telar-agent` has the interface, `DecisionModel`, and `telar-typesafe` has
+[Jev](https://docs.typesafe.ai) of TypeSafe AI for every platform:
+
+```kotlin
+val jev: DecisionModel = TypeSafeDecisionModel(HttpClient(), apiKey = key)
+```
+
+`decisionEdge` lets the model pick the next node. This is the quick start without `categoryOf`:
+
+```kotlin
+val graph = StateGraph<SupportEmail> {
+    val refund = node("refund") { email -> email.copy(reply = "Your refund is on its way.") }
+    val technical = node("technical") { email -> email.copy(reply = "Please update the app.") }
+    val escalate = node("escalate") { email -> email.copy(reply = "A colleague will reply today.") }
+
+    decisionEdge(
+        from = START,
+        model = jev,
+        instructions = "What does the customer who wrote this support email want?",
+        // The nodes the model may pick. It sees their names and these descriptions.
+        routes = mapOf(
+            refund to "Money back for an order or a charge",
+            technical to "Help with something that does not work",
+        ),
+        // An email the model is not sure about goes to a person.
+        minConfidence = 0.6,
+        fallback = escalate,
+    ) { email -> email.body } // what the model judges
+}.compile()
+```
+
+Runnable version: [`DecisionRouter`](samples/src/main/kotlin/dev/deeptelar/telar/samples/DecisionRouter.kt).
+It runs without an API key, and with Jev when `TYPESAFE_API_KEY` is set.
+
+In a node, ask one question with `choose`, `isYes` or `score`, and keep the answer in the state:
+
+```kotlin
+enum class Team(val handles: String) { REFUND("Money back"), TECHNICAL("Something does not work") }
+
+val classify = node("classify", work = { email ->
+    jev.choose<Team>(email.body, "Which team should handle this email?") { it.handles }
+}) { email, answer -> email.copy(team = answer.value<Team>(), confidence = answer.confidence) }
+
+val urgent = jev.isYes(email.body, "Does the customer need an answer today?").probability > 0.8
+val anger = jev.score(email.body, "How angry is the customer?", listOf("Calm", "Annoyed", "Furious")).score
+```
+
+- **`confidence` says how clearly one option won**, from 0 to 1. It does not say that the answer is
+  right. Try your limits on your own data before you rely on them.
+- `decisionEdge` does not write the decision into the state. When the state should keep it, ask in a
+  node as above, and route with `conditionalEdge` on what the node stored.
+- Several questions about the same text cost one call: `jev.decide(DecisionRequest(text, questions))`.
+- A failed call throws `DecisionModelException`. On an edge it is the `cause` of an
+  `EdgeConditionException`.
+- In a test, a lambda is a model: `DecisionModel { request -> DecisionResponse(request.questions.mapValues { Answer.Choice("refund") }) }`.
+
 ### Agents with tools
 
 An agent is a model that decides by itself which of your functions to call, and how often, before
@@ -911,6 +976,7 @@ Runnable examples live in [`samples/`](samples/src/main/kotlin/dev/deeptelar/tel
 
 ```bash
 ./gradlew :samples:runQuickStart        # the email support agent of the quick start
+./gradlew :samples:runDecisionRouter    # the same agent, routed by a decision model
 ./gradlew :samples:runHumanInTheLoop    # a refund that waits for approval, saved to disk
 ./gradlew :samples:runReviewLoop        # a reviewer approves a draft or sends it back
 ./gradlew :samples:runAskFromANode      # a payout that asks for approval only when it is large
