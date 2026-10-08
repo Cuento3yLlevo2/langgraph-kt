@@ -130,6 +130,26 @@ val pay = node("pay") { ticket ->
 | `GraphEvent.Interrupted` | The run paused. Last event. |
 | `GraphEvent.Completed` | The run reached `END`. Last event. |
 
+## A model that decides
+
+From `telar-agent`, with Jev in `telar-typesafe`. The README has the
+[guide](../README.md#decision-models).
+
+```kotlin
+val jev: DecisionModel = TypeSafeDecisionModel(HttpClient(), apiKey = key)
+
+// The model picks the next node. Below minConfidence the run goes to the fallback.
+decisionEdge(classify, jev, "What does the customer want?",
+    routes = mapOf(refund to "Money back", technical to "Something does not work"),
+    minConfidence = 0.6, fallback = escalate,
+) { ticket -> ticket.message }
+
+// One question, in a node.
+jev.choose(text, "Which team?", mapOf("refund" to null, "technical" to null)).option
+jev.isYes(text, "Is this urgent?").isYes
+jev.score(text, "How angry?", listOf("Calm", "Annoyed", "Furious")).score
+```
+
 ## An agent with tools
 
 From `telar-agent`. [Level 6](06-the-agent.md) teaches it, and the README has the

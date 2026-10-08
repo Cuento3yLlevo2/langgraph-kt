@@ -54,6 +54,10 @@ made under that name keep it. The repository is `deeptelar/telar` and the demo i
   core. The app supplies the `HttpClient` and its engine
 - **`telar-langchain4j`** (JVM): `LangChain4jChatModel` adapts a LangChain4j 1.x model to
   `ChatModel`; `chatNode` / `chatMessagesNode` build a node straight from a LangChain4j model
+- **`telar-typesafe`** (KMP): `TypeSafeDecisionModel`, the Jev decision model of TypeSafe AI
+  (System One API) on Ktor client core. It implements `DecisionModel` of `telar-agent`, the
+  interface for models that pick an option, answer yes or no, or rate, instead of writing;
+  `decisionEdge` routes a graph with one
 - **`samples`**: runnable examples with tests; not published. `samples/.../tutorial/levelN` is the
   code of the tutorial in `docs/`; a page shows its level's code and output, so change both together
 - **`build-logic`**: convention plugins `telar.kmp-library`, `telar.web-library`,

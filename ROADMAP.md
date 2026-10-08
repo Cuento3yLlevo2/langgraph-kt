@@ -80,7 +80,6 @@ Ideas without a place in the plan yet. Say so in the issue or in a discussion if
 | Idea | What it is | Issue |
 |---|---|---|
 | Functional API | Write a small workflow as ordinary `suspend` functions, without a graph, and keep checkpoints and streaming. | [#39] |
-| Decision models | An interface for models that classify instead of chat, such as Jev, and a router built on it. "Typed answers from a model" above is the first step: it gives a typed router with any model. | [#40] |
 | Images and files in messages | A `ChatMessage` holds text only today. | |
 | Tools from MCP servers | Use the tools of a Model Context Protocol server as `Tool`s. | |
 | Memory across threads | A store that an agent reads and writes in every conversation, next to the checkpoint of one thread. | |
@@ -105,5 +104,4 @@ approach can be discussed. [CONTRIBUTING.md](CONTRIBUTING.md) has the setup and 
 [#37]: https://github.com/deeptelar/telar/issues/37
 [#38]: https://github.com/deeptelar/telar/issues/38
 [#39]: https://github.com/deeptelar/telar/issues/39
-[#40]: https://github.com/deeptelar/telar/issues/40
 [#41]: https://github.com/deeptelar/telar/issues/41

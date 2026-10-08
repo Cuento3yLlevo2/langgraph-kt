@@ -9,6 +9,13 @@ breaking changes.
 
 ### Added
 
+- Decision models: models that decide instead of writing. `DecisionModel` in `telar-agent` is the
+  interface, next to `ChatModel`: a model picks one of your options, answers yes or no, or rates on
+  a scale, and says how sure it is. `choose`, `isYes` and `score` ask one question, and
+  `decisionEdge` is a conditional edge on which such a model picks the next node and sends a
+  decision below `minConfidence` to a `fallback`.
+- `telar-typesafe`, a new module for every target. `TypeSafeDecisionModel` calls Jev, the decision
+  model of TypeSafe AI, through its System One API.
 - `interrupt(state)` pauses a run from inside a node. A node that finds out while it works that it
   needs a person saves a state with its question and stops there. `resume` writes the answer into
   the state and runs the node again from its first line. Before, a run paused only before or after

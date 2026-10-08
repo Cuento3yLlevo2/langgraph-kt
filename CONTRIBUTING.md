@@ -45,6 +45,7 @@ Chrome. Install Chrome or Chromium, and set `CHROME_BIN` to its path if it is no
 | `telar-agent` | `ChatModel`, tools and the tool-calling agent loop (multiplatform) |
 | `telar-anthropic` | `AnthropicChatModel`, Claude through Ktor (multiplatform) |
 | `telar-langchain4j` | LangChain4j integration (JVM) |
+| `telar-typesafe` | `TypeSafeDecisionModel`, the Jev decision model of TypeSafe AI through Ktor (multiplatform) |
 | `samples` | Runnable examples, not published. `samples/.../tutorial` holds the code of the tutorial |
 | `docs` | The tutorial, one Markdown page per level |
 | `build-logic` | Gradle convention plugins shared by all modules |
