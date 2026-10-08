@@ -9,6 +9,13 @@ To ask for a feature or to move one up, add a 👍 to its issue or
 
 Last updated: 2026-10-08.
 
+## The goal
+
+Telar aims to be the open-source library a Kotlin developer reaches for to build AI agents and
+workflows: agents first, simple to start with, and with the most complete set of workflow features.
+Models, and the ways of working with them, change fast. This plan changes with them: what
+developers need for their agents goes on this page, and the order follows what they ask for.
+
 ## Where the project is
 
 `0.1.0-alpha06` is on Maven Central. It has the graph builder and the engine (loops, parallel
@@ -56,6 +63,7 @@ New modules and additions to `telar-agent`. They do not change the core.
 | Database checkpointer | Saves runs in a SQL database, for servers and for Android apps. | Planned | |
 | OpenAI and Ollama | `telar-openai` and `telar-ollama` on Ktor, for every platform. Today these models are reached through LangChain4j, on the JVM only. | Planned | [#37] |
 | Typed answers from a model | Ask a model for a `@Serializable` class and get an instance of it, built on the schema generator that tools already use. | Planned | |
+| Decision models | An interface for models that classify instead of chat, such as Jev: fast, cheap, and with an answer of a fixed type. A router built on it picks the next node of a graph. "Typed answers from a model" above comes first: it gives a typed router with any chat model. | Planned | [#40] |
 | Tracing | Hooks in the engine that report every node, edge, tool call and token count, and a module that sends them to OpenTelemetry. | Planned | [#38] |
 | Helpers for tests | `telar-test`: a model that gives the answers a test wrote down, so that a graph with an agent is tested without an API key and without a model of your own. | Planned | |
 | One version for all modules | `telar-bom`: a bill of materials. An app names the version of Telar once, and every module it adds uses that version. | Planned | |
@@ -86,7 +94,6 @@ Ideas without a place in the plan yet. Say so in the issue or in a discussion if
 | Idea | What it is | Issue |
 |---|---|---|
 | Functional API | Write a small workflow as ordinary `suspend` functions, without a graph, and keep checkpoints and streaming. | [#39] |
-| Decision models | An interface for models that classify instead of chat, such as Jev, and a router built on it. "Typed answers from a model" above is the first step: it gives a typed router with any model. | [#40] |
 | Images and files in messages | A `ChatMessage` holds text only today. | |
 | Tools from MCP servers | Use the tools of a Model Context Protocol server as `Tool`s. | |
 | Memory across threads | A store that an agent reads and writes in every conversation, next to the checkpoint of one thread. | |
