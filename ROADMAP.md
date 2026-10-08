@@ -1,5 +1,10 @@
 # Roadmap
 
+Telar aims to be the open-source library a Kotlin developer reaches for to build AI agents and
+workflows: agents first, simple to start with, and with the most complete set of workflow features.
+Models, and the ways of working with them, change fast. This plan changes with them: what
+developers need for their agents goes on this page, and the order follows what they ask for.
+
 This page lists what is planned for Telar before `1.0`. It is a plan and not a promise: there
 are no dates, and the order can change with what users ask for. The [changelog](CHANGELOG.md) lists
 what is already released.
@@ -8,13 +13,6 @@ To ask for a feature or to move one up, add a 👍 to its issue or
 [start a discussion](https://github.com/deeptelar/telar/discussions).
 
 Last updated: 2026-10-08.
-
-## The goal
-
-Telar aims to be the open-source library a Kotlin developer reaches for to build AI agents and
-workflows: agents first, simple to start with, and with the most complete set of workflow features.
-Models, and the ways of working with them, change fast. This plan changes with them: what
-developers need for their agents goes on this page, and the order follows what they ask for.
 
 ## Where the project is
 
