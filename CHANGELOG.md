@@ -13,6 +13,11 @@ breaking changes.
   needs a person saves a state with its question and stops there. `resume` writes the answer into
   the state and runs the node again from its first line. Before, a run paused only before or after
   the nodes that `GraphConfig` names.
+- `mergeRules` builds a `Reducer` from one rule for each property, so that nodes that return a whole
+  state can run in the same step without a reducer that merges whole states by hand: `append` adds
+  what each node added to a list, `replace` takes the value of the node that changed it, and `merge`
+  combines the changed values with a function of yours. A node that changes a property without a
+  rule fails the run with a `MergeRuleException` as the cause, and loses nothing silently.
 - `subgraph(name, graph, state, update)` in `StateGraph`: a compiled graph is a node of another
   graph. `state` reads the state of the subgraph out of the state of the graph around it, and
   `update` writes it back. When a node of the subgraph calls `interrupt`, the graph around pauses

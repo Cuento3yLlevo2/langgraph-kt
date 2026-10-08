@@ -541,8 +541,39 @@ val graph = StateGraph<Pitch> {
 }.compile(reducer = keepShortest) // without a reducer, compile() rejects this graph
 ```
 
-A reducer has to carry over everything it wants to keep from `updates`, so prefer `work` and
-`update` when nodes add to the state, and use a reducer when the step has to choose or compare.
+A reducer written by hand has to carry over everything it wants to keep from `updates`. When the
+nodes add to the state, `mergeRules` builds the reducer from one rule for each property they change:
+
+```kotlin
+data class Research(val notes: List<String> = emptyList(), val status: String = "", val score: Int = 0)
+
+val graph = StateGraph<Research> {
+    val web = node("web") { it.copy(notes = it.notes + searchWeb()) }
+    val docs = node("docs") { it.copy(notes = it.notes + searchDocs(), status = "found") }
+
+    START then web then END
+    START then docs then END
+}.compile(
+    reducer = mergeRules {
+        // A list gets what each node added to it.
+        append(Research::notes) { copy(notes = it) }
+        // A value is taken from the node that changed it.
+        replace(Research::status) { copy(status = it) }
+        // Anything else: say how the changed values combine.
+        merge(Research::score, combine = { _, changed -> changed.max() }) { copy(score = it) }
+    },
+)
+```
+
+- A rule names a property and says how to write the merged value back, which is a `copy`.
+- A node that changes a property without a rule fails the run with a `ReducerException`. Nothing is
+  lost without a word.
+- So do two nodes that `replace` a property with different values. `merge` says which one counts:
+  `combine = { _, changed -> changed.last() }` lets the last node of the step win.
+
+Which one to use: `work` and `update` when a node does slow work and then adds its result;
+`mergeRules` when nodes are written as `node(name) { ... }` and change different properties, or add
+to the same list; a reducer of your own when the step has to choose or compare whole states.
 
 ### Loops
 

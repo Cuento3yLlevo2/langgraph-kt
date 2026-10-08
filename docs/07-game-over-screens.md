@@ -89,7 +89,8 @@ Node 'read' fans out to several nodes that return a whole state, so compile() ne
 Two arrows leave `read`, so `kitchen` and `driver` run at the same time. Each returns a whole
 ticket, and nothing says how to make one ticket out of two. Give the two nodes a `work` and an
 `update` (level 4). The other way out is a `Reducer`, a function that merges whole states; the
-[README](../README.md#merging-whole-states) shows one.
+[README](../README.md#merging-whole-states) shows one, and `mergeRules`, which builds one from a
+rule for each property.
 
 If a map has several mistakes, the message lists all of them at once.
 
