@@ -7,7 +7,7 @@ what is already released.
 To ask for a feature or to move one up, add a 👍 to its issue or
 [start a discussion](https://github.com/deeptelar/telar/discussions).
 
-Last updated: 2026-10-07.
+Last updated: 2026-10-08.
 
 ## Where the project is
 
@@ -57,6 +57,8 @@ New modules and additions to `telar-agent`. They do not change the core.
 | OpenAI and Ollama | `telar-openai` and `telar-ollama` on Ktor, for every platform. Today these models are reached through LangChain4j, on the JVM only. | Planned | [#37] |
 | Typed answers from a model | Ask a model for a `@Serializable` class and get an instance of it, built on the schema generator that tools already use. | Planned | |
 | Tracing | Hooks in the engine that report every node, edge, tool call and token count, and a module that sends them to OpenTelemetry. | Planned | [#38] |
+| Helpers for tests | `telar-test`: a model that gives the answers a test wrote down, so that a graph with an agent is tested without an API key and without a model of your own. | Planned | |
+| One version for all modules | `telar-bom`: a bill of materials. An app names the version of Telar once, and every module it adds uses that version. | Planned | |
 
 ## 3. Beta: make it stable
 
@@ -70,6 +72,10 @@ New modules and additions to `telar-agent`. They do not change the core.
   today. Only the browser checkpointer is tested in a browser.
 - **Documentation.** A guide for every feature on this page, a tutorial level where one fits, and a
   page for people who know LangGraph for Python: what has the same name and what is different.
+- **A documentation site.** The guides are in the README today, and the site has only the API
+  reference. The guides and the tutorial move to a site with a menu and a search.
+- **The project's own name everywhere.** The topic `langgraph` is taken off the repository, which
+  keeps the sentence that says what Telar is inspired by.
 - **Written rules.** Which Kotlin versions are supported, and how long a deprecated declaration
   stays before it is removed.
 
