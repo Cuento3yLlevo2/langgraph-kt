@@ -25,6 +25,11 @@ public final class dev/deeptelar/telar/CheckpointCorruptedException : dev/deepte
 	public final fun getThreadId ()Ljava/lang/String;
 }
 
+public final class dev/deeptelar/telar/CheckpointKt {
+	public static final fun withCheckpoint (Ljava/util/List;Ldev/deeptelar/telar/Checkpoint;I)Ljava/util/List;
+	public static synthetic fun withCheckpoint$default (Ljava/util/List;Ldev/deeptelar/telar/Checkpoint;IILjava/lang/Object;)Ljava/util/List;
+}
+
 public final class dev/deeptelar/telar/CheckpointNotFoundException : dev/deeptelar/telar/TelarException {
 	public fun <init> (Ljava/lang/String;)V
 	public final fun getThreadId ()Ljava/lang/String;
@@ -32,12 +37,20 @@ public final class dev/deeptelar/telar/CheckpointNotFoundException : dev/deeptel
 
 public abstract interface class dev/deeptelar/telar/Checkpointer {
 	public abstract fun delete (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun history (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun load (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun save (Ljava/lang/String;Ldev/deeptelar/telar/Checkpoint;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public final class dev/deeptelar/telar/Checkpointer$DefaultImpls {
+	public static fun history (Ldev/deeptelar/telar/Checkpointer;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
 public final class dev/deeptelar/telar/CompiledGraph {
+	public final fun fork (Ldev/deeptelar/telar/Checkpoint;Ldev/deeptelar/telar/GraphConfig;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun fork$default (Ldev/deeptelar/telar/CompiledGraph;Ldev/deeptelar/telar/Checkpoint;Ldev/deeptelar/telar/GraphConfig;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun getTopology ()Ldev/deeptelar/telar/GraphTopology;
+	public final fun history (Ldev/deeptelar/telar/GraphConfig;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun invoke (Ljava/lang/Object;Ldev/deeptelar/telar/GraphConfig;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun invoke$default (Ldev/deeptelar/telar/CompiledGraph;Ljava/lang/Object;Ldev/deeptelar/telar/GraphConfig;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun lastResult (Ldev/deeptelar/telar/GraphConfig;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -45,6 +58,8 @@ public final class dev/deeptelar/telar/CompiledGraph {
 	public static synthetic fun resume$default (Ldev/deeptelar/telar/CompiledGraph;Ldev/deeptelar/telar/GraphConfig;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun stream (Ljava/lang/Object;Ldev/deeptelar/telar/GraphConfig;)Lkotlinx/coroutines/flow/Flow;
 	public static synthetic fun stream$default (Ldev/deeptelar/telar/CompiledGraph;Ljava/lang/Object;Ldev/deeptelar/telar/GraphConfig;ILjava/lang/Object;)Lkotlinx/coroutines/flow/Flow;
+	public final fun streamFork (Ldev/deeptelar/telar/Checkpoint;Ldev/deeptelar/telar/GraphConfig;Lkotlin/jvm/functions/Function2;)Lkotlinx/coroutines/flow/Flow;
+	public static synthetic fun streamFork$default (Ldev/deeptelar/telar/CompiledGraph;Ldev/deeptelar/telar/Checkpoint;Ldev/deeptelar/telar/GraphConfig;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)Lkotlinx/coroutines/flow/Flow;
 	public final fun streamResume (Ldev/deeptelar/telar/GraphConfig;Lkotlin/jvm/functions/Function2;)Lkotlinx/coroutines/flow/Flow;
 	public static synthetic fun streamResume$default (Ldev/deeptelar/telar/CompiledGraph;Ldev/deeptelar/telar/GraphConfig;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)Lkotlinx/coroutines/flow/Flow;
 }
@@ -265,7 +280,10 @@ public final class dev/deeptelar/telar/MaxIterationsExceededException : dev/deep
 
 public final class dev/deeptelar/telar/MemoryCheckpointer : dev/deeptelar/telar/Checkpointer {
 	public fun <init> ()V
+	public fun <init> (I)V
+	public synthetic fun <init> (IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun delete (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun history (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun load (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun save (Ljava/lang/String;Ldev/deeptelar/telar/Checkpoint;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
@@ -349,5 +367,10 @@ public final class dev/deeptelar/telar/SubgraphPosition {
 public abstract class dev/deeptelar/telar/TelarException : java/lang/RuntimeException {
 	public fun <init> (Ljava/lang/String;Ljava/lang/Throwable;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class dev/deeptelar/telar/ThreadAlreadyExistsException : dev/deeptelar/telar/TelarException {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun getThreadId ()Ljava/lang/String;
 }
 

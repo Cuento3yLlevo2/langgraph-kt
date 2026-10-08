@@ -14,6 +14,7 @@ abstract interface <#A: kotlin/Any?> dev.deeptelar.telar/Checkpointer { // dev.d
     abstract suspend fun delete(kotlin/String) // dev.deeptelar.telar/Checkpointer.delete|delete(kotlin.String){}[0]
     abstract suspend fun load(kotlin/String): dev.deeptelar.telar/Checkpoint<#A>? // dev.deeptelar.telar/Checkpointer.load|load(kotlin.String){}[0]
     abstract suspend fun save(kotlin/String, dev.deeptelar.telar/Checkpoint<#A>) // dev.deeptelar.telar/Checkpointer.save|save(kotlin.String;dev.deeptelar.telar.Checkpoint<1:0>){}[0]
+    open suspend fun history(kotlin/String): kotlin.collections/List<dev.deeptelar.telar/Checkpoint<#A>> // dev.deeptelar.telar/Checkpointer.history|history(kotlin.String){}[0]
 }
 
 abstract interface <#A: kotlin/Any?> dev.deeptelar.telar/StateSerializer { // dev.deeptelar.telar/StateSerializer|null[0]
@@ -204,7 +205,10 @@ final class <#A: kotlin/Any?> dev.deeptelar.telar/CompiledGraph { // dev.deeptel
         final fun <get-topology>(): dev.deeptelar.telar/GraphTopology // dev.deeptelar.telar/CompiledGraph.topology.<get-topology>|<get-topology>(){}[0]
 
     final fun stream(#A, dev.deeptelar.telar/GraphConfig<#A> = ...): kotlinx.coroutines.flow/Flow<dev.deeptelar.telar/GraphEvent<#A>> // dev.deeptelar.telar/CompiledGraph.stream|stream(1:0;dev.deeptelar.telar.GraphConfig<1:0>){}[0]
+    final fun streamFork(dev.deeptelar.telar/Checkpoint<#A>, dev.deeptelar.telar/GraphConfig<#A>, kotlin.coroutines/SuspendFunction1<#A, #A> = ...): kotlinx.coroutines.flow/Flow<dev.deeptelar.telar/GraphEvent<#A>> // dev.deeptelar.telar/CompiledGraph.streamFork|streamFork(dev.deeptelar.telar.Checkpoint<1:0>;dev.deeptelar.telar.GraphConfig<1:0>;kotlin.coroutines.SuspendFunction1<1:0,1:0>){}[0]
     final fun streamResume(dev.deeptelar.telar/GraphConfig<#A>, kotlin.coroutines/SuspendFunction1<#A, #A> = ...): kotlinx.coroutines.flow/Flow<dev.deeptelar.telar/GraphEvent<#A>> // dev.deeptelar.telar/CompiledGraph.streamResume|streamResume(dev.deeptelar.telar.GraphConfig<1:0>;kotlin.coroutines.SuspendFunction1<1:0,1:0>){}[0]
+    final suspend fun fork(dev.deeptelar.telar/Checkpoint<#A>, dev.deeptelar.telar/GraphConfig<#A>, kotlin.coroutines/SuspendFunction1<#A, #A> = ...): dev.deeptelar.telar/GraphResult<#A> // dev.deeptelar.telar/CompiledGraph.fork|fork(dev.deeptelar.telar.Checkpoint<1:0>;dev.deeptelar.telar.GraphConfig<1:0>;kotlin.coroutines.SuspendFunction1<1:0,1:0>){}[0]
+    final suspend fun history(dev.deeptelar.telar/GraphConfig<#A>): kotlin.collections/List<dev.deeptelar.telar/Checkpoint<#A>> // dev.deeptelar.telar/CompiledGraph.history|history(dev.deeptelar.telar.GraphConfig<1:0>){}[0]
     final suspend fun invoke(#A, dev.deeptelar.telar/GraphConfig<#A> = ...): dev.deeptelar.telar/GraphResult<#A> // dev.deeptelar.telar/CompiledGraph.invoke|invoke(1:0;dev.deeptelar.telar.GraphConfig<1:0>){}[0]
     final suspend fun lastResult(dev.deeptelar.telar/GraphConfig<#A>): dev.deeptelar.telar/GraphResult<#A>? // dev.deeptelar.telar/CompiledGraph.lastResult|lastResult(dev.deeptelar.telar.GraphConfig<1:0>){}[0]
     final suspend fun resume(dev.deeptelar.telar/GraphConfig<#A>, kotlin.coroutines/SuspendFunction1<#A, #A> = ...): dev.deeptelar.telar/GraphResult<#A> // dev.deeptelar.telar/CompiledGraph.resume|resume(dev.deeptelar.telar.GraphConfig<1:0>;kotlin.coroutines.SuspendFunction1<1:0,1:0>){}[0]
@@ -241,9 +245,10 @@ final class <#A: kotlin/Any?> dev.deeptelar.telar/GraphConfig { // dev.deeptelar
 }
 
 final class <#A: kotlin/Any?> dev.deeptelar.telar/MemoryCheckpointer : dev.deeptelar.telar/Checkpointer<#A> { // dev.deeptelar.telar/MemoryCheckpointer|null[0]
-    constructor <init>() // dev.deeptelar.telar/MemoryCheckpointer.<init>|<init>(){}[0]
+    constructor <init>(kotlin/Int = ...) // dev.deeptelar.telar/MemoryCheckpointer.<init>|<init>(kotlin.Int){}[0]
 
     final suspend fun delete(kotlin/String) // dev.deeptelar.telar/MemoryCheckpointer.delete|delete(kotlin.String){}[0]
+    final suspend fun history(kotlin/String): kotlin.collections/List<dev.deeptelar.telar/Checkpoint<#A>> // dev.deeptelar.telar/MemoryCheckpointer.history|history(kotlin.String){}[0]
     final suspend fun load(kotlin/String): dev.deeptelar.telar/Checkpoint<#A>? // dev.deeptelar.telar/MemoryCheckpointer.load|load(kotlin.String){}[0]
     final suspend fun save(kotlin/String, dev.deeptelar.telar/Checkpoint<#A>) // dev.deeptelar.telar/MemoryCheckpointer.save|save(kotlin.String;dev.deeptelar.telar.Checkpoint<1:0>){}[0]
 }
@@ -401,11 +406,19 @@ final class dev.deeptelar.telar/SubgraphPosition { // dev.deeptelar.telar/Subgra
     final fun toString(): kotlin/String // dev.deeptelar.telar/SubgraphPosition.toString|toString(){}[0]
 }
 
+final class dev.deeptelar.telar/ThreadAlreadyExistsException : dev.deeptelar.telar/TelarException { // dev.deeptelar.telar/ThreadAlreadyExistsException|null[0]
+    constructor <init>(kotlin/String) // dev.deeptelar.telar/ThreadAlreadyExistsException.<init>|<init>(kotlin.String){}[0]
+
+    final val threadId // dev.deeptelar.telar/ThreadAlreadyExistsException.threadId|{}threadId[0]
+        final fun <get-threadId>(): kotlin/String // dev.deeptelar.telar/ThreadAlreadyExistsException.threadId.<get-threadId>|<get-threadId>(){}[0]
+}
+
 final const val dev.deeptelar.telar/END // dev.deeptelar.telar/END|{}END[0]
     final fun <get-END>(): kotlin/String // dev.deeptelar.telar/END.<get-END>|<get-END>(){}[0]
 final const val dev.deeptelar.telar/START // dev.deeptelar.telar/START|{}START[0]
     final fun <get-START>(): kotlin/String // dev.deeptelar.telar/START.<get-START>|<get-START>(){}[0]
 
+final fun <#A: kotlin/Any?> (kotlin.collections/List<dev.deeptelar.telar/Checkpoint<#A>>).dev.deeptelar.telar/withCheckpoint(dev.deeptelar.telar/Checkpoint<#A>, kotlin/Int = ...): kotlin.collections/List<dev.deeptelar.telar/Checkpoint<#A>> // dev.deeptelar.telar/withCheckpoint|withCheckpoint@kotlin.collections.List<dev.deeptelar.telar.Checkpoint<0:0>>(dev.deeptelar.telar.Checkpoint<0:0>;kotlin.Int){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> (kotlinx.coroutines.flow/Flow<dev.deeptelar.telar/GraphEvent<#A>>).dev.deeptelar.telar/states(): kotlinx.coroutines.flow/Flow<#A> // dev.deeptelar.telar/states|states@kotlinx.coroutines.flow.Flow<dev.deeptelar.telar.GraphEvent<0:0>>(){0§<kotlin.Any?>}[0]
 final fun <#A: kotlin/Any?> dev.deeptelar.telar/StateGraph(kotlin/Function1<dev.deeptelar.telar/StateGraph<#A>, kotlin/Unit>): dev.deeptelar.telar/StateGraph<#A> // dev.deeptelar.telar/StateGraph|StateGraph(kotlin.Function1<dev.deeptelar.telar.StateGraph<0:0>,kotlin.Unit>){0§<kotlin.Any?>}[0]
 final suspend fun <#A: kotlin/Any?> dev.deeptelar.telar/interrupt(#A): kotlin/Nothing // dev.deeptelar.telar/interrupt|interrupt(0:0){0§<kotlin.Any?>}[0]

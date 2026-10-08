@@ -48,33 +48,76 @@ public data class SubgraphPosition(
 )
 
 /**
- * Persists the latest [Checkpoint] of each thread so a run can pause and resume later, even in a
- * different process.
+ * Persists the checkpoints of each thread so a run can pause and resume later, even in a different
+ * process.
+ *
+ * A checkpointer has to keep the latest checkpoint of a thread. One that also keeps the earlier
+ * ones implements [history], and [CompiledGraph.history] and [CompiledGraph.fork] can then go back
+ * to an earlier step. The checkpointers of this library do; [withCheckpoint] has the rule for a
+ * checkpointer of your own.
  */
 public interface Checkpointer<State> {
-    /** Stores [checkpoint] as the latest checkpoint of [threadId], replacing any previous one. */
+    /**
+     * Stores [checkpoint] as the latest checkpoint of [threadId].
+     *
+     * A checkpointer that keeps a history adds it to the history of the thread, where it replaces
+     * the checkpoints with its step or a later one: a thread has one checkpoint for each step.
+     */
     public suspend fun save(threadId: String, checkpoint: Checkpoint<State>)
 
     /** Returns the latest checkpoint of [threadId], or `null` if the thread has none. */
     public suspend fun load(threadId: String): Checkpoint<State>?
 
-    /** Removes the checkpoint of [threadId]. Does nothing if the thread has none. */
+    /**
+     * Returns the checkpoints that [threadId] still has, oldest first, ending with the one that
+     * [load] returns. Empty if the thread has none.
+     *
+     * The default is for a checkpointer that keeps only the latest checkpoint.
+     */
+    public suspend fun history(threadId: String): List<Checkpoint<State>> = listOfNotNull(load(threadId))
+
+    /** Removes every checkpoint of [threadId]. Does nothing if the thread has none. */
     public suspend fun delete(threadId: String)
 }
 
 /**
+ * Returns this history of a thread after [checkpoint] is saved, for a [Checkpointer] that keeps a
+ * history: the checkpoints with an earlier step, then [checkpoint], and of those the last
+ * [maxHistory].
+ *
+ * A checkpoint replaces the one with the same step, because both stand at the same place of the
+ * run: a run that pauses before its next nodes, or in one of them, saves that place again.
+ */
+public fun <State> List<Checkpoint<State>>.withCheckpoint(
+    checkpoint: Checkpoint<State>,
+    maxHistory: Int = Int.MAX_VALUE,
+): List<Checkpoint<State>> = (filter { it.step < checkpoint.step } + checkpoint).takeLast(maxHistory)
+
+/**
  * A [Checkpointer] that keeps checkpoints in memory. Intended for tests and short-lived processes.
  * Safe to share between coroutines and threads.
+ *
+ * @param maxHistory how many checkpoints a thread keeps, counted from the latest. The default keeps
+ * all of them; `1` keeps only the latest.
+ * @throws GraphValidationException if [maxHistory] is not positive.
  */
-public class MemoryCheckpointer<State> : Checkpointer<State> {
+public class MemoryCheckpointer<State>(
+    private val maxHistory: Int = Int.MAX_VALUE,
+) : Checkpointer<State> {
     private val mutex = Mutex()
-    private val memory = mutableMapOf<String, Checkpoint<State>>()
+    private val memory = mutableMapOf<String, List<Checkpoint<State>>>()
 
-    override suspend fun save(threadId: String, checkpoint: Checkpoint<State>) {
-        mutex.withLock { memory[threadId] = checkpoint }
+    init {
+        if (maxHistory <= 0) throw GraphValidationException("maxHistory must be positive, was $maxHistory.")
     }
 
-    override suspend fun load(threadId: String): Checkpoint<State>? = mutex.withLock { memory[threadId] }
+    override suspend fun save(threadId: String, checkpoint: Checkpoint<State>) {
+        mutex.withLock { memory[threadId] = memory[threadId].orEmpty().withCheckpoint(checkpoint, maxHistory) }
+    }
+
+    override suspend fun load(threadId: String): Checkpoint<State>? = mutex.withLock { memory[threadId]?.lastOrNull() }
+
+    override suspend fun history(threadId: String): List<Checkpoint<State>> = mutex.withLock { memory[threadId].orEmpty() }
 
     override suspend fun delete(threadId: String) {
         mutex.withLock { memory.remove(threadId) }

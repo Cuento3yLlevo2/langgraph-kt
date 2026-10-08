@@ -26,6 +26,54 @@ class MemoryCheckpointerTest {
         }
 
     @Test
+    fun `a thread keeps one checkpoint for each step`() =
+        runTest {
+            val checkpointer = MemoryCheckpointer<TestState>()
+            assertEquals(emptyList(), checkpointer.history("t"))
+
+            checkpointer.save("t", Checkpoint(TestState(0), listOf("a"), step = 0))
+            checkpointer.save("t", Checkpoint(TestState(1), listOf("b"), step = 1))
+            // The same place of the run, saved again: a pause before "b".
+            checkpointer.save("t", Checkpoint(TestState(1), listOf("b"), step = 1, interruptedBefore = true))
+            checkpointer.save("t", Checkpoint(TestState(2), listOf("c"), step = 2))
+            checkpointer.save("other", Checkpoint(TestState(9), listOf("a"), step = 0))
+
+            assertEquals(
+                listOf(
+                    Checkpoint(TestState(0), listOf("a"), step = 0),
+                    Checkpoint(TestState(1), listOf("b"), step = 1, interruptedBefore = true),
+                    Checkpoint(TestState(2), listOf("c"), step = 2),
+                ),
+                checkpointer.history("t"),
+            )
+
+            // A checkpoint of an earlier step takes the place of that step and of what came after it.
+            checkpointer.save("t", Checkpoint(TestState(7), listOf("b"), step = 1))
+            assertEquals(listOf(TestState(0), TestState(7)), checkpointer.history("t").map { it.state })
+
+            checkpointer.delete("t")
+            assertEquals(emptyList(), checkpointer.history("t"))
+            assertEquals(1, checkpointer.history("other").size)
+        }
+
+    @Test
+    fun `maxHistory limits how many checkpoints a thread keeps`() =
+        runTest {
+            val lastTwo = MemoryCheckpointer<TestState>(maxHistory = 2)
+            val latest = MemoryCheckpointer<TestState>(maxHistory = 1)
+
+            repeat(4) { step ->
+                lastTwo.save("t", Checkpoint(TestState(step), listOf("a"), step = step))
+                latest.save("t", Checkpoint(TestState(step), listOf("a"), step = step))
+            }
+
+            assertEquals(listOf(2, 3), lastTwo.history("t").map { it.step })
+            assertEquals(listOf(3), latest.history("t").map { it.step })
+            assertEquals(3, latest.load("t")?.step)
+            assertFailsWith<GraphValidationException> { MemoryCheckpointer<TestState>(maxHistory = 0) }
+        }
+
+    @Test
     fun `concurrent saves from many coroutines are all stored`() =
         runTest {
             val checkpointer = MemoryCheckpointer<TestState>()

@@ -49,6 +49,11 @@ import kotlin.coroutines.EmptyCoroutineContext
  * one step of this graph. When one of its nodes calls [interrupt], this run pauses as well, and
  * [resume] continues inside the subgraph, at the node that paused.
  *
+ * ## History
+ *
+ * A checkpointer keeps the checkpoint of every step of a thread. [history] reads them, and [fork]
+ * continues from an earlier one on a new thread.
+ *
  * ## Failures and retries
  *
  * With a checkpointer, a step is saved once its nodes have run, their results are merged and the
@@ -139,6 +144,82 @@ public class CompiledGraph<State> internal constructor(
             GraphResult.Interrupted(checkpoint.state, checkpoint.nextNodes)
         }
     }
+
+    /**
+     * Returns the checkpoints of the run of [GraphConfig.threadId], oldest first: the one that was
+     * saved when the run started, and one for each step that finished since. The last one is where
+     * the thread stands now. Empty when the thread has no checkpoint.
+     *
+     * ```kotlin
+     * val history = graph.history(config)
+     * history.forEach { println("after step ${it.step}: ${it.state}, next ${it.nextNodes}") }
+     * ```
+     *
+     * A run that paused has the state it paused with in the checkpoint of its last step. [invoke]
+     * starts the history of a thread again. How far back the history goes is up to the
+     * [Checkpointer]: one that keeps only the latest checkpoint returns that one.
+     *
+     * @throws GraphValidationException if [config] has no checkpointer.
+     */
+    public suspend fun history(config: GraphConfig<State>): List<Checkpoint<State>> {
+        val checkpointer =
+            config.checkpointer ?: throw GraphValidationException("history() needs a GraphConfig with a checkpointer.")
+        return checkpointer.history(config.threadId)
+    }
+
+    /**
+     * Continues from [checkpoint] on the new thread [GraphConfig.threadId], and leaves the thread
+     * that [checkpoint] comes from as it is. Use it to go back to an earlier step of a run and try
+     * something else from there: another answer of a person, a corrected state, a changed node.
+     *
+     * ```kotlin
+     * val beforeReview = graph.history(config).first { it.nextNodes == listOf("review") }
+     * val retry = graph.fork(beforeReview, config.copy(threadId = "ticket-42-retry")) { it.copy(approved = false) }
+     * ```
+     *
+     * The new thread starts with [checkpoint], with the state that [update] returns, and runs its
+     * next nodes like [resume] does. It keeps the step numbers of the run it comes from.
+     *
+     * @param checkpoint where to continue from, usually one of [history].
+     * @param config the settings of the new run. Its thread must not have a checkpoint yet.
+     * @param update edits the state of [checkpoint] before execution continues.
+     * @throws GraphValidationException if [config] has no checkpointer, [checkpoint] is the end of
+     * a run, or it names nodes that are not in this graph.
+     * @throws ThreadAlreadyExistsException if the thread of [config] already has a checkpoint.
+     */
+    public suspend fun fork(
+        checkpoint: Checkpoint<State>,
+        config: GraphConfig<State>,
+        update: suspend (State) -> State = { it },
+    ): GraphResult<State> = forkEvents(checkpoint, config, update, progress = false).last().toResult()
+
+    /** Like [fork], but returns a cold [Flow] of [GraphEvent]s. See [stream]. */
+    public fun streamFork(
+        checkpoint: Checkpoint<State>,
+        config: GraphConfig<State>,
+        update: suspend (State) -> State = { it },
+    ): Flow<GraphEvent<State>> = forkEvents(checkpoint, config, update, progress = true)
+
+    private fun forkEvents(
+        checkpoint: Checkpoint<State>,
+        config: GraphConfig<State>,
+        update: suspend (State) -> State,
+        progress: Boolean,
+    ): Flow<GraphEvent<State>> =
+        flow {
+            validateInterrupts(config)
+            val checkpointer =
+                config.checkpointer ?: throw GraphValidationException("fork() needs a GraphConfig with a checkpointer.")
+            if (checkpoint.isComplete) {
+                throw GraphValidationException("fork() needs a checkpoint with nodes to run next. This one is the end of a run.")
+            }
+            validatePosition(config.threadId, checkpoint.nextNodes, checkpoint.subgraphs)
+            if (checkpointer.load(config.threadId) != null) throw ThreadAlreadyExistsException(config.threadId)
+            // Save the start of the new thread before anything runs, so that a failure in its first step can be resumed.
+            val start = checkpoint.copy(state = update(checkpoint.state))
+            checkpointer.save(config.threadId, start)
+            run(config, RunStart(start.state, start.nextNodes, start.step, start.interruptedBefore, start.subgraphs), progress)
+        }
 
     /**
      * Like [invoke], but returns a cold [Flow] that emits a [GraphEvent] as each node starts and
