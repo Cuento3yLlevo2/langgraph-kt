@@ -10,10 +10,12 @@ dependencies {
     dokka(project(":telar-agent"))
     dokka(project(":telar-anthropic"))
     dokka(project(":telar-langchain4j"))
+    dokka(project(":telar-typesafe"))
     kover(project(":telar-core"))
     kover(project(":telar-serialization"))
     kover(project(":telar-checkpoint-file"))
     kover(project(":telar-agent"))
     kover(project(":telar-anthropic"))
     kover(project(":telar-langchain4j"))
+    kover(project(":telar-typesafe"))
 }
