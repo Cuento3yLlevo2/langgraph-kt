@@ -146,15 +146,17 @@ ESCALATION: Hi Cleo, a colleague from our team will reply to you personally toda
 ```kotlin
 dependencies {
     // The graph builder and the engine. This is all the quick start needs.
-    implementation("dev.deeptelar:telar-core:0.1.0-alpha06")
+    implementation("dev.deeptelar:telar-core:0.1.0-alpha07")
 
     // Optional modules. Add only the ones you use.
-    implementation("dev.deeptelar:telar-serialization:0.1.0-alpha06")      // save @Serializable states
-    implementation("dev.deeptelar:telar-checkpoint-file:0.1.0-alpha06")    // save runs as JSON files
-    implementation("dev.deeptelar:telar-checkpoint-browser:0.1.0-alpha06") // save runs in a browser's localStorage (JS and Wasm)
-    implementation("dev.deeptelar:telar-agent:0.1.0-alpha06")              // chat models, tools and the tool-calling agent
-    implementation("dev.deeptelar:telar-anthropic:0.1.0-alpha06")          // call Claude, on every platform
-    implementation("dev.deeptelar:telar-langchain4j:0.1.0-alpha06")        // call AI models through LangChain4j (JVM)
+    implementation("dev.deeptelar:telar-serialization:0.1.0-alpha07")      // save @Serializable states
+    implementation("dev.deeptelar:telar-checkpoint-file:0.1.0-alpha07")    // save runs as JSON files
+    implementation("dev.deeptelar:telar-checkpoint-browser:0.1.0-alpha07") // save runs in a browser's localStorage (JS and Wasm)
+    implementation("dev.deeptelar:telar-agent:0.1.0-alpha07")              // chat models, tools and the tool-calling agent
+    implementation("dev.deeptelar:telar-anthropic:0.1.0-alpha07")          // call Claude, on every platform
+    implementation("dev.deeptelar:telar-openai:0.1.0-alpha07")             // call OpenAI, Ollama and compatible servers, on every platform
+    implementation("dev.deeptelar:telar-langchain4j:0.1.0-alpha07")        // call AI models through LangChain4j (JVM)
+    implementation("dev.deeptelar:telar-typesafe:0.1.0-alpha07")           // ask Jev, a decision model, on every platform
 }
 ```
 
@@ -169,16 +171,16 @@ dependencies {
 | `telar-checkpoint-browser` | JS and Wasm in a browser | `LocalStorageCheckpointer`, runs that survive a page reload |
 | `telar-agent` | same as core | `ChatModel`, `Tool`, and the tool-calling agent: `toolAgent` / `toolLoop` |
 | `telar-anthropic` | same as core | `AnthropicChatModel`, Claude through Ktor |
-| `telar-openai` | same as core | `OpenAiChatModel`: OpenAI, Ollama and other servers with the Chat Completions API, through Ktor. Not released yet: it comes with the version after `0.1.0-alpha06`. |
+| `telar-openai` | same as core | `OpenAiChatModel`: OpenAI, Ollama and other servers with the Chat Completions API, through Ktor |
 | `telar-langchain4j` | JVM (Java 17+) | `LangChain4jChatModel` and `chatNode` / `chatMessagesNode` for LangChain4j 1.x models |
-| `telar-typesafe` | same as core | `TypeSafeDecisionModel`: Jev, the decision model of TypeSafe AI, through Ktor. Not released yet: it comes with the version after `0.1.0-alpha06`. |
+| `telar-typesafe` | same as core | `TypeSafeDecisionModel`: Jev, the decision model of TypeSafe AI, through Ktor |
 
 Requires Kotlin 2.x. JVM artifacts target Java 11, except `telar-langchain4j`, which needs
 Java 17 because LangChain4j does.
 
 ### Status
 
-Alpha. `0.1.0-alpha06` is the latest release, and it is on Maven Central. The API may still change
+Alpha. `0.1.0-alpha07` is the latest release, and it is on Maven Central. The API may still change
 before `1.0`; the [changelog](CHANGELOG.md) lists what changes in each version, and the
 [roadmap](ROADMAP.md) lists what is planned.
 

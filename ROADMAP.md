@@ -16,15 +16,12 @@ Last updated: 2026-10-08.
 
 ## Where the project is
 
-`0.1.0-alpha06` is on Maven Central. It has the graph builder and the engine (loops, parallel
-branches, streaming, checkpoints, pausing for a person), checkpointers for memory, files and the
-browser, a tool-calling agent for every platform, and model modules for Claude and for LangChain4j.
-The API can still change in any release.
-
-Since that release, `main` also has `interrupt`: a node pauses the run in the middle of its work, for
-example to ask a person a question it only knows at run time. And it has `telar-openai`, a model
-module for every platform that calls OpenAI, Ollama and the other servers with the Chat Completions
-API.
+`0.1.0-alpha07` is on Maven Central. It has the graph builder and the engine: loops, parallel
+branches, subgraphs, streaming, checkpoints with the history of a run, and pausing for a person,
+before a node or in the middle of its work. Around the engine it has checkpointers for memory, files
+and the browser, a tool-calling agent for every platform, and model modules for Claude, for OpenAI,
+Ollama and the other servers with the Chat Completions API, for LangChain4j, and for Jev, a decision
+model. The API can still change in any release.
 
 ## The way to 1.0
 
@@ -48,11 +45,9 @@ These change `telar-core`, so they come first.
 
 | Feature | What you get | State | Issue |
 |---|---|---|---|
-| Subgraphs | A compiled graph becomes a node of another graph, with a mapping between the two states and one thread for both. On `main`: `subgraph`, a run that pauses inside a subgraph and resumes there, the events of a subgraph in the stream of the graph around it, and the subgraph in `topology`. Still to come: `interruptBefore` for a node of a subgraph, and a retry after a failure that continues inside the subgraph. | In progress | [#34] |
-| Checkpoint history and forks | A thread keeps every step, not only the last one. Read an earlier state, or continue from it on a new thread without changing the original. This changes the `Checkpointer` interface. | Planned | [#35] |
+| Subgraphs | A compiled graph becomes a node of another graph, with a mapping between the two states and one thread for both. Released: `subgraph`, a run that pauses inside a subgraph and resumes there, the events of a subgraph in the stream of the graph around it, and the subgraph in `topology`. Still to come: `interruptBefore` for a node of a subgraph, and a retry after a failure that continues inside the subgraph. | In progress | [#34] |
 | Fan-out over a list | One node runs once per item of a list, all at the same time, when the number of items is only known at run time. Today the edges fix how many nodes run in parallel. | Planned | |
 | Retry and time limit for a node | A node says how often it may be tried again and how long it may take. Today a failed run is retried by hand with `resume`. | Planned | |
-| A merge rule for one property | "Add to this list, replace that value", written once in place of a `Reducer` that merges whole states by hand. Nodes with `work` and `update` already cover most graphs, and Kotlin Multiplatform has no reflection, so the design is open. It is decided before the beta, because it changes how a state is written. | Exploring | [#41] |
 
 ## 2. Around the engine
 
@@ -62,7 +57,6 @@ New modules and additions to `telar-agent`. They do not change the core.
 |---|---|---|---|
 | Database checkpointer | Saves runs in a SQL database, for servers and for Android apps. | Planned | |
 | Typed answers from a model | Ask a model for a `@Serializable` class and get an instance of it, built on the schema generator that tools already use. | Planned | |
-| Decision models | An interface for models that classify instead of chat, such as Jev: fast, cheap, and with an answer of a fixed type. A router built on it picks the next node of a graph. "Typed answers from a model" above comes first: it gives a typed router with any chat model. | Planned | [#40] |
 | Tracing | Hooks in the engine that report every node, edge, tool call and token count, and a module that sends them to OpenTelemetry. | Planned | [#38] |
 | Helpers for tests | `telar-test`: a model that gives the answers a test wrote down, so that a graph with an agent is tested without an API key and without a model of your own. | Planned | |
 | One version for all modules | `telar-bom`: a bill of materials. An app names the version of Telar once, and every module it adds uses that version. | Planned | |
@@ -113,7 +107,5 @@ To build something on this page, comment on its issue first, or open one if it h
 approach can be discussed. [CONTRIBUTING.md](CONTRIBUTING.md) has the setup and the design rules.
 
 [#34]: https://github.com/deeptelar/telar/issues/34
-[#35]: https://github.com/deeptelar/telar/issues/35
 [#38]: https://github.com/deeptelar/telar/issues/38
 [#39]: https://github.com/deeptelar/telar/issues/39
-[#41]: https://github.com/deeptelar/telar/issues/41

@@ -7,8 +7,15 @@ breaking changes.
 
 ## [Unreleased]
 
+## [0.1.0-alpha07] - 2026-10-08
+
 ### Added
 
+- `telar-openai`, a new module for every target. `OpenAiChatModel` calls a model through the Chat
+  Completions API, with tools and streaming. OpenAI is the default, `OpenAiChatModel.ollama` calls a
+  model that Ollama runs on your machine, and `baseUrl` reaches any other server with this API, such
+  as LM Studio, vLLM, Groq or OpenRouter. Before, these models were reached through LangChain4j, on
+  the JVM only.
 - Decision models: models that decide instead of writing. `DecisionModel` in `telar-agent` is the
   interface, next to `ChatModel`: a model picks one of your options, answers yes or no, or rates on
   a scale, and says how sure it is. `choose`, `isYes` and `score` ask one question, and
@@ -37,12 +44,6 @@ breaking changes.
   `GraphEvent` needs a branch for it.**
 - `GraphTopology.subgraphs`: the nodes and edges of the graph behind each subgraph node.
 - `textDelta` also reads the text of a model that runs inside a subgraph.
-
-- `telar-openai`, a new module for every target. `OpenAiChatModel` calls a model through the Chat
-  Completions API, with tools and streaming. OpenAI is the default, `OpenAiChatModel.ollama` calls a
-  model that Ollama runs on your machine, and `baseUrl` reaches any other server with this API, such
-  as LM Studio, vLLM, Groq or OpenRouter. Before, these models were reached through LangChain4j, on
-  the JVM only.
 
 ### Changed
 
@@ -245,7 +246,8 @@ First public release. Everything below is new compared with the unpublished beta
 - `START` counted toward `maxIterations`.
 - `FileCheckpointer` did not write the format version into its files.
 
-[Unreleased]: https://github.com/deeptelar/telar/compare/v0.1.0-alpha06...HEAD
+[Unreleased]: https://github.com/deeptelar/telar/compare/v0.1.0-alpha07...HEAD
+[0.1.0-alpha07]: https://github.com/deeptelar/telar/compare/v0.1.0-alpha06...v0.1.0-alpha07
 [0.1.0-alpha06]: https://github.com/deeptelar/telar/compare/v0.1.0-alpha05...v0.1.0-alpha06
 [0.1.0-alpha05]: https://github.com/deeptelar/telar/compare/v0.1.0-alpha04...v0.1.0-alpha05
 [0.1.0-alpha04]: https://github.com/deeptelar/telar/compare/v0.1.0-alpha03...v0.1.0-alpha04
