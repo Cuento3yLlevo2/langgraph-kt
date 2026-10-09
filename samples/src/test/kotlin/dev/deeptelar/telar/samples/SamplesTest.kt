@@ -4,11 +4,13 @@ import dev.deeptelar.telar.GraphConfig
 import dev.deeptelar.telar.GraphResult
 import dev.deeptelar.telar.MemoryCheckpointer
 import dev.deeptelar.telar.agent.AgentState
+import dev.deeptelar.telar.agent.ChatDecisionModel
 import dev.deeptelar.telar.agent.ChatMessage
 import dev.deeptelar.telar.agent.ChatRequest
 import dev.deeptelar.telar.agent.choose
 import dev.deeptelar.telar.anthropic.AnthropicChatModel
 import dev.deeptelar.telar.openai.OpenAiChatModel
+import dev.deeptelar.telar.typesafe.TypeSafeDecisionModel
 import dev.langchain4j.data.message.UserMessage
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -246,6 +248,39 @@ class SamplesTest {
             modelFor(client, mapOf("OPENAI_API_KEY" to "b", "OPENAI_BASE_URL" to "https://example.com/openai/")).chat(question)
 
             assertEquals(listOf("https://api.openai.com/v1/chat/completions", "https://example.com/openai/chat/completions"), asked)
+            client.close()
+        }
+
+    @Test
+    fun `the decision router sample picks its model from the environment`() {
+        val client = HttpClient()
+
+        assertSame(scriptedDecisions, decisionModelFor(client, emptyMap()))
+        assertIs<TypeSafeDecisionModel>(decisionModelFor(client, mapOf("TYPESAFE_API_KEY" to "t", "OPENAI_API_KEY" to "b")))
+        assertIs<ChatDecisionModel>(decisionModelFor(client, mapOf("TYPESAFE_API_KEY" to " ", "OPENAI_API_KEY" to "b")))
+        assertIs<ChatDecisionModel>(decisionModelFor(client, mapOf("OLLAMA_MODEL" to "llama3.2")))
+        client.close()
+    }
+
+    @Test
+    fun `a chat model routes the emails of the decision router sample`() =
+        runTest {
+            // What a chat model answers to ChatDecisionModel, as the content of a response of OpenAI.
+            val decision = """{\"decision\": {\"refund\": 0.02, \"technical\": 0.03, \"escalate\": 0.95}}"""
+            val client =
+                HttpClient(
+                    MockEngine {
+                        respond(
+                            """{"choices":[{"message":{"role":"assistant","content":"$decision"}}]}""",
+                            headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                        )
+                    },
+                )
+            val graph = routedSupport(decisionModelFor(client, mapOf("OPENAI_API_KEY" to "b")))
+
+            val state = graph.invoke(SupportEmail(sender = "Cleo", body = "This is unacceptable, third time I write to you!!")).state
+
+            assertEquals(Category.ESCALATION, state.category)
             client.close()
         }
 
