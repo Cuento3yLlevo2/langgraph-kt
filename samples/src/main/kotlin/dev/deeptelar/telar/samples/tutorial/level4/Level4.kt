@@ -27,7 +27,7 @@ suspend fun askDriver(millis: Long): String {
     return "the driver is 5 minutes away"
 }
 
-/** Level 4 of the tutorial in `docs/`: two slow lookups run at the same time. */
+/** Level 4 of the tutorial in `docs/tutorial/`: two slow lookups run at the same time. */
 fun helpDesk(lookupMillis: Long = 1_000): CompiledGraph<Ticket> =
     StateGraph<Ticket> {
         // `work` asks and returns what it found. The block after it writes that fact into the ticket.

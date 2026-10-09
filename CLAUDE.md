@@ -63,7 +63,7 @@ made under that name keep it. The repository is `deeptelar/telar` and the demo i
   interface for models that pick an option, answer yes or no, or rate, instead of writing;
   `decisionEdge` routes a graph with one
 - **`samples`**: runnable examples with tests; not published. `samples/.../tutorial/levelN` is the
-  code of the tutorial in `docs/`; a page shows its level's code and output, so change both together
+  code of the tutorial in `docs/tutorial/`; a page shows its level's code and output, so change both together
 - **`build-logic`**: convention plugins `telar.kmp-library`, `telar.web-library`,
   `telar.jvm-library`, `telar.quality` (ktlint, Kover, Dokka), `telar.publishing`,
   `telar.root`

@@ -48,7 +48,7 @@ Chrome. Install Chrome or Chromium, and set `CHROME_BIN` to its path if it is no
 | `telar-langchain4j` | LangChain4j integration (JVM) |
 | `telar-typesafe` | `TypeSafeDecisionModel`, the Jev decision model of TypeSafe AI through Ktor (multiplatform) |
 | `samples` | Runnable examples, not published. `samples/.../tutorial` holds the code of the tutorial |
-| `docs` | The tutorial, one Markdown page per level. `docs/brand` holds the logo and banners |
+| `docs` | `docs/tutorial` holds the tutorial, one Markdown page per level. `docs/brand` holds the logo and banners |
 | `build-logic` | Gradle convention plugins shared by all modules |
 | `gradle/libs.versions.toml` | Every dependency version |
 
@@ -91,7 +91,7 @@ Chrome. Install Chrome or Chromium, and set `CHROME_BIN` to its path if it is no
 4. Run `./gradlew check apiCheck`.
 5. If you changed the public API on purpose, run `./gradlew apiDump` and commit the updated files in
    `*/api/`. Reviewers use that diff to see exactly what changed for users.
-6. If you change a tutorial level in `samples/.../tutorial`, update its page in `docs/` so the code
+6. If you change a tutorial level in `samples/.../tutorial`, update its page in `docs/tutorial/` so the code
    and the output shown there stay the same as the program. `TutorialTest` pins the output.
 7. Add a line to the "Unreleased" section of [CHANGELOG.md](CHANGELOG.md) when users will notice
    the change.
