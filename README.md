@@ -57,8 +57,8 @@ implementation("io.ktor:ktor-client-cio:3.6.0")                // any Ktor engin
 
 The same agent with OpenAI, Gemini or a local Ollama model, a person who approves each tool call,
 and a chat that continues across turns: [Agents with tools](#agents-with-tools).
-When an agent alone is not enough, put it in a graph of your own with [`toolLoop`](#agents-with-tools)
-next to plain Kotlin steps, as the [quick start](#quick-start) below shows.
+When an agent alone is not enough, put it in a graph of your own with [`toolLoop`](#agents-with-tools),
+next to plain Kotlin steps such as those of the [quick start](#quick-start) below.
 
 ## Why Telar
 
