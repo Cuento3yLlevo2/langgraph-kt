@@ -995,7 +995,9 @@ toolLoop(
 
 Runnable version: [`ToolAgent`](samples/src/main/kotlin/dev/deeptelar/telar/samples/ToolAgent.kt). It
 runs without an API key, with Claude when `ANTHROPIC_API_KEY` is set, with OpenAI when
-`OPENAI_API_KEY` is set, and with a model of Ollama when `OLLAMA_MODEL` names one.
+`OPENAI_API_KEY` is set, and with a model of Ollama when `OLLAMA_MODEL` names one. `OPENAI_MODEL`
+names another model than `gpt-5`, and `OPENAI_BASE_URL` another server with the API of OpenAI, such
+as Gemini or Groq.
 [Level 6 of the tutorial](docs/06-the-agent.md) explains the same agent step by step.
 
 ### Inspecting a graph

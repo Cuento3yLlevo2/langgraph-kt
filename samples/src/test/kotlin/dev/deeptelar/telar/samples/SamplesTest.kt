@@ -5,10 +5,15 @@ import dev.deeptelar.telar.GraphResult
 import dev.deeptelar.telar.MemoryCheckpointer
 import dev.deeptelar.telar.agent.AgentState
 import dev.deeptelar.telar.agent.ChatMessage
+import dev.deeptelar.telar.agent.ChatRequest
 import dev.deeptelar.telar.anthropic.AnthropicChatModel
 import dev.deeptelar.telar.openai.OpenAiChatModel
 import dev.langchain4j.data.message.UserMessage
 import io.ktor.client.HttpClient
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.respond
+import io.ktor.http.HttpHeaders
+import io.ktor.http.headersOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.currentTime
 import kotlinx.coroutines.test.runTest
@@ -209,6 +214,29 @@ class SamplesTest {
         assertIs<OpenAiChatModel>(modelFor(client, mapOf("OLLAMA_MODEL" to "llama3.2")))
         client.close()
     }
+
+    @Test
+    fun `the tool agent sample sends its requests to the server that OPENAI_BASE_URL names`() =
+        runTest {
+            val asked = mutableListOf<String>()
+            val client =
+                HttpClient(
+                    MockEngine { request ->
+                        asked += request.url.toString()
+                        respond(
+                            """{"choices":[{"message":{"role":"assistant","content":"Hello"}}]}""",
+                            headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                        )
+                    },
+                )
+            val question = ChatRequest(listOf(ChatMessage.User("Hi")))
+
+            modelFor(client, mapOf("OPENAI_API_KEY" to "b")).chat(question)
+            modelFor(client, mapOf("OPENAI_API_KEY" to "b", "OPENAI_BASE_URL" to "https://example.com/openai/")).chat(question)
+
+            assertEquals(listOf("https://api.openai.com/v1/chat/completions", "https://example.com/openai/chat/completions"), asked)
+            client.close()
+        }
 
     @Test
     fun `help desk agent continues a conversation from the last result`() =
