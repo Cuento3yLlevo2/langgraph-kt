@@ -1,0 +1,11 @@
+/*
+ * The size of the logo in the page header of the API reference. Dokka replaces its own style sheet
+ * with a custom one named logo-styles.css.
+ *
+ * The loom is 16 pixels wide, so at 32 pixels each of its pixels is drawn as 2 × 2.
+ */
+:root {
+    --dokka-logo-image-url: url('../images/logo-icon.svg');
+    --dokka-logo-height: 32px;
+    --dokka-logo-width: 32px;
+}

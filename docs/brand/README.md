@@ -18,7 +18,7 @@ belongs to the banners, never inside the logo.
 | `telar-loom-mark.svg` | The loom alone |
 | `app-icon-512.png`, `app-icon-512-dark.png` | Avatars and app icons, such as the picture of the GitHub organization |
 | `favicon.svg`, `favicon.ico`, `favicon-16.png`, `favicon-32.png` | Browser tabs. A simpler 16-pixel loom with one node |
-| `dokka/logo-icon.svg` | The loom in the header of the API reference. Dokka finds it by this name |
+| `dokka/logo-icon.svg`, `dokka/logo-styles.css` | The loom in the header of the API reference, and its size there. Dokka finds both by these names |
 | `social-preview-1280x640.png` | The picture GitHub shows when someone shares a link to the repository |
 | `banner-social-1500x500.png` | Headers of social profiles |
 | `banner-slide-1280x720.png` | The title slide of a talk |
