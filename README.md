@@ -27,7 +27,6 @@ A model that calls your functions until it can answer. `toolAgent` is that loop,
 import dev.deeptelar.telar.agent.*
 import dev.deeptelar.telar.anthropic.AnthropicChatModel
 import io.ktor.client.HttpClient
-import io.ktor.client.plugins.HttpTimeout
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -39,8 +38,7 @@ val weather = Tool<City>("weather", "Returns today's weather in a city.") { city
 }
 
 suspend fun main() {
-    val client = HttpClient { install(HttpTimeout) { requestTimeoutMillis = 120_000 } }
-    val model = AnthropicChatModel(client, apiKey = System.getenv("ANTHROPIC_API_KEY"), model = "claude-opus-5-5")
+    val model = AnthropicChatModel(HttpClient(), apiKey = System.getenv("ANTHROPIC_API_KEY"), model = "claude-opus-5-5")
     val agent = toolAgent(model, tools = listOf(weather), system = "You are a travel assistant.")
 
     // The agent is a graph like any other: stream it, save it, pause it before a tool runs.
@@ -51,6 +49,7 @@ suspend fun main() {
 ```
 
 ```kotlin
+// build.gradle.kts. `@Serializable` needs the plugin kotlin("plugin.serialization").
 implementation("dev.deeptelar:telar-agent:0.1.0-alpha07")
 implementation("dev.deeptelar:telar-anthropic:0.1.0-alpha07") // or telar-openai: OpenAI, Gemini, Ollama, Groq, ...
 implementation("io.ktor:ktor-client-cio:3.6.0")                // any Ktor engine
@@ -65,8 +64,8 @@ next to plain Kotlin steps, as the [quick start](#quick-start) below shows.
 
 - **Your state is a plain `data class`.** Each node returns a `.copy()` of it, so a run is easy to
   test, print and save, and parallel branches cannot overwrite each other by accident.
-- **Mistakes fail in `compile()`, not in production.** An unknown node, a node nothing leads to, or
-  two parallel nodes with no rule to merge their results are reported before anything runs.
+- **Mistakes in the graph fail in `compile()`.** An unknown node, a node nothing leads to, or two
+  parallel nodes with no rule to merge their results are reported before anything runs.
 - **Pause anywhere, continue later.** Stop before a node, or call `interrupt` from inside one when
   it finds out it needs a person. The run is saved, and `resume` continues it hours later, in
   another process. `history` and `fork` go back to any earlier step.
@@ -79,10 +78,11 @@ next to plain Kotlin steps, as the [quick start](#quick-start) below shows.
   OpenAI, plus any LangChain4j model on the JVM. `ChatModel` is one function, so a model of your
   own, or a fake one in a test, takes a few lines.
 
-### Telar and other Kotlin libraries
+### Telar and other libraries
 
-Kotlin has other good choices for AI agents. This is how we see the differences; if something here
-is wrong or out of date, please [open an issue](https://github.com/deeptelar/telar/issues).
+A Kotlin project has other good choices for AI agents. This is how we see the differences in October
+2026; if something here is wrong or out of date, please
+[open an issue](https://github.com/deeptelar/telar/issues).
 
 | | Telar | [Koog](https://github.com/JetBrains/koog) | [LangGraph4j](https://github.com/langgraph4j/langgraph4j) | [LangChain4j](https://github.com/langchain4j/langchain4j) |
 |---|---|---|---|---|
@@ -909,9 +909,10 @@ val jev: DecisionModel = TypeSafeDecisionModel(HttpClient(), apiKey = key)
 ```
 
 `ChatDecisionModel` asks the chat model how likely it finds each option, in one call for all the
-questions of a request. Those probabilities are the model's own estimate, so its `confidence` is
-rougher than that of [Jev](https://docs.typesafe.ai), a model trained to decide. The examples below
-use `jev`; every one of them works with `decider` as well.
+questions of a request, and computes `confidence` from those numbers as Jev does. The numbers are
+the model's own estimate, so its `confidence` is rougher than that of
+[Jev](https://docs.typesafe.ai), a model trained to decide. The examples below use `jev`; every one
+of them works with `decider` as well.
 
 `decisionEdge` lets the model pick the next node. This is the quick start without `categoryOf`:
 
@@ -940,7 +941,8 @@ val graph = StateGraph<SupportEmail> {
 ```
 
 Runnable version: [`DecisionRouter`](samples/src/main/kotlin/dev/deeptelar/telar/samples/DecisionRouter.kt).
-It runs without an API key, and with Jev when `TYPESAFE_API_KEY` is set.
+It runs without an API key, with Jev when `TYPESAFE_API_KEY` is set, and with a chat model through
+`ChatDecisionModel` when the key of one is set, such as `OPENAI_API_KEY`.
 
 In a node, ask one question with `choose`, `isYes` or `score`, and keep the answer in the state:
 
@@ -955,8 +957,9 @@ val urgent = jev.isYes(email.body, "Does the customer need an answer today?").pr
 val anger = jev.score(email.body, "How angry is the customer?", listOf("Calm", "Annoyed", "Furious")).score
 ```
 
-- **`confidence` says how clearly one option won**, from 0 to 1. It does not say that the answer is
-  right. Try your limits on your own data before you rely on them.
+- **`confidence` says how clearly one option won**: how far the most likely option is above an even
+  split, from 0 to 1. It does not say that the answer is right. Try your limits on your own data
+  before you rely on them.
 - **Give the model an option for the rest.** It picks one of the options it has, also when none
   fits, and it can be sure of that pick. Asked to choose between `refund` and `technical` only, Jev
   gave "This is unacceptable, third time I write to you!!" to `technical` with a confidence of 0.9.
