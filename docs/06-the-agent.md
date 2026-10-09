@@ -278,7 +278,7 @@ val model: ChatModel = OpenAiChatModel(HttpClient(), apiKey = System.getenv("OPE
 val model: ChatModel = OpenAiChatModel.ollama(HttpClient(), model = "llama3.2")
 
 // Most other models, on the JVM, through LangChain4j. From the module telar-langchain4j.
-val model: ChatModel = LangChain4jChatModel(GoogleAiGeminiChatModel.builder().apiKey(System.getenv("GEMINI_API_KEY")).modelName("gemini-2.5-flash").build())
+val model: ChatModel = LangChain4jChatModel(GoogleAiGeminiChatModel.builder().apiKey(System.getenv("GEMINI_API_KEY")).modelName("gemini-3.8-flash").build())
 
 val state = helpDesk(model).invoke(AgentState("I'm Ana. Where is my pizza?")).state
 ```

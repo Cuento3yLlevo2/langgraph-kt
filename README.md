@@ -745,7 +745,7 @@ val model: ChatModel = OpenAiChatModel(HttpClient(), apiKey = key, model = "gpt-
 val model: ChatModel = OpenAiChatModel.ollama(HttpClient(), model = "llama3.2")
 
 // Any LangChain4j model, on the JVM (telar-langchain4j): Gemini, Bedrock, Mistral, ...
-val model: ChatModel = LangChain4jChatModel(GoogleAiGeminiChatModel.builder().apiKey(key).modelName("gemini-2.5-flash").build())
+val model: ChatModel = LangChain4jChatModel(GoogleAiGeminiChatModel.builder().apiKey(key).modelName("gemini-3.8-flash").build())
 
 // In a test, a lambda.
 val model = ChatModel { request -> ChatResponse(ChatMessage.Assistant("Thanks for your email!")) }
