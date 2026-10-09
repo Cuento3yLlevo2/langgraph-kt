@@ -252,6 +252,16 @@ class SamplesTest {
         }
 
     @Test
+    fun `a model that prints its decisions answers as the model it wraps`() =
+        runTest {
+            val options = mapOf<String, String?>("refund" to null, "technical" to null, "escalate" to null)
+
+            val answer = scriptedDecisions.printingDecisions().choose("I would like a refund.", "What does the customer want?", options)
+
+            assertEquals(scriptedDecisions.choose("I would like a refund.", "What does the customer want?", options), answer)
+        }
+
+    @Test
     fun `the decision router sample picks its model from the environment`() {
         val client = HttpClient()
 

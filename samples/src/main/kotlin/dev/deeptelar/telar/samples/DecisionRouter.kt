@@ -11,6 +11,7 @@ import dev.deeptelar.telar.agent.decisionEdge
 import dev.deeptelar.telar.typesafe.TypeSafeDecisionModel
 import io.ktor.client.HttpClient
 import kotlinx.serialization.json.jsonPrimitive
+import java.util.Locale
 
 /** Below this confidence a person reads the email. */
 const val SURE_ENOUGH = 0.6
@@ -105,9 +106,30 @@ fun decisionModelFor(client: HttpClient, environment: Map<String, String> = Syst
     }
 }
 
+/**
+ * This model, printing each option it picks and how sure it is. A [DecisionModel] is one function,
+ * so a model that wraps another takes a few lines.
+ */
+fun DecisionModel.printingDecisions(): DecisionModel =
+    DecisionModel { request ->
+        decide(request).also { response ->
+            response.answers.values.filterIsInstance<Answer.Choice>().forEach { answer ->
+                println("  picked ${answer.option}, confidence ${"%.2f".format(Locale.ROOT, answer.confidence)}")
+            }
+        }
+    }
+
 suspend fun main() {
     val client = HttpClient()
-    val graph = routedSupport(decisionModelFor(client))
+    val model = decisionModelFor(client)
+    println(
+        when (model) {
+            is TypeSafeDecisionModel -> "Jev decides."
+            is ChatDecisionModel -> "A chat model decides, through ChatDecisionModel."
+            else -> "No API key is set, so the scripted model decides."
+        },
+    )
+    val graph = routedSupport(model.printingDecisions())
 
     val emails =
         listOf(
