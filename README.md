@@ -751,12 +751,12 @@ val model: ChatModel = LangChain4jChatModel(GoogleAiGeminiChatModel.builder().ap
 val model = ChatModel { request -> ChatResponse(ChatMessage.Assistant("Thanks for your email!")) }
 ```
 
-Give the client time. The CIO engine of Ktor ends a request after 15 seconds, also when the answer is
-still arriving, and a model often takes longer. Install `HttpTimeout` with a limit that fits your
-models:
+A call to `AnthropicChatModel` or `OpenAiChatModel` may take five minutes, also with an engine of
+Ktor that has a shorter limit of its own, such as the 15 seconds of CIO. Change the limit with
+`timeout`. `timeout = null` leaves the limits to the client:
 
 ```kotlin
-val client = HttpClient { install(HttpTimeout) { requestTimeoutMillis = 5 * 60 * 1000 } }
+val model: ChatModel = OpenAiChatModel(HttpClient(), apiKey = key, model = "gpt-5", timeout = 10.minutes)
 ```
 
 A node that needs one piece of text from the model asks for it with `chat`:
@@ -873,6 +873,7 @@ val anger = jev.score(email.body, "How angry is the customer?", listOf("Calm", "
 - Several questions about the same text cost one call: `jev.decide(DecisionRequest(text, questions))`.
 - A failed call throws `DecisionModelException`. On an edge it is the `cause` of an
   `EdgeConditionException`.
+- A call to `TypeSafeDecisionModel` may take one minute. Change that with `timeout`.
 - In a test, a lambda is a model: `DecisionModel { request -> DecisionResponse(request.questions.mapValues { Answer.Choice("refund") }) }`.
 
 ### Agents with tools

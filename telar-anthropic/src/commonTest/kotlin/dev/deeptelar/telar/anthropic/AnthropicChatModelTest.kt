@@ -1,5 +1,6 @@
 package dev.deeptelar.telar.anthropic
 
+import dev.deeptelar.telar.GraphValidationException
 import dev.deeptelar.telar.agent.AgentState
 import dev.deeptelar.telar.agent.ChatMessage
 import dev.deeptelar.telar.agent.ChatModelException
@@ -11,12 +12,16 @@ import dev.deeptelar.telar.agent.toolAgent
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.HttpTimeoutCapability
 import io.ktor.client.request.HttpRequestData
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.TextContent
 import io.ktor.http.headersOf
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -31,6 +36,9 @@ import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 @Serializable
 data class Lookup(
@@ -291,6 +299,67 @@ class AnthropicChatModelTest {
             assertFailsWith<ChatModelException> { model("<html>").chat(hello) }
             assertFailsWith<ChatModelException> { model("[]").chat(hello) }
         }
+
+    @Test
+    fun `a request has the time limit of the model and none when the model has none`() =
+        runTest {
+            val limits = mutableListOf<Pair<Long?, Long?>?>()
+            val client =
+                HttpClient(
+                    MockEngine { request ->
+                        limits +=
+                            request.getCapabilityOrNull(HttpTimeoutCapability)?.let { it.requestTimeoutMillis to it.socketTimeoutMillis }
+                        respond(text("Hi"), headers = headersOf(HttpHeaders.ContentType, "application/json"))
+                    },
+                )
+
+            AnthropicChatModel(client, "test-key", "claude-opus-5-5").chat(hello)
+            AnthropicChatModel(client, "test-key", "claude-opus-5-5", timeout = 30.seconds).chat(hello)
+            AnthropicChatModel(client, "test-key", "claude-opus-5-5", timeout = null).chat(hello)
+
+            assertEquals(listOf<Pair<Long?, Long?>?>(300_000L to 300_000L, 30_000L to 30_000L, null), limits)
+        }
+
+    @Test
+    fun `a call that takes longer than the time limit of the model fails`() =
+        runTest {
+            val silent = HttpClient(MockEngine { awaitCancellation() })
+            val model = AnthropicChatModel(silent, "test-key", "claude-opus-5-5", timeout = 50.milliseconds)
+
+            val asked = assertFailsWith<ChatModelException> { model.chat(hello) }
+            val streamed = assertFailsWith<ChatModelException> { model.stream(hello).toList() }
+
+            assertEquals("The Claude API did not finish its answer within 50ms.", asked.message)
+            assertEquals(asked.message, streamed.message)
+        }
+
+    @Test
+    fun `a time limit of the client is named as one when the model has none`() =
+        runTest {
+            val silent = HttpClient(MockEngine { awaitCancellation() }) { install(HttpTimeout) { requestTimeoutMillis = 50 } }
+
+            val failure =
+                assertFailsWith<ChatModelException> {
+                    AnthropicChatModel(
+                        silent,
+                        "test-key",
+                        "claude-opus-5-5",
+                        timeout = null,
+                    ).chat(hello)
+                }
+
+            assertTrue(
+                failure.message!!.startsWith("The Claude API did not finish its answer in the time the client allows: "),
+                failure.message,
+            )
+        }
+
+    @Test
+    fun `a time limit that is not positive is rejected`() {
+        val client = HttpClient(MockEngine { respond("") })
+
+        assertFailsWith<GraphValidationException> { AnthropicChatModel(client, "test-key", "claude-opus-5-5", timeout = Duration.ZERO) }
+    }
 
     @Test
     fun `a failure to reach the API is an error with the cause`() =

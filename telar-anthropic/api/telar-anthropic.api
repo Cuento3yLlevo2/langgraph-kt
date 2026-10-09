@@ -1,8 +1,8 @@
 public final class dev/deeptelar/telar/anthropic/AnthropicChatModel : dev/deeptelar/telar/agent/ChatModel {
 	public static final field Companion Ldev/deeptelar/telar/anthropic/AnthropicChatModel$Companion;
 	public static final field DEFAULT_MAX_TOKENS I
-	public fun <init> (Lio/ktor/client/HttpClient;Ljava/lang/String;Ljava/lang/String;ILkotlinx/serialization/json/JsonObject;Ljava/util/Map;Ljava/lang/String;)V
-	public synthetic fun <init> (Lio/ktor/client/HttpClient;Ljava/lang/String;Ljava/lang/String;ILkotlinx/serialization/json/JsonObject;Ljava/util/Map;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lio/ktor/client/HttpClient;Ljava/lang/String;Ljava/lang/String;ILkotlinx/serialization/json/JsonObject;Ljava/util/Map;Ljava/lang/String;Lkotlin/time/Duration;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lio/ktor/client/HttpClient;Ljava/lang/String;Ljava/lang/String;ILkotlinx/serialization/json/JsonObject;Ljava/util/Map;Ljava/lang/String;Lkotlin/time/Duration;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun chat (Ldev/deeptelar/telar/agent/ChatRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun stream (Ldev/deeptelar/telar/agent/ChatRequest;)Lkotlinx/coroutines/flow/Flow;
 }

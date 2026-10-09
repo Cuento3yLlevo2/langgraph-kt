@@ -7,7 +7,7 @@
 
 // Library unique name: <telar:telar-typesafe>
 final class dev.deeptelar.telar.typesafe/TypeSafeDecisionModel : dev.deeptelar.telar.agent/DecisionModel { // dev.deeptelar.telar.typesafe/TypeSafeDecisionModel|null[0]
-    constructor <init>(io.ktor.client/HttpClient, kotlin/String, kotlin/String = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ..., kotlin/String = ...) // dev.deeptelar.telar.typesafe/TypeSafeDecisionModel.<init>|<init>(io.ktor.client.HttpClient;kotlin.String;kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.String){}[0]
+    constructor <init>(io.ktor.client/HttpClient, kotlin/String, kotlin/String = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ..., kotlin/String = ..., kotlin.time/Duration? = ...) // dev.deeptelar.telar.typesafe/TypeSafeDecisionModel.<init>|<init>(io.ktor.client.HttpClient;kotlin.String;kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.String;kotlin.time.Duration?){}[0]
 
     final suspend fun decide(dev.deeptelar.telar.agent/DecisionRequest): dev.deeptelar.telar.agent/DecisionResponse // dev.deeptelar.telar.typesafe/TypeSafeDecisionModel.decide|decide(dev.deeptelar.telar.agent.DecisionRequest){}[0]
 

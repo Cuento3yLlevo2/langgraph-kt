@@ -1,5 +1,6 @@
 package dev.deeptelar.telar.openai
 
+import dev.deeptelar.telar.GraphValidationException
 import dev.deeptelar.telar.agent.ChatEvent
 import dev.deeptelar.telar.agent.ChatMessage
 import dev.deeptelar.telar.agent.ChatModel
@@ -9,6 +10,10 @@ import dev.deeptelar.telar.agent.ChatResponse
 import dev.deeptelar.telar.agent.TokenUsage
 import dev.deeptelar.telar.agent.ToolCall
 import io.ktor.client.HttpClient
+import io.ktor.client.network.sockets.SocketTimeoutException
+import io.ktor.client.plugins.HttpRequestTimeoutException
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -40,6 +45,8 @@ import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.minutes
 
 /**
  * A [ChatModel] that calls a model through the Chat Completions API of OpenAI. Many other servers
@@ -66,9 +73,8 @@ import kotlinx.serialization.json.putJsonObject
  * Android, `ktor-client-darwin` on iOS or `ktor-client-js` in a browser. The client is yours: share
  * one between models, and close it when your app is done with it.
  *
- * Give the client time: the CIO engine of Ktor ends a request after 15 seconds, also when the answer
- * is still arriving. `HttpClient { install(HttpTimeout) { requestTimeoutMillis = 5 * 60 * 1000 } }`
- * gives a model five minutes.
+ * A call may take five minutes, whatever limits the client and its engine have: the CIO engine, for
+ * one, ends a request after 15 seconds. Change the limit with `timeout`.
  *
  * [chat] returns when the model has finished, and [stream] delivers the text while the model
  * writes it. A `toolAgent` uses [stream] when its run is collected with `stream`. What a server
@@ -90,15 +96,28 @@ import kotlinx.serialization.json.putJsonObject
  * @param headers more headers for every request, such as `OpenAI-Organization`.
  * @param baseUrl where the API lives, up to and including the version: this class adds
  * `/chat/completions` to it.
+ * @param timeout how long one call may take, from the request to the end of the answer, and how
+ * long it may wait for the next piece of the answer. It replaces the limits of [client] and of its
+ * engine for the requests of this model. `null` leaves those limits in place.
+ * @throws GraphValidationException if [timeout] is not positive.
  */
 public class OpenAiChatModel(
-    private val client: HttpClient,
+    client: HttpClient,
     private val apiKey: String?,
     private val model: String,
     private val parameters: JsonObject = JsonObject(emptyMap()),
     private val headers: Map<String, String> = emptyMap(),
     private val baseUrl: String = OPENAI_BASE_URL,
+    private val timeout: Duration? = 5.minutes,
 ) : ChatModel {
+    init {
+        if (timeout != null && !timeout.isPositive()) throw GraphValidationException("timeout must be positive, was $timeout.")
+    }
+
+    // Ktor applies the limit of a request only in a client that has the HttpTimeout plugin. This
+    // client has it, with everything else of the client it was made from, and shares its engine.
+    private val client: HttpClient = if (timeout == null) client else client.config { install(HttpTimeout) }
+
     /**
      * Sends [request] to the Chat Completions API and returns the model's answer.
      *
@@ -115,7 +134,7 @@ public class OpenAiChatModel(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            throw unreachable(e)
+            throw failed(e)
         }
 
         if (status !in 200..299) throw apiError(status, text)
@@ -160,7 +179,7 @@ public class OpenAiChatModel(
                     } catch (e: ChatModelException) {
                         failure = e
                     } catch (e: Exception) {
-                        failure = unreachable(e)
+                        failure = failed(e)
                     }
                     pieces.close()
                 }
@@ -177,10 +196,26 @@ public class OpenAiChatModel(
         this@OpenAiChatModel.headers.forEach { (name, value) -> header(name, value) }
         contentType(ContentType.Application.Json)
         setBody(body.toString())
+        this@OpenAiChatModel.timeout?.let { limit ->
+            timeout {
+                requestTimeoutMillis = limit.inWholeMilliseconds
+                socketTimeoutMillis = limit.inWholeMilliseconds
+            }
+        }
     }
 
-    private fun unreachable(cause: Exception): ChatModelException =
-        ChatModelException("Could not reach the API at $baseUrl: ${cause.message ?: cause::class.simpleName}", cause)
+    /** The exception for a request that ended without a response, or in the middle of one. */
+    private fun failed(cause: Exception): ChatModelException =
+        when {
+            cause !is HttpRequestTimeoutException && cause !is SocketTimeoutException ->
+                ChatModelException("Could not reach the API at $baseUrl: ${cause.message ?: cause::class.simpleName}", cause)
+            timeout != null -> ChatModelException("The API at $baseUrl did not finish its answer within $timeout.", cause)
+            else ->
+                ChatModelException(
+                    "The API at $baseUrl did not finish its answer in the time the client allows: ${cause.message}",
+                    cause,
+                )
+        }
 
     private fun apiError(status: Int, text: String): ChatModelException =
         ChatModelException("API error $status ${describe(errorIn(text), text)}")
@@ -263,13 +298,16 @@ public class OpenAiChatModel(
          *
          * @param baseUrl where Ollama serves the API. Change it when Ollama runs on another machine;
          * an Android emulator reaches the machine it runs on at `http://10.0.2.2:11434/v1`.
+         * @param timeout how long one call may take. A large model on a small machine can need more.
          */
         public fun ollama(
             client: HttpClient,
             model: String,
             parameters: JsonObject = JsonObject(emptyMap()),
             baseUrl: String = OLLAMA_BASE_URL,
-        ): OpenAiChatModel = OpenAiChatModel(client, apiKey = null, model = model, parameters = parameters, baseUrl = baseUrl)
+            timeout: Duration? = 5.minutes,
+        ): OpenAiChatModel =
+            OpenAiChatModel(client, apiKey = null, model = model, parameters = parameters, baseUrl = baseUrl, timeout = timeout)
     }
 }
 
