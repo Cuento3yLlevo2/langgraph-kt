@@ -283,8 +283,8 @@ val model: ChatModel = LangChain4jChatModel(GoogleAiGeminiChatModel.builder().ap
 val state = helpDesk(model).invoke(AgentState("I'm Ana. Where is my pizza?")).state
 ```
 
-A model can take a while, and the CIO engine of Ktor ends a request after 15 seconds. Give the
-client more time with `HttpClient { install(HttpTimeout) { requestTimeoutMillis = 5 * 60 * 1000 } }`.
+A model can take a while. A call to `AnthropicChatModel` or `OpenAiChatModel` may take five minutes;
+pass a `timeout` to change that.
 
 This snippet is not part of the runnable level, because it needs an account and a key, or a model
 on your machine. Keep the key out of your source code; read it from an environment variable as

@@ -1,5 +1,6 @@
 package dev.deeptelar.telar.typesafe
 
+import dev.deeptelar.telar.GraphValidationException
 import dev.deeptelar.telar.agent.Answer
 import dev.deeptelar.telar.agent.DecisionModel
 import dev.deeptelar.telar.agent.DecisionModelException
@@ -8,6 +9,10 @@ import dev.deeptelar.telar.agent.DecisionResponse
 import dev.deeptelar.telar.agent.Question
 import dev.deeptelar.telar.agent.TokenUsage
 import io.ktor.client.HttpClient
+import io.ktor.client.network.sockets.SocketTimeoutException
+import io.ktor.client.plugins.HttpRequestTimeoutException
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -27,6 +32,8 @@ import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.minutes
 
 /**
  * A [DecisionModel] that calls Jev, the decision model of TypeSafe AI, through its System One API.
@@ -42,8 +49,8 @@ import kotlinx.serialization.json.putJsonObject
  * ```
  *
  * `HttpClient()` uses the Ktor engine among your dependencies. The client is yours: share one
- * between models, and close it when your app is done with it. The CIO engine of Ktor ends a request
- * after 15 seconds; install the `HttpTimeout` plugin in [client] to change that.
+ * between models, and close it when your app is done with it. A call may take one minute, whatever
+ * limits the client and its engine have. Change the limit with `timeout`.
  *
  * The API answers `429` or `529` when it has too much to do. This class does not try again by
  * itself: install the `HttpRequestRetry` plugin of Ktor in [client] to retry those with a pause.
@@ -57,14 +64,26 @@ import kotlinx.serialization.json.putJsonObject
  * `jev-1.13.0` when you have set confidence limits for it.
  * @param headers more headers for every request.
  * @param baseUrl where the API lives. Change it to go through a proxy or a gateway.
+ * @param timeout how long one call may take. It replaces the limits of [client] and of its engine
+ * for the requests of this model. `null` leaves those limits in place.
+ * @throws GraphValidationException if [timeout] is not positive.
  */
 public class TypeSafeDecisionModel(
-    private val client: HttpClient,
+    client: HttpClient,
     private val apiKey: String,
     private val model: String = DEFAULT_MODEL,
     private val headers: Map<String, String> = emptyMap(),
     private val baseUrl: String = "https://api.typesafe.ai",
+    private val timeout: Duration? = 1.minutes,
 ) : DecisionModel {
+    init {
+        if (timeout != null && !timeout.isPositive()) throw GraphValidationException("timeout must be positive, was $timeout.")
+    }
+
+    // Ktor applies the limit of a request only in a client that has the HttpTimeout plugin. This
+    // client has it, with everything else of the client it was made from, and shares its engine.
+    private val client: HttpClient = if (timeout == null) client else client.config { install(HttpTimeout) }
+
     /**
      * Sends the questions of [request] to the System One API and returns Jev's answers.
      *
@@ -81,13 +100,19 @@ public class TypeSafeDecisionModel(
                     this@TypeSafeDecisionModel.headers.forEach { (name, value) -> header(name, value) }
                     contentType(ContentType.Application.Json)
                     setBody(body(request).toString())
+                    this@TypeSafeDecisionModel.timeout?.let { limit ->
+                        timeout {
+                            requestTimeoutMillis = limit.inWholeMilliseconds
+                            socketTimeoutMillis = limit.inWholeMilliseconds
+                        }
+                    }
                 }
             status = response.status.value
             text = response.bodyAsText()
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            throw DecisionModelException("Could not reach the TypeSafe API: ${e.message ?: e::class.simpleName}", e)
+            throw failed(e)
         }
 
         if (status !in 200..299) throw DecisionModelException("TypeSafe API error $status: ${text.trim().ifEmpty { "no details" }}")
@@ -132,6 +157,15 @@ public class TypeSafeDecisionModel(
                     }
                 }
             }
+        }
+
+    /** The exception for a request that ended without a response. */
+    private fun failed(cause: Exception): DecisionModelException =
+        when {
+            cause !is HttpRequestTimeoutException && cause !is SocketTimeoutException ->
+                DecisionModelException("Could not reach the TypeSafe API: ${cause.message ?: cause::class.simpleName}", cause)
+            timeout != null -> DecisionModelException("The TypeSafe API did not answer within $timeout.", cause)
+            else -> DecisionModelException("The TypeSafe API did not answer in the time the client allows: ${cause.message}", cause)
         }
 
     /** Reads the answer to [question], or returns `null` when [answer] is not an answer of its kind. */

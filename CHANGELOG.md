@@ -12,7 +12,22 @@ breaking changes.
 - `ChatDecisionModel` in `telar-agent`: a `DecisionModel` that asks any `ChatModel`, so `choose`,
   `isYes`, `score` and `decisionEdge` work with Claude, OpenAI, Gemini, Ollama or any other chat
   model. One call answers every question of a request. The model estimates how likely each option
-  is, and `confidence` is the lead of the most likely option over the next one.
+  is, and `confidence` is computed from those as Jev computes it: how far the most likely option is
+  above an even split.
+- `AnthropicChatModel`, `OpenAiChatModel` and `TypeSafeDecisionModel` have a `timeout`: how long one
+  call may take, from the request to the end of the answer. The default is five minutes for the two
+  chat models and one minute for Jev.
+
+### Changed
+
+- **A call to a model is no longer cut off by a limit of the Ktor engine.** The CIO engine ends a
+  request after 15 seconds, also when a streamed answer is still arriving, and OkHttp ends one that
+  waits 10 seconds for data. The `timeout` of the model now replaces the limits of the client and
+  of its engine for the requests of that model. If you set those limits yourself with the
+  `HttpTimeout` plugin and want to keep them, pass `timeout = null`.
+- A call that ran out of time fails with a message that says so, such as `The API at
+  https://api.openai.com/v1 did not finish its answer within 5m.` It said `Could not reach the API`,
+  also when a part of the answer had arrived.
 
 ### Fixed
 

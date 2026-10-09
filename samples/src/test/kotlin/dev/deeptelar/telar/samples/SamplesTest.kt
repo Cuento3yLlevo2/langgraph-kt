@@ -6,6 +6,7 @@ import dev.deeptelar.telar.MemoryCheckpointer
 import dev.deeptelar.telar.agent.AgentState
 import dev.deeptelar.telar.agent.ChatMessage
 import dev.deeptelar.telar.agent.ChatRequest
+import dev.deeptelar.telar.agent.choose
 import dev.deeptelar.telar.anthropic.AnthropicChatModel
 import dev.deeptelar.telar.openai.OpenAiChatModel
 import dev.langchain4j.data.message.UserMessage
@@ -102,13 +103,23 @@ class SamplesTest {
     fun `a decision model routes an email and an unsure decision goes to a person`() =
         runTest {
             val graph = routedSupport(scriptedDecisions)
+            val complaint = "This is unacceptable!!"
+            val twoRequests = "The app shows an error and I would like a refund."
+            val options = mapOf<String, String?>("refund" to null, "technical" to null, "escalate" to null)
 
             val categories =
-                listOf("I would like a refund.", "The app shows an error.", "This is unacceptable!!").map {
+                listOf("I would like a refund.", "The app shows an error.", complaint, twoRequests).map {
                     graph.invoke(SupportEmail(sender = "Ana", body = it)).state.category
                 }
 
-            assertEquals(listOf(Category.REFUND, Category.TECHNICAL, Category.ESCALATION), categories)
+            assertEquals(listOf(Category.REFUND, Category.TECHNICAL, Category.ESCALATION, Category.ESCALATION), categories)
+            // The complaint goes to a person because the model picks that, and the two requests because it is not sure.
+            val picked = scriptedDecisions.choose(complaint, "What does the customer want?", options)
+            val unsure = scriptedDecisions.choose(twoRequests, "What does the customer want?", options)
+            assertEquals("escalate", picked.option)
+            assertTrue(picked.confidence > SURE_ENOUGH)
+            assertEquals("refund", unsure.option)
+            assertTrue(unsure.confidence < SURE_ENOUGH)
         }
 
     @Test

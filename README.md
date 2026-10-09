@@ -829,12 +829,12 @@ val model: ChatModel = LangChain4jChatModel(GoogleAiGeminiChatModel.builder().ap
 val model = ChatModel { request -> ChatResponse(ChatMessage.Assistant("Thanks for your email!")) }
 ```
 
-Give the client time. The CIO engine of Ktor ends a request after 15 seconds, also when the answer is
-still arriving, and a model often takes longer. Install `HttpTimeout` with a limit that fits your
-models:
+A call to `AnthropicChatModel` or `OpenAiChatModel` may take five minutes, also with an engine of
+Ktor that has a shorter limit of its own, such as the 15 seconds of CIO. Change the limit with
+`timeout`. `timeout = null` leaves the limits to the client:
 
 ```kotlin
-val client = HttpClient { install(HttpTimeout) { requestTimeoutMillis = 5 * 60 * 1000 } }
+val model: ChatModel = OpenAiChatModel(HttpClient(), apiKey = key, model = "gpt-5", timeout = 10.minutes)
 ```
 
 A node that needs one piece of text from the model asks for it with `chat`:
@@ -929,8 +929,10 @@ val graph = StateGraph<SupportEmail> {
         routes = mapOf(
             refund to "Money back for an order or a charge",
             technical to "Help with something that does not work",
+            // An option for the rest: a model picks one of its options, also when none fits.
+            escalate to "A complaint, or anything else that a person should read",
         ),
-        // An email the model is not sure about goes to a person.
+        // An email the model is not sure about goes to a person too.
         minConfidence = 0.6,
         fallback = escalate,
     ) { email -> email.body } // what the model judges
@@ -955,11 +957,15 @@ val anger = jev.score(email.body, "How angry is the customer?", listOf("Calm", "
 
 - **`confidence` says how clearly one option won**, from 0 to 1. It does not say that the answer is
   right. Try your limits on your own data before you rely on them.
+- **Give the model an option for the rest.** It picks one of the options it has, also when none
+  fits, and it can be sure of that pick. Asked to choose between `refund` and `technical` only, Jev
+  gave "This is unacceptable, third time I write to you!!" to `technical` with a confidence of 0.9.
 - `decisionEdge` does not write the decision into the state. When the state should keep it, ask in a
   node as above, and route with `conditionalEdge` on what the node stored.
 - Several questions about the same text cost one call: `jev.decide(DecisionRequest(text, questions))`.
 - A failed call throws `DecisionModelException`. On an edge it is the `cause` of an
   `EdgeConditionException`.
+- A call to `TypeSafeDecisionModel` may take one minute. Change that with `timeout`.
 - In a test, a lambda is a model: `DecisionModel { request -> DecisionResponse(request.questions.mapValues { Answer.Choice("refund") }) }`.
 
 ### Agents with tools

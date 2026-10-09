@@ -24,9 +24,10 @@ import dev.deeptelar.telar.StateGraph
  * ```
  *
  * The model sees the names of the nodes in [routes] as its options, so name the nodes for what they
- * do. The decision is not written into the state. When the state should keep it, or the next step
- * needs the probabilities, ask the model in a node with [choose] and route with
- * `conditionalEdge` on what the node stored.
+ * do. It picks one of them also when none fits, and can be sure of that pick, so give it a route
+ * for what the others do not cover. The decision is not written into the state. When the state
+ * should keep it, or the next step needs the probabilities, ask the model in a node with [choose]
+ * and route with `conditionalEdge` on what the node stored.
  *
  * A failure of the model fails the run with an `EdgeConditionException`, which has the
  * [DecisionModelException] as its `cause`.

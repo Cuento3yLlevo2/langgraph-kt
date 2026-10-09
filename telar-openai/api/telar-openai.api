@@ -2,14 +2,14 @@ public final class dev/deeptelar/telar/openai/OpenAiChatModel : dev/deeptelar/te
 	public static final field Companion Ldev/deeptelar/telar/openai/OpenAiChatModel$Companion;
 	public static final field OLLAMA_BASE_URL Ljava/lang/String;
 	public static final field OPENAI_BASE_URL Ljava/lang/String;
-	public fun <init> (Lio/ktor/client/HttpClient;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;Ljava/util/Map;Ljava/lang/String;)V
-	public synthetic fun <init> (Lio/ktor/client/HttpClient;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;Ljava/util/Map;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lio/ktor/client/HttpClient;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;Ljava/util/Map;Ljava/lang/String;Lkotlin/time/Duration;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lio/ktor/client/HttpClient;Ljava/lang/String;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;Ljava/util/Map;Ljava/lang/String;Lkotlin/time/Duration;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun chat (Ldev/deeptelar/telar/agent/ChatRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun stream (Ldev/deeptelar/telar/agent/ChatRequest;)Lkotlinx/coroutines/flow/Flow;
 }
 
 public final class dev/deeptelar/telar/openai/OpenAiChatModel$Companion {
-	public final fun ollama (Lio/ktor/client/HttpClient;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;Ljava/lang/String;)Ldev/deeptelar/telar/openai/OpenAiChatModel;
-	public static synthetic fun ollama$default (Ldev/deeptelar/telar/openai/OpenAiChatModel$Companion;Lio/ktor/client/HttpClient;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;Ljava/lang/String;ILjava/lang/Object;)Ldev/deeptelar/telar/openai/OpenAiChatModel;
+	public final fun ollama-jSaE0eg (Lio/ktor/client/HttpClient;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;Ljava/lang/String;Lkotlin/time/Duration;)Ldev/deeptelar/telar/openai/OpenAiChatModel;
+	public static synthetic fun ollama-jSaE0eg$default (Ldev/deeptelar/telar/openai/OpenAiChatModel$Companion;Lio/ktor/client/HttpClient;Ljava/lang/String;Lkotlinx/serialization/json/JsonObject;Ljava/lang/String;Lkotlin/time/Duration;ILjava/lang/Object;)Ldev/deeptelar/telar/openai/OpenAiChatModel;
 }
 

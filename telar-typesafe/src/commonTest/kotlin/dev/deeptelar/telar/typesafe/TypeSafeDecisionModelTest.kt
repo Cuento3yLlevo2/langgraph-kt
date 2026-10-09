@@ -1,5 +1,6 @@
 package dev.deeptelar.telar.typesafe
 
+import dev.deeptelar.telar.GraphValidationException
 import dev.deeptelar.telar.START
 import dev.deeptelar.telar.StateGraph
 import dev.deeptelar.telar.agent.Answer
@@ -13,12 +14,15 @@ import dev.deeptelar.telar.agent.isYes
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.HttpTimeoutCapability
 import io.ktor.client.request.HttpRequestData
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.TextContent
 import io.ktor.http.headersOf
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
@@ -30,6 +34,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 class TypeSafeDecisionModelTest {
     private val sent = mutableListOf<HttpRequestData>()
@@ -250,6 +258,61 @@ class TypeSafeDecisionModelTest {
                 assertEquals("The TypeSafe API returned a response that is not a JSON object.", failure.message)
             }
         }
+
+    @Test
+    fun `a request has the time limit of the model and none when the model has none`() =
+        runTest {
+            val limits = mutableListOf<Pair<Long?, Long?>?>()
+            val client =
+                HttpClient(
+                    MockEngine { request ->
+                        limits +=
+                            request.getCapabilityOrNull(HttpTimeoutCapability)?.let { it.requestTimeoutMillis to it.socketTimeoutMillis }
+                        respond(urgent, headers = headersOf(HttpHeaders.ContentType, "application/json"))
+                    },
+                )
+
+            TypeSafeDecisionModel(client, "test-key").isYes(payouts, "Urgent?")
+            TypeSafeDecisionModel(client, "test-key", timeout = 30.seconds).isYes(payouts, "Urgent?")
+            TypeSafeDecisionModel(client, "test-key", timeout = null).isYes(payouts, "Urgent?")
+
+            assertEquals(listOf<Pair<Long?, Long?>?>(60_000L to 60_000L, 30_000L to 30_000L, null), limits)
+        }
+
+    @Test
+    fun `a call that takes longer than the time limit of the model fails`() =
+        runTest {
+            val silent = HttpClient(MockEngine { awaitCancellation() })
+            val model = TypeSafeDecisionModel(silent, "test-key", timeout = 50.milliseconds)
+
+            val asked = assertFailsWith<DecisionModelException> { model.isYes(payouts, "Urgent?") }
+
+            assertEquals("The TypeSafe API did not answer within 50ms.", asked.message)
+        }
+
+    @Test
+    fun `a time limit of the client is named as one when the model has none`() =
+        runTest {
+            val silent = HttpClient(MockEngine { awaitCancellation() }) { install(HttpTimeout) { requestTimeoutMillis = 50 } }
+
+            val failure =
+                assertFailsWith<DecisionModelException> {
+                    TypeSafeDecisionModel(
+                        silent,
+                        "test-key",
+                        timeout = null,
+                    ).isYes(payouts, "Urgent?")
+                }
+
+            assertTrue(failure.message!!.startsWith("The TypeSafe API did not answer in the time the client allows: "), failure.message)
+        }
+
+    @Test
+    fun `a time limit that is not positive is rejected`() {
+        val client = HttpClient(MockEngine { respond("") })
+
+        assertFailsWith<GraphValidationException> { TypeSafeDecisionModel(client, "test-key", timeout = Duration.ZERO) }
+    }
 
     @Test
     fun `a failure to reach the API is an error with the cause`() =
