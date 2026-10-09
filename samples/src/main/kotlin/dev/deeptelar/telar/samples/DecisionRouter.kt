@@ -56,7 +56,7 @@ fun routedSupport(model: DecisionModel): CompiledGraph<SupportEmail> =
                     // sends an angry email that asks for nothing to `technical`, and is sure of it.
                     escalate to "A complaint, or anything else that a person should read",
                 ),
-            // A person also reads what the model cannot place, such as two requests in one email.
+            // A person also reads an email that the model is not sure about.
             minConfidence = SURE_ENOUGH,
             fallback = escalate,
         ) { email -> email.body }
@@ -69,7 +69,7 @@ val scriptedDecisions: DecisionModel =
         val body = request.state.jsonPrimitive.content
         val answer =
             when {
-                // Two requests in one email: the model cannot say which of them it is.
+                // This stand-in is not sure about an email with two requests. Jev is: it picks the refund.
                 listOf("refund", "error").all { it in body.lowercase() } -> choice("refund" to 0.5, "technical" to 0.45, "escalate" to 0.05)
                 categoryOf(body) == Category.REFUND -> choice("refund" to 0.9, "technical" to 0.05, "escalate" to 0.05)
                 categoryOf(body) == Category.TECHNICAL -> choice("refund" to 0.05, "technical" to 0.9, "escalate" to 0.05)
