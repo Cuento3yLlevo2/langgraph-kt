@@ -1,6 +1,7 @@
-name: API docs
+name: Documentation site
 
-# Builds the Dokka API reference and publishes it to GitHub Pages.
+# Builds the site in docs/ and the Dokka API reference, and publishes both to GitHub Pages: the
+# site at the root and the API reference in api/.
 on:
   push:
     branches: [main]
@@ -25,11 +26,24 @@ jobs:
           distribution: temurin
           java-version: 17
       - uses: gradle/actions/setup-gradle@v6
-      - run: ./gradlew dokkaGenerate
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+      - name: Build the site
+        working-directory: docs
+        run: |
+          npm ci
+          npm run build
+      - name: Build the API reference
+        run: ./gradlew dokkaGenerate
+      - name: Put the API reference in the site
+        run: cp -r build/dokka/html docs/.vitepress/dist/api
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:
-          path: build/dokka/html
+          path: docs/.vitepress/dist
 
   deploy:
     needs: build

@@ -1,0 +1,36 @@
+/* The colors of docs/brand/README.md: navy, ochre, red, cream and ink. */
+:root {
+  --vp-c-brand-1: #23336b;
+  --vp-c-brand-2: #33489a;
+  --vp-c-brand-3: #23336b;
+  --vp-c-brand-soft: rgba(35, 51, 107, 0.12);
+
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: linear-gradient(120deg, #23336b 35%, #a8322d);
+  --vp-home-hero-image-background-image: linear-gradient(135deg, #efe6d2 40%, #d19a32);
+  --vp-home-hero-image-filter: blur(56px);
+}
+
+.dark {
+  --vp-c-brand-1: #e3b862;
+  --vp-c-brand-2: #d19a32;
+  --vp-c-brand-3: #d19a32;
+  --vp-c-brand-soft: rgba(209, 154, 50, 0.16);
+
+  --vp-c-bg: #15131f;
+  --vp-c-bg-alt: #100e18;
+  --vp-c-bg-elv: #1e1b2e;
+  --vp-c-bg-soft: #1e1b2e;
+
+  --vp-button-brand-text: #15131f;
+  --vp-button-brand-hover-text: #15131f;
+  --vp-button-brand-active-text: #15131f;
+
+  --vp-home-hero-name-background: linear-gradient(120deg, #efe6d2 35%, #d19a32);
+  --vp-home-hero-image-background-image: linear-gradient(135deg, #23336b 40%, #a8322d);
+}
+
+/* The logo is pixel art: keep its edges sharp at every size. */
+.VPImage {
+  image-rendering: pixelated;
+}

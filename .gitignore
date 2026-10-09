@@ -31,3 +31,8 @@ local.properties
 
 # OS
 .DS_Store
+
+# Documentation site (docs/)
+node_modules/
+docs/.vitepress/dist/
+docs/.vitepress/cache/

@@ -102,4 +102,4 @@ You now know them:
 | Edge | What runs after a node | A path between two places |
 | Graph | All nodes and edges together | The map |
 
-[All levels](README.md) · Next: [Level 1, a line of nodes](01-a-line-of-nodes.md)
+[All levels](./) · Next: [Level 1, a line of nodes](01-a-line-of-nodes.md)

@@ -1,6 +1,6 @@
 # Cheat sheet
 
-Every word and every move of the [tutorial](README.md) on one page.
+Every word and every move of the [tutorial](./) on one page.
 
 ## Words
 
@@ -138,8 +138,8 @@ val pay = node("pay") { ticket ->
 
 ## A model that decides
 
-From `telar-agent`, with Jev in `telar-typesafe`. The README has the
-[guide](../../README.md#decision-models).
+From `telar-agent`, with Jev in `telar-typesafe`. The guide is
+[Decision models](../guides/decision-models.md).
 
 ```kotlin
 val jev: DecisionModel = TypeSafeDecisionModel(HttpClient(), apiKey = key)
@@ -158,8 +158,8 @@ jev.score(text, "How angry?", listOf("Calm", "Annoyed", "Furious")).score
 
 ## An agent with tools
 
-From `telar-agent`. [Level 6](06-the-agent.md) teaches it, and the README has the
-short version under [Agents with tools](../../README.md#agents-with-tools).
+From `telar-agent`. [Level 6](06-the-agent.md) teaches it, and the guide
+[Agents with tools](../guides/agents-with-tools.md) is the short version.
 
 ```kotlin
 @Serializable

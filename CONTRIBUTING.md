@@ -27,6 +27,8 @@ Useful commands:
 | `./gradlew apiCheck` / `apiDump` | Checks / updates the public API dumps (see below) |
 | `./gradlew :samples:runQuickStart` | Runs a sample |
 | `./gradlew dokkaGenerate` | Builds the API reference into `build/dokka/html` |
+| `npm ci && npm run dev`, in `docs/` | Serves the documentation site at `localhost:5173/telar/` and reloads it when a page changes. Needs Node.js 20 or newer |
+| `npm run build`, in `docs/` | Builds the site into `docs/.vitepress/dist`. Fails on a link to a page that does not exist |
 
 Apple targets (iOS, macOS) only build and test on macOS, and the Windows target only tests on
 Windows. CI covers all of them, so you do not need every OS locally.
@@ -48,7 +50,7 @@ Chrome. Install Chrome or Chromium, and set `CHROME_BIN` to its path if it is no
 | `telar-langchain4j` | LangChain4j integration (JVM) |
 | `telar-typesafe` | `TypeSafeDecisionModel`, the Jev decision model of TypeSafe AI through Ktor (multiplatform) |
 | `samples` | Runnable examples, not published. `samples/.../tutorial` holds the code of the tutorial |
-| `docs` | `docs/tutorial` holds the tutorial, one Markdown page per level. `docs/brand` holds the logo and banners |
+| `docs` | The [documentation site](https://deeptelar.github.io/telar/), built with VitePress: `index.md` is its home page, `docs/guides` has a page per feature and `docs/tutorial` a page per level. Its menu is in `docs/.vitepress/config.ts`. `docs/brand` holds the logo and banners |
 | `build-logic` | Gradle convention plugins shared by all modules |
 | `gradle/libs.versions.toml` | Every dependency version |
 
@@ -93,9 +95,12 @@ Chrome. Install Chrome or Chromium, and set `CHROME_BIN` to its path if it is no
    `*/api/`. Reviewers use that diff to see exactly what changed for users.
 6. If you change a tutorial level in `samples/.../tutorial`, update its page in `docs/tutorial/` so the code
    and the output shown there stay the same as the program. `TutorialTest` pins the output.
-7. Add a line to the "Unreleased" section of [CHANGELOG.md](CHANGELOG.md) when users will notice
+7. If you add or change a feature, update its guide in `docs/guides/`. A page reads well on GitHub
+   and on the site when its links to other pages are relative and end in `.md`, and its links to
+   files outside `docs/` are full GitHub addresses. A new page needs a line in the menu.
+8. Add a line to the "Unreleased" section of [CHANGELOG.md](CHANGELOG.md) when users will notice
    the change.
-8. Open a pull request against `main` and link the issue.
+9. Open a pull request against `main` and link the issue.
 
 `main` is the only long-lived branch. It always holds the next version, and releases are tags on it.
 
@@ -138,7 +143,8 @@ One-time setup:
 For each release:
 
 1. Open a pull request that moves the "Unreleased" entries in `CHANGELOG.md` under the new version
-   and date, and sets `VERSION_NAME` in `gradle.properties` to the release version. Merge it.
+   and date, sets `VERSION_NAME` in `gradle.properties` to the release version, and replaces the
+   previous version in `README.md`, `ROADMAP.md`, `docs/` and the bug report template. Merge it.
 2. Tag that commit on `main` as `vX.Y.Z` and push the tag. The release workflow publishes to Maven
    Central and creates the GitHub release.
 3. Open a pull request that sets `VERSION_NAME` to the next `-SNAPSHOT`.

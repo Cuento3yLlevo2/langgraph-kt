@@ -22,7 +22,7 @@ flowchart LR
 
 The model is not on the map. It is outside, and the `answer` node talks to it.
 
-[`level6/Level6.kt`](../../samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level6/Level6.kt)
+[`level6/Level6.kt`](https://github.com/deeptelar/telar/blob/main/samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level6/Level6.kt)
 
 ```kotlin
 fun replyDesk(model: ChatModel): CompiledGraph<Ticket> =
@@ -150,7 +150,7 @@ an `OrderLookup` that is ready to use.
 
 `@Description` tells the model what a field is for. Write the descriptions with care: they are all
 the model knows about your tool. `@Serializable` comes from kotlinx.serialization and needs its
-Gradle plugin, which this repository already has.
+Gradle plugin, which the repository already has.
 
 ### The loop
 
@@ -289,9 +289,9 @@ pass a `timeout` to change that.
 This snippet is not part of the runnable level, because it needs an account and a key, or a model
 on your machine. Keep the key out of your source code; read it from an environment variable as
 shown. The
-[ToolAgent sample](../../samples/src/main/kotlin/dev/deeptelar/telar/samples/ToolAgent.kt) is this help
+[ToolAgent sample](https://github.com/deeptelar/telar/blob/main/samples/src/main/kotlin/dev/deeptelar/telar/samples/ToolAgent.kt) is this help
 desk with a real model: Claude when `ANTHROPIC_API_KEY` is set, OpenAI when `OPENAI_API_KEY` is set,
-a model of Ollama when `OLLAMA_MODEL` names one, and a pretend one otherwise. The README has more under [AI models](../../README.md#ai-models).
+a model of Ollama when `OLLAMA_MODEL` names one, and a pretend one otherwise. The guide [AI models](../guides/ai-models.md) has more.
 
 ### What changes when the model is real
 
@@ -303,8 +303,8 @@ a model of Ollama when `OLLAMA_MODEL` names one, and a pretend one otherwise. Th
   agent, and it takes two steps, so the default `maxIterations` of 25 allows twelve rounds.
 - **Its tools act for you.** Ask a person before a tool does something that cannot be undone. The
   node that runs the tools is named `tools`, so `interruptBefore = setOf("tools")` from level 5
-  pauses the run before any tool runs. The README shows how to read the calls that wait and how to
-  say no, under [Agents with tools](../../README.md#agents-with-tools).
+  pauses the run before any tool runs. The guide [Agents with tools](../guides/agents-with-tools.md) shows how to read the calls
+  that wait and how to say no.
 
 ## Your turn
 
@@ -325,4 +325,4 @@ You can now:
 - write a tool and build an agent with `toolAgent`,
 - put the agent inside a graph of your own with `toolLoop`.
 
-[Back to level 5](05-save-points.md) · [All levels](README.md) · Next: [Level 7, game over screens](07-game-over-screens.md)
+[Back to level 5](05-save-points.md) · [All levels](./) · Next: [Level 7, game over screens](07-game-over-screens.md)

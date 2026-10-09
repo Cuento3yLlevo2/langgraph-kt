@@ -43,6 +43,24 @@ jobs:
           name: test-reports-linux
           path: '**/build/reports/'
 
+  # The docs workflow only runs on main, so build the site here too. The build fails on a link to
+  # a page that does not exist.
+  docs-site:
+    name: Documentation site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+      - name: Build the site
+        working-directory: docs
+        run: |
+          npm ci
+          npm run build
+
   native-tests:
     name: Native tests (${{ matrix.os }})
     strategy:

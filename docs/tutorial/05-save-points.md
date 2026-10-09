@@ -20,7 +20,7 @@ The pause is not a node. It is a place where you tell the run to stop and save.
 
 ## The code
 
-[`level5/Level5.kt`](../../samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level5/Level5.kt)
+[`level5/Level5.kt`](https://github.com/deeptelar/telar/blob/main/samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level5/Level5.kt)
 
 ```kotlin
 data class Ticket(
@@ -125,8 +125,8 @@ into the run: `ticket.copy(approved = approved)`. Then `pay` runs with the updat
 - **`interruptAfter`** also exists. It stops after a node has run instead of before.
 - **A node can pause by itself.** `interruptBefore` stops at a door every time. A node that only
   needs a manager for some tickets calls `interrupt(ticket.copy(...))` in the middle of its work,
-  and `resume` runs that node again. The
-  [README](../../README.md#ask-from-inside-a-node) shows how.
+  and `resume` runs that node again. The guide
+  [Ask from inside a node](../guides/human-in-the-loop.md#ask-from-inside-a-node) shows how.
 
 ### Where does a thread stand?
 
@@ -155,13 +155,13 @@ val checkpointer = FileCheckpointer(Path("checkpoints"), KotlinxStateSerializer<
 ```
 
 `@Serializable` tells Kotlin how to turn the ticket into text for the file. The
-[HumanInTheLoop sample](../../samples/src/main/kotlin/dev/deeptelar/telar/samples/HumanInTheLoop.kt) is a
+[HumanInTheLoop sample](https://github.com/deeptelar/telar/blob/main/samples/src/main/kotlin/dev/deeptelar/telar/samples/HumanInTheLoop.kt) is a
 complete program that does this.
 
 A web app has no files. There, `LocalStorageCheckpointer` keeps the saves in the browser, so a
 paused run is still waiting after the page is reloaded. To keep saves somewhere else, such as a
-database, you implement `Checkpointer`, which has three functions: `save`, `load` and `delete`. The
-[README](../../README.md#human-in-the-loop) shows both.
+database, you implement `Checkpointer`, which has three functions: `save`, `load` and `delete`. The guide
+[Human-in-the-loop](../guides/human-in-the-loop.md) shows both.
 
 ## Your turn
 
@@ -179,4 +179,4 @@ You can now:
 - pause a run before a node and continue it with a human's decision,
 - tell `invoke`, `resume` and `lastResult` apart.
 
-[Back to level 4](04-two-things-at-once.md) · [All levels](README.md) · Next: [Level 6, the agent](06-the-agent.md)
+[Back to level 4](04-two-things-at-once.md) · [All levels](./) · Next: [Level 6, the agent](06-the-agent.md)
