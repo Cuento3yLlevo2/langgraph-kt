@@ -177,7 +177,7 @@ public class OpenAiChatModel(
         ChatModelException("Could not reach the API at $baseUrl: ${cause.message ?: cause::class.simpleName}", cause)
 
     private fun apiError(status: Int, text: String): ChatModelException =
-        ChatModelException("API error $status ${describe(parse(text)?.get("error"), text)}")
+        ChatModelException("API error $status ${describe(errorIn(text), text)}")
 
     private fun body(request: ChatRequest, streamed: Boolean = false): JsonObject {
         val body =
@@ -379,10 +379,28 @@ private fun parse(text: String): JsonObject? =
         null
     }
 
-/** Describes the `error` of a response: its type or code and its message, or [fallback] when it has neither. */
+/**
+ * Returns the `error` of the body of a failed request, or `null` when [text] has none. OpenAI sends
+ * an object with the error. Gemini sends a list with that object as its only item.
+ */
+private fun errorIn(text: String): JsonElement? {
+    val body =
+        try {
+            Json.parseToJsonElement(text)
+        } catch (_: SerializationException) {
+            return null
+        }
+    val holder = body as? JsonObject ?: (body as? JsonArray)?.firstOrNull() as? JsonObject
+    return holder?.get("error")
+}
+
+/**
+ * Describes the `error` of a response: its type, status or code and its message, or [fallback] when
+ * it has neither.
+ */
 private fun describe(error: JsonElement?, fallback: String): String {
     val details = error as? JsonObject
-    val kind = details.string("type") ?: details.string("code") ?: "unknown"
+    val kind = details.string("type") ?: details.string("status") ?: details.string("code") ?: "unknown"
     val message = details.string("message") ?: (error as? JsonPrimitive)?.contentOrNull ?: fallback
     return "($kind): $message"
 }

@@ -17,6 +17,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.TextContent
 import io.ktor.http.headersOf
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -377,6 +378,21 @@ class OpenAiChatModelTest {
 
             assertEquals("API error 429 (rate_limit_exceeded): Slow down.", coded.message)
             assertEquals("API error 404 (unknown): model 'llama9' not found", plain.message)
+        }
+
+    @Test
+    fun `an error that arrives in a list is reported with its status and message`() =
+        runTest {
+            // What Gemini answers through its API for OpenAI clients.
+            val body = """[{"error": {"code": 404, "message": "This model is no longer available.", "status": "NOT_FOUND"}}]"""
+
+            val asked = assertFailsWith<ChatModelException> { model(body, HttpStatusCode.NotFound).chat(hello) }
+            val streamed = assertFailsWith<ChatModelException> { model(body, HttpStatusCode.NotFound).stream(hello).toList() }
+            val empty = assertFailsWith<ChatModelException> { model("[]", HttpStatusCode.NotFound).chat(hello) }
+
+            assertEquals("API error 404 (NOT_FOUND): This model is no longer available.", asked.message)
+            assertEquals(asked.message, streamed.message)
+            assertEquals("API error 404 (unknown): []", empty.message)
         }
 
     @Test

@@ -7,6 +7,12 @@ breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+
+- `OpenAiChatModel` reports an error of Gemini with its status and its message, such as
+  `API error 404 (NOT_FOUND): This model is no longer available.` Gemini sends the error inside a
+  list, and the message of the exception was the whole body of the response.
+
 ## [0.1.0-alpha07] - 2026-10-09
 
 ### Added
