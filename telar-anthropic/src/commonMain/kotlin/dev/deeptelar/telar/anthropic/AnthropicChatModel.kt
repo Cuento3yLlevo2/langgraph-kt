@@ -56,6 +56,10 @@ import kotlinx.serialization.json.putJsonArray
  * Android, `ktor-client-darwin` on iOS or `ktor-client-js` in a browser. The client is yours: share
  * one between models, and close it when your app is done with it.
  *
+ * Give the client time: the CIO engine of Ktor ends a request after 15 seconds, also when the answer
+ * is still arriving. `HttpClient { install(HttpTimeout) { requestTimeoutMillis = 5 * 60 * 1000 } }`
+ * gives a model five minutes.
+ *
  * [chat] returns when Claude has finished, and [stream] delivers the text while Claude writes it. A
  * `toolAgent` uses [stream] when its run is collected with `stream`. Claude's thinking and other
  * content that the API wants back unchanged travels in [ChatMessage.Assistant.providerContent].

@@ -15,6 +15,7 @@ import dev.deeptelar.telar.agent.toolAgent
 import dev.deeptelar.telar.anthropic.AnthropicChatModel
 import dev.deeptelar.telar.openai.OpenAiChatModel
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.HttpTimeout
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
@@ -88,7 +89,8 @@ val scriptedModel: ChatModel =
 /**
  * The model that the environment asks for: Claude with ANTHROPIC_API_KEY, OpenAI with OPENAI_API_KEY
  * (OPENAI_MODEL names another model than gpt-5), or the model of a local Ollama that OLLAMA_MODEL
- * names. Without any of them, the scripted model answers.
+ * names. OPENAI_BASE_URL sends the requests for OpenAI to another server with the same API, such as
+ * Gemini or Groq. Without any of them, the scripted model answers.
  */
 fun modelFor(client: HttpClient, environment: Map<String, String> = System.getenv()): ChatModel {
     fun setting(name: String): String? = environment[name]?.takeIf { it.isNotBlank() }
@@ -97,14 +99,21 @@ fun modelFor(client: HttpClient, environment: Map<String, String> = System.geten
     val ollamaModel = setting("OLLAMA_MODEL")
     return when {
         claudeKey != null -> AnthropicChatModel(client, apiKey = claudeKey, model = "claude-opus-5-5")
-        openAiKey != null -> OpenAiChatModel(client, apiKey = openAiKey, model = setting("OPENAI_MODEL") ?: "gpt-5")
+        openAiKey != null ->
+            OpenAiChatModel(
+                client,
+                apiKey = openAiKey,
+                model = setting("OPENAI_MODEL") ?: "gpt-5",
+                baseUrl = setting("OPENAI_BASE_URL") ?: OpenAiChatModel.OPENAI_BASE_URL,
+            )
         ollamaModel != null -> OpenAiChatModel.ollama(client, model = ollamaModel)
         else -> scriptedModel
     }
 }
 
 suspend fun main() {
-    val client = HttpClient()
+    // The CIO engine of Ktor ends a request after 15 seconds. A model can take longer, so it gets 5 minutes.
+    val client = HttpClient { install(HttpTimeout) { requestTimeoutMillis = 5 * 60 * 1000 } }
     val agent = helpDeskAgent(modelFor(client))
 
     for (question in listOf("I'm Ana. Where is my pizza, and how much is a cola?", "Do you sell tiramisu?")) {

@@ -278,10 +278,13 @@ val model: ChatModel = OpenAiChatModel(HttpClient(), apiKey = System.getenv("OPE
 val model: ChatModel = OpenAiChatModel.ollama(HttpClient(), model = "llama3.2")
 
 // Most other models, on the JVM, through LangChain4j. From the module telar-langchain4j.
-val model: ChatModel = LangChain4jChatModel(GoogleAiGeminiChatModel.builder().apiKey(System.getenv("GEMINI_API_KEY")).modelName("gemini-2.5-flash").build())
+val model: ChatModel = LangChain4jChatModel(GoogleAiGeminiChatModel.builder().apiKey(System.getenv("GEMINI_API_KEY")).modelName("gemini-3.8-flash").build())
 
 val state = helpDesk(model).invoke(AgentState("I'm Ana. Where is my pizza?")).state
 ```
+
+A model can take a while, and the CIO engine of Ktor ends a request after 15 seconds. Give the
+client more time with `HttpClient { install(HttpTimeout) { requestTimeoutMillis = 5 * 60 * 1000 } }`.
 
 This snippet is not part of the runnable level, because it needs an account and a key, or a model
 on your machine. Keep the key out of your source code; read it from an environment variable as

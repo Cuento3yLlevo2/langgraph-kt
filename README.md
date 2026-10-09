@@ -745,10 +745,18 @@ val model: ChatModel = OpenAiChatModel(HttpClient(), apiKey = key, model = "gpt-
 val model: ChatModel = OpenAiChatModel.ollama(HttpClient(), model = "llama3.2")
 
 // Any LangChain4j model, on the JVM (telar-langchain4j): Gemini, Bedrock, Mistral, ...
-val model: ChatModel = LangChain4jChatModel(GoogleAiGeminiChatModel.builder().apiKey(key).modelName("gemini-2.5-flash").build())
+val model: ChatModel = LangChain4jChatModel(GoogleAiGeminiChatModel.builder().apiKey(key).modelName("gemini-3.8-flash").build())
 
 // In a test, a lambda.
 val model = ChatModel { request -> ChatResponse(ChatMessage.Assistant("Thanks for your email!")) }
+```
+
+Give the client time. The CIO engine of Ktor ends a request after 15 seconds, also when the answer is
+still arriving, and a model often takes longer. Install `HttpTimeout` with a limit that fits your
+models:
+
+```kotlin
+val client = HttpClient { install(HttpTimeout) { requestTimeoutMillis = 5 * 60 * 1000 } }
 ```
 
 A node that needs one piece of text from the model asks for it with `chat`:
@@ -995,7 +1003,9 @@ toolLoop(
 
 Runnable version: [`ToolAgent`](samples/src/main/kotlin/dev/deeptelar/telar/samples/ToolAgent.kt). It
 runs without an API key, with Claude when `ANTHROPIC_API_KEY` is set, with OpenAI when
-`OPENAI_API_KEY` is set, and with a model of Ollama when `OLLAMA_MODEL` names one.
+`OPENAI_API_KEY` is set, and with a model of Ollama when `OLLAMA_MODEL` names one. `OPENAI_MODEL`
+names another model than `gpt-5`, and `OPENAI_BASE_URL` another server with the API of OpenAI, such
+as Gemini or Groq.
 [Level 6 of the tutorial](docs/06-the-agent.md) explains the same agent step by step.
 
 ### Inspecting a graph
