@@ -15,3 +15,8 @@ updates:
     directory: /docs
     schedule:
       interval: weekly
+    ignore:
+      # vitepress-plugin-mermaid sets which major versions of Mermaid it works with. Move to a new
+      # one by hand, when the plugin allows it.
+      - dependency-name: mermaid
+        update-types: ["version-update:semver-major"]

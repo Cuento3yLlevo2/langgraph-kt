@@ -46,8 +46,8 @@ These change `telar-core`, so they come first.
 | Feature | What you get | State | Issue |
 |---|---|---|---|
 | Subgraphs | A compiled graph becomes a node of another graph, with a mapping between the two states and one thread for both. Released: `subgraph`, a run that pauses inside a subgraph and resumes there, the events of a subgraph in the stream of the graph around it, and the subgraph in `topology`. Still to come: `interruptBefore` for a node of a subgraph, and a retry after a failure that continues inside the subgraph. | In progress | [#34] |
-| Fan-out over a list | One node runs once per item of a list, all at the same time, when the number of items is only known at run time. Today the edges fix how many nodes run in parallel. | Planned | |
-| Retry and time limit for a node | A node says how often it may be tried again and how long it may take. Today a failed run is retried by hand with `resume`. | Planned | |
+| Fan-out over a list | One node runs once per item of a list, all at the same time, when the number of items is only known at run time. Today the edges fix how many nodes run in parallel. | Planned | [#82] |
+| Retry and time limit for a node | A node says how often it may be tried again and how long it may take. Today a failed run is retried by hand with `resume`. | Planned | [#83] |
 
 ## 2. Around the engine
 
@@ -55,11 +55,11 @@ New modules and additions to `telar-agent`. They do not change the core.
 
 | Feature | What you get | State | Issue |
 |---|---|---|---|
-| Database checkpointer | Saves runs in a SQL database, for servers and for Android apps. | Planned | |
-| Typed answers from a model | Ask a model for a `@Serializable` class and get an instance of it, built on the schema generator that tools already use. | Planned | |
+| Database checkpointer | Saves runs in a SQL database, for servers and for Android apps. | Planned | [#84] |
+| Typed answers from a model | Ask a model for a `@Serializable` class and get an instance of it, built on the schema generator that tools already use. | Planned | [#85] |
 | Tracing | Hooks in the engine that report every node, edge, tool call and token count, and a module that sends them to OpenTelemetry. | Planned | [#38] |
-| Helpers for tests | `telar-test`: a model that gives the answers a test wrote down, so that a graph with an agent is tested without an API key and without a model of your own. | Planned | |
-| One version for all modules | `telar-bom`: a bill of materials. An app names the version of Telar once, and every module it adds uses that version. | Planned | |
+| Helpers for tests | `telar-test`: a model that gives the answers a test wrote down, so that a graph with an agent is tested without an API key and without a model of your own. | Planned | [#86] |
+| One version for all modules | `telar-bom`: a bill of materials. An app names the version of Telar once, and every module it adds uses that version. | Planned | [#79] |
 
 ## 3. Beta: make it stable
 
@@ -70,9 +70,10 @@ New modules and additions to `telar-agent`. They do not change the core.
 - **A checkpoint format you can rely on.** A checkpoint written by one version can be read by every
   later `1.x` version, and a guide explains how to change a state class when saved runs exist.
 - **Tests in a real browser.** The JS and Wasm tests of the agent and model modules run on Node.js
-  today. Only the browser checkpointer is tested in a browser.
+  today. Only the browser checkpointer is tested in a browser ([#81]).
 - **Documentation.** A guide for every feature on this page, a tutorial level where one fits, and a
-  page for people who know LangGraph for Python: what has the same name and what is different.
+  page for people who know LangGraph for Python: what has the same name and what is different
+  ([#80]).
 - **The project's own name everywhere.** The topic `langgraph` is taken off the repository, which
   keeps the sentence that says what Telar is inspired by.
 - **Written rules.** Which Kotlin versions are supported, and how long a deprecated declaration
@@ -104,6 +105,20 @@ Ideas without a place in the plan yet. Say so in the issue or in a discussion if
 To build something on this page, comment on its issue first, or open one if it has none, so the
 approach can be discussed. [CONTRIBUTING.md](CONTRIBUTING.md) has the setup and the design rules.
 
+For a first contribution, the issues labeled
+[good first issue](https://github.com/deeptelar/telar/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
+are small and say where to start. The ones labeled
+[help wanted](https://github.com/deeptelar/telar/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
+are larger, or need something the maintainers lack, such as a key for another model provider.
+
 [#34]: https://github.com/deeptelar/telar/issues/34
 [#38]: https://github.com/deeptelar/telar/issues/38
 [#39]: https://github.com/deeptelar/telar/issues/39
+[#79]: https://github.com/deeptelar/telar/issues/79
+[#80]: https://github.com/deeptelar/telar/issues/80
+[#81]: https://github.com/deeptelar/telar/issues/81
+[#82]: https://github.com/deeptelar/telar/issues/82
+[#83]: https://github.com/deeptelar/telar/issues/83
+[#84]: https://github.com/deeptelar/telar/issues/84
+[#85]: https://github.com/deeptelar/telar/issues/85
+[#86]: https://github.com/deeptelar/telar/issues/86
