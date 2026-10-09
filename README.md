@@ -893,16 +893,25 @@ The [`ChatAgent`](samples/src/main/kotlin/dev/deeptelar/telar/samples/ChatAgent.
 ### Decision models
 
 A chat model writes. A **decision model** decides: it picks one of the options you give it, answers
-yes or no, or rates on a scale, and says how sure it is. It answers in a fraction of the time and
-the price of a chat model, and its answer has a fixed type. That fits the places where a graph
-decides: which node runs next, whether a draft is good enough, whether a person has to look.
+yes or no, or rates on a scale, and says how sure it is. Its answer has a fixed type, and a model
+built for deciding gives it in a fraction of the time and the price of a chat model. That fits the
+places where a graph decides: which node runs next, whether a draft is good enough, whether a
+person has to look.
 
-`telar-agent` has the interface, `DecisionModel`, and `telar-typesafe` has
-[Jev](https://docs.typesafe.ai) of TypeSafe AI for every platform:
+`telar-agent` has the interface, `DecisionModel`, and two implementations to choose from:
 
 ```kotlin
+// Any chat model you already use decides (telar-agent). A small, fast model is usually enough.
+val decider: DecisionModel = ChatDecisionModel(AnthropicChatModel(HttpClient(), apiKey = key, model = "claude-haiku-5-5"))
+
+// Jev of TypeSafe AI, a model built for decisions, on every platform (telar-typesafe).
 val jev: DecisionModel = TypeSafeDecisionModel(HttpClient(), apiKey = key)
 ```
+
+`ChatDecisionModel` asks the chat model how likely it finds each option, in one call for all the
+questions of a request. Those probabilities are the model's own estimate, so its `confidence` is
+rougher than that of [Jev](https://docs.typesafe.ai), a model trained to decide. The examples below
+use `jev`; every one of them works with `decider` as well.
 
 `decisionEdge` lets the model pick the next node. This is the quick start without `categoryOf`:
 

@@ -7,6 +7,13 @@ breaking changes.
 
 ## [Unreleased]
 
+### Added
+
+- `ChatDecisionModel` in `telar-agent`: a `DecisionModel` that asks any `ChatModel`, so `choose`,
+  `isYes`, `score` and `decisionEdge` work with Claude, OpenAI, Gemini, Ollama or any other chat
+  model. One call answers every question of a request. The model estimates how likely each option
+  is, and `confidence` is the lead of the most likely option over the next one.
+
 ### Fixed
 
 - `OpenAiChatModel` reports an error of Gemini with its status and its message, such as
