@@ -42,7 +42,8 @@ import kotlinx.serialization.json.putJsonObject
  * ```
  *
  * `HttpClient()` uses the Ktor engine among your dependencies. The client is yours: share one
- * between models, and close it when your app is done with it.
+ * between models, and close it when your app is done with it. The CIO engine of Ktor ends a request
+ * after 15 seconds; install the `HttpTimeout` plugin in [client] to change that.
  *
  * The API answers `429` or `529` when it has too much to do. This class does not try again by
  * itself: install the `HttpRequestRetry` plugin of Ktor in [client] to retry those with a pause.

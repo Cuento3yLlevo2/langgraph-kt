@@ -15,6 +15,7 @@ import dev.deeptelar.telar.agent.toolAgent
 import dev.deeptelar.telar.anthropic.AnthropicChatModel
 import dev.deeptelar.telar.openai.OpenAiChatModel
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.HttpTimeout
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
@@ -111,7 +112,8 @@ fun modelFor(client: HttpClient, environment: Map<String, String> = System.geten
 }
 
 suspend fun main() {
-    val client = HttpClient()
+    // The CIO engine of Ktor ends a request after 15 seconds. A model can take longer, so it gets 5 minutes.
+    val client = HttpClient { install(HttpTimeout) { requestTimeoutMillis = 5 * 60 * 1000 } }
     val agent = helpDeskAgent(modelFor(client))
 
     for (question in listOf("I'm Ana. Where is my pizza, and how much is a cola?", "Do you sell tiramisu?")) {

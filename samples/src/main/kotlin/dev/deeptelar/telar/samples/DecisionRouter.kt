@@ -9,6 +9,7 @@ import dev.deeptelar.telar.agent.DecisionResponse
 import dev.deeptelar.telar.agent.decisionEdge
 import dev.deeptelar.telar.typesafe.TypeSafeDecisionModel
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.HttpTimeout
 import kotlinx.serialization.json.jsonPrimitive
 
 /** Below this confidence a person reads the email. */
@@ -74,7 +75,8 @@ val scriptedDecisions: DecisionModel =
 /** Set TYPESAFE_API_KEY to let Jev decide. Without it, the scripted model does. */
 suspend fun main() {
     val key = System.getenv("TYPESAFE_API_KEY")
-    val client = HttpClient()
+    // The CIO engine of Ktor ends a request after 15 seconds. A model can take longer, so it gets 5 minutes.
+    val client = HttpClient { install(HttpTimeout) { requestTimeoutMillis = 5 * 60 * 1000 } }
     val model = if (key.isNullOrBlank()) scriptedDecisions else TypeSafeDecisionModel(client, apiKey = key)
     val graph = routedSupport(model)
 

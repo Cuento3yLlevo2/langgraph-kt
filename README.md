@@ -751,6 +751,14 @@ val model: ChatModel = LangChain4jChatModel(GoogleAiGeminiChatModel.builder().ap
 val model = ChatModel { request -> ChatResponse(ChatMessage.Assistant("Thanks for your email!")) }
 ```
 
+Give the client time. The CIO engine of Ktor ends a request after 15 seconds, also when the answer is
+still arriving, and a model often takes longer. Install `HttpTimeout` with a limit that fits your
+models:
+
+```kotlin
+val client = HttpClient { install(HttpTimeout) { requestTimeoutMillis = 5 * 60 * 1000 } }
+```
+
 A node that needs one piece of text from the model asks for it with `chat`:
 
 ```kotlin
