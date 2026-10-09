@@ -7,7 +7,7 @@ breaking changes.
 
 ## [Unreleased]
 
-## [0.1.0-alpha07] - 2026-10-08
+## [0.1.0-alpha07] - 2026-10-09
 
 ### Added
 
