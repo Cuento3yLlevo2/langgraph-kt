@@ -5,6 +5,17 @@ pass, and the design rules the project follows.
 
 By participating you agree to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
+## Where to start
+
+- **A first contribution:** the issues labeled [good first issue](https://github.com/deeptelar/telar/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) are small, use only the
+  public API, and say which files to read first and when the work is done.
+- **Something larger:** the issues labeled [help wanted](https://github.com/deeptelar/telar/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) need more time, or something the
+  maintainers lack, such as a key for another model provider.
+- **A feature:** the [roadmap](ROADMAP.md) lists what is planned, with an issue for each item.
+- **A question or an idea:** [Discussions](https://github.com/deeptelar/telar/discussions).
+
+Comment on an issue before you start, so that two people do not write the same thing.
+
 ## Getting started
 
 Requirements: JDK 17 or newer. Everything else (Gradle, Kotlin, Kotlin/Native toolchains, Node.js for

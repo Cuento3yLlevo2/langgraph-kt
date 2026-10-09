@@ -162,8 +162,10 @@ The pages of the site are the Markdown files in [`docs/`](docs).
 
 ## Contributing
 
-Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for the development setup and the
-three design rules (immutable state, coroutines only, type-safe DSL).
+Contributions are welcome. The issues labeled [good first issue](https://github.com/deeptelar/telar/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
+are small and say where to start. [CONTRIBUTING.md](CONTRIBUTING.md) has the development setup and
+the three design rules (immutable state, coroutines only, type-safe DSL), and the
+[roadmap](ROADMAP.md) lists what is planned.
 
 ## License
 
