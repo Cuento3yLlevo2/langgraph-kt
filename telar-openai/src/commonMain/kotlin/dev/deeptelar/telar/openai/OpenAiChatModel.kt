@@ -67,7 +67,9 @@ import kotlinx.serialization.json.putJsonObject
  * one between models, and close it when your app is done with it.
  *
  * [chat] returns when the model has finished, and [stream] delivers the text while the model
- * writes it. A `toolAgent` uses [stream] when its run is collected with `stream`.
+ * writes it. A `toolAgent` uses [stream] when its run is collected with `stream`. What a server
+ * wants back unchanged with a tool call, such as a thought signature of Gemini, travels in
+ * [ChatMessage.Assistant.providerContent].
  *
  * Tools need a model that can call them. A small local model may answer in text where a larger one
  * would call a tool.
@@ -216,19 +218,22 @@ public class OpenAiChatModel(
         answer.string("refusal")?.takeIf { it.isNotBlank() }?.let { throw ChatModelException("The model declined this request: $it") }
         if (finishReason == "content_filter") throw ChatModelException("A content filter stopped the model's answer.")
 
+        val calls = (answer?.get("tool_calls") as? JsonArray).orEmpty().filterIsInstance<JsonObject>()
+        val toolCalls =
+            calls.mapIndexed { index, call ->
+                val function = call["function"] as? JsonObject
+                ToolCall(
+                    // A result names its call by this id, so a call that came without one gets one.
+                    call.string("id")?.takeIf { it.isNotEmpty() } ?: "call_$index",
+                    function.string("name").orEmpty(),
+                    input(function?.get("arguments")),
+                )
+            }
         val message =
             ChatMessage.Assistant(
                 text = text(answer?.get("content")),
-                toolCalls =
-                    (answer?.get("tool_calls") as? JsonArray).orEmpty().filterIsInstance<JsonObject>().mapIndexed { index, call ->
-                        val function = call["function"] as? JsonObject
-                        ToolCall(
-                            // A result names its call by this id, so a call that came without one gets one.
-                            call.string("id")?.takeIf { it.isNotEmpty() } ?: "call_$index",
-                            function.string("name").orEmpty(),
-                            input(function?.get("arguments")),
-                        )
-                    },
+                toolCalls = toolCalls,
+                providerContent = extraContent(answer, toolCalls.map { it.id }.zip(calls)),
                 truncated = finishReason == "length",
             )
         val usage =
@@ -279,12 +284,14 @@ private class StreamedCompletion {
     private val positions = mutableMapOf<Int, Int>()
     private var usage: JsonObject? = null
     private var finishReason: String? = null
+    private var extraContent: JsonElement? = null
     private var done = false
 
     private class Call(
         val id: String?,
     ) {
         var name = ""
+        var extraContent: JsonElement? = null
 
         /** The input of a tool call arrives as pieces of JSON text. */
         val arguments = StringBuilder()
@@ -316,6 +323,7 @@ private class StreamedCompletion {
         choice.string("finish_reason")?.let { finishReason = it }
         val delta = choice["delta"] as? JsonObject ?: return null
         delta.string("refusal")?.let { refusal.append(it) }
+        delta.extraContent()?.let { extraContent = it }
         (delta["tool_calls"] as? JsonArray).orEmpty().filterIsInstance<JsonObject>().forEach(::addCall)
         return delta.string("content")?.takeIf { it.isNotEmpty() }?.also { content.append(it) }
     }
@@ -334,6 +342,7 @@ private class StreamedCompletion {
                 positions[index] = calls.size
                 calls += it
             }
+        piece.extraContent()?.let { call.extraContent = it }
         val function = piece["function"] as? JsonObject
         function.string("name")?.let { call.name += it }
         when (val arguments = function?.get("arguments")) {
@@ -352,10 +361,12 @@ private class StreamedCompletion {
                     putJsonObject("message") {
                         put("content", content.toString())
                         if (refusal.isNotEmpty()) put("refusal", refusal.toString())
+                        extraContent?.let { put(EXTRA_CONTENT, it) }
                         putJsonArray("tool_calls") {
                             calls.forEach { call ->
                                 addJsonObject {
                                     call.id?.let { put("id", it) }
+                                    call.extraContent?.let { put(EXTRA_CONTENT, it) }
                                     putJsonObject("function") {
                                         put("name", call.name)
                                         put("arguments", call.arguments.toString())
@@ -378,6 +389,29 @@ private fun parse(text: String): JsonObject? =
     } catch (_: SerializationException) {
         null
     }
+
+/**
+ * The field in which a server sends what it wants back unchanged with the next request. Gemini puts
+ * the thought signature of a tool call there, and rejects a request that comes without it.
+ */
+private const val EXTRA_CONTENT = "extra_content"
+
+private fun JsonObject.extraContent(): JsonElement? = this[EXTRA_CONTENT]?.takeIf { it !is JsonNull }
+
+/**
+ * Returns the `extra_content` of [answer] and of its tool calls as the value of
+ * [ChatMessage.Assistant.providerContent], or `null` when the answer has none. The one of the
+ * message keeps its name, and the ones of the calls are under `tool_calls` and the id of their call.
+ */
+private fun extraContent(answer: JsonObject?, calls: List<Pair<String, JsonObject>>): JsonObject? {
+    val ofMessage = answer?.extraContent()
+    val ofCalls = calls.mapNotNull { (id, call) -> call.extraContent()?.let { id to it } }.toMap()
+    if (ofMessage == null && ofCalls.isEmpty()) return null
+    return buildJsonObject {
+        ofMessage?.let { put(EXTRA_CONTENT, it) }
+        if (ofCalls.isNotEmpty()) put("tool_calls", JsonObject(ofCalls))
+    }
+}
 
 /**
  * Returns the `error` of the body of a failed request, or `null` when [text] has none. OpenAI sends
@@ -427,16 +461,21 @@ private fun messages(request: ChatRequest): JsonArray =
                 is ChatMessage.Assistant -> {
                     // The API rejects an assistant message that says nothing and asks for nothing.
                     if (message.text.isEmpty() && message.toolCalls.isEmpty()) continue
+                    // What the server sent as extra_content goes back to it where it was.
+                    val kept = message.providerContent as? JsonObject
+                    val keptOfCalls = kept?.get("tool_calls") as? JsonObject
                     addJsonObject {
                         put("role", "assistant")
                         // A message that only asks for tools has no text, which the API writes as null.
                         put("content", if (message.text.isEmpty()) JsonNull else JsonPrimitive(message.text))
+                        kept?.extraContent()?.let { put(EXTRA_CONTENT, it) }
                         if (message.toolCalls.isNotEmpty()) {
                             putJsonArray("tool_calls") {
                                 message.toolCalls.forEach { call ->
                                     addJsonObject {
                                         put("id", call.id)
                                         put("type", "function")
+                                        keptOfCalls?.get(call.id)?.let { put(EXTRA_CONTENT, it) }
                                         putJsonObject("function") {
                                             put("name", call.name)
                                             // The API takes the input as JSON in a string.

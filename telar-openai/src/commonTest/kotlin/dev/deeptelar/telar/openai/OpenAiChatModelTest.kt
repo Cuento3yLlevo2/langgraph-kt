@@ -24,6 +24,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.put
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -202,6 +203,69 @@ class OpenAiChatModelTest {
                 ),
                 sentBody()["messages"],
             )
+        }
+
+    @Test
+    fun `the extra content of an answer goes back to the server where it was`() =
+        runTest {
+            // Gemini sends a thought signature with the first tool call of an answer, and wants it back.
+            val signature = """{"google": {"thought_signature": "sig-a"}}"""
+            val asksForTools =
+                answer(
+                    """
+                    {"content": null, "extra_content": {"google": {"note": "n"}}, "tool_calls": [
+                      {"id": "call_1", "type": "function", "extra_content": $signature, "function": {"name": "menu_price", "arguments": "{\"item\":\"cola\"}"}},
+                      {"id": "call_2", "type": "function", "extra_content": null, "function": {"name": "menu_price", "arguments": "{\"item\":\"tea\"}"}}
+                    ]}
+                    """,
+                    finishReason = "tool_calls",
+                )
+            val model =
+                OpenAiChatModel(
+                    client(HttpStatusCode.OK to asksForTools, HttpStatusCode.OK to text("Done")),
+                    apiKey = "test-key",
+                    model = "gemini",
+                )
+
+            val asked = model.chat(hello).message
+            model.chat(
+                ChatRequest(
+                    hello.messages + asked +
+                        ChatMessage.ToolResult("call_1", "menu_price", "2 euros") +
+                        ChatMessage.ToolResult("call_2", "menu_price", "3 euros"),
+                ),
+            )
+
+            assertEquals(
+                json("""{"extra_content": {"google": {"note": "n"}}, "tool_calls": {"call_1": $signature}}"""),
+                asked.providerContent,
+            )
+            assertEquals(
+                json(
+                    """
+                    {"role": "assistant", "content": null, "extra_content": {"google": {"note": "n"}}, "tool_calls": [
+                      {"id": "call_1", "type": "function", "extra_content": $signature, "function": {"name": "menu_price", "arguments": "{\"item\":\"cola\"}"}},
+                      {"id": "call_2", "type": "function", "function": {"name": "menu_price", "arguments": "{\"item\":\"tea\"}"}}
+                    ]}
+                    """,
+                ),
+                sentBody(1)["messages"]!!.jsonArray[1],
+            )
+        }
+
+    @Test
+    fun `the content that another model kept is not sent`() =
+        runTest {
+            val model = model(text("Hi"))
+            val ofClaude = json("""[{"type": "thinking", "thinking": "Hm", "signature": "s"}]""")
+
+            model.chat(
+                ChatRequest(
+                    listOf(ChatMessage.User("Hello"), ChatMessage.Assistant("Hi", providerContent = ofClaude), ChatMessage.User("Anyone?")),
+                ),
+            )
+
+            assertEquals(json("""{"role": "assistant", "content": "Hi"}"""), sentBody()["messages"]!!.jsonArray[1])
         }
 
     @Test
