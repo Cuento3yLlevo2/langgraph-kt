@@ -73,8 +73,6 @@ New modules and additions to `telar-agent`. They do not change the core.
   today. Only the browser checkpointer is tested in a browser.
 - **Documentation.** A guide for every feature on this page, a tutorial level where one fits, and a
   page for people who know LangGraph for Python: what has the same name and what is different.
-- **A documentation site.** The guides are in the README today, and the site has only the API
-  reference. The guides and the tutorial move to a site with a menu and a search.
 - **The project's own name everywhere.** The topic `langgraph` is taken off the repository, which
   keeps the sentence that says what Telar is inspired by.
 - **Written rules.** Which Kotlin versions are supported, and how long a deprecated declaration

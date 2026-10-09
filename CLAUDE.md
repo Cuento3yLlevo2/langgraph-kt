@@ -17,6 +17,7 @@ Read CONTRIBUTING.md as well; its design rules apply to every change.
 ./gradlew ktlintFormat                       # Fix formatting
 ./gradlew apiDump                            # Update */api/*.api after an intentional public API change
 ./gradlew :samples:runQuickStart             # Run a sample
+(cd docs && npm ci && npm run build)         # Build the documentation site; fails on a dead link
 ```
 
 Single test class:
@@ -64,6 +65,12 @@ made under that name keep it. The repository is `deeptelar/telar` and the demo i
   `decisionEdge` routes a graph with one
 - **`samples`**: runnable examples with tests; not published. `samples/.../tutorial/levelN` is the
   code of the tutorial in `docs/tutorial/`; a page shows its level's code and output, so change both together
+- **`docs`**: the documentation site (VitePress), published at <https://deeptelar.github.io/telar/>
+  with the Dokka API reference under `api/`. `index.md` is the home page, `guides/` has a page per
+  feature, `tutorial/` a page per level; the menu is in `docs/.vitepress/config.ts`. The README is
+  the short pitch and links to the site, so a feature's guide goes in `docs/guides/`, not in the
+  README. Links between pages are relative and end in `.md`; links to files outside `docs/` are
+  full GitHub addresses
 - **`build-logic`**: convention plugins `telar.kmp-library`, `telar.web-library`,
   `telar.jvm-library`, `telar.quality` (ktlint, Kover, Dokka), `telar.publishing`,
   `telar.root`

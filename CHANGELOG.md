@@ -20,6 +20,9 @@ breaking changes.
 
 ### Changed
 
+- The guides moved from the README to a documentation site, <https://deeptelar.github.io/telar/>,
+  which also has the tutorial, a menu and a search. The API reference, which was at that address,
+  is now at <https://deeptelar.github.io/telar/api/>.
 - **A call to a model is no longer cut off by a limit of the Ktor engine.** The CIO engine ends a
   request after 15 seconds, also when a streamed answer is still arriving, and OkHttp ends one that
   waits 10 seconds for data. The `timeout` of the model now replaces the limits of the client and
