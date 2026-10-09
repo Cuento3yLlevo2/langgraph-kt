@@ -33,6 +33,9 @@ export default withMermaid(
     rewrites: { 'tutorial/README.md': 'tutorial/index.md' },
 
     sitemap: { hostname: site },
+    markdown: { theme: { light: 'solarized-light', dark: 'vitesse-dark' } },
+    // The colors of a diagram come from the style sheet of the theme, in both modes.
+    mermaid: { fontFamily: "'Geist Mono', ui-monospace, monospace" },
     head: [
       ['link', { rel: 'icon', type: 'image/svg+xml', href: `${base}favicon.svg` }],
       ['link', { rel: 'icon', sizes: '32x32', href: `${base}favicon.ico` }],
@@ -44,7 +47,9 @@ export default withMermaid(
     ],
 
     themeConfig: {
-      logo: { src: '/telar-loom-mark.svg', alt: '' },
+      // The lockup has the wordmark, so the title is not written next to it.
+      logo: { light: '/telar-lockup.svg', dark: '/telar-lockup-on-dark.svg', alt: 'Telar' },
+      siteTitle: false,
       nav: [
         { text: 'Get started', link: '/quick-start' },
         { text: 'Guides', link: '/guides/', activeMatch: '^/guides/' },

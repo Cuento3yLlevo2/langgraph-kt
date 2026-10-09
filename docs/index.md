@@ -3,25 +3,20 @@ layout: home
 title: Telar
 titleTemplate: AI agents and workflows for Kotlin
 
-hero:
-  name: Telar
-  text: AI agents and workflows for Kotlin, as small typed graphs
+banner:
+  label: AI workflows, woven
+  title: AI agents and workflows for Kotlin, as small typed graphs
   tagline: Write each step as a suspend function on a data class of your own, and connect the steps with arrows. Telar runs the graph on every Kotlin platform.
-  image:
-    src: /telar-loom-mark.svg
-    alt: The Telar logo, a small loom
+  imageAlt: The Telar logo, a small loom
   actions:
-    - theme: brand
-      text: Get started
+    - text: Get started
       link: /quick-start
-    - theme: alt
-      text: Tutorial
+      primary: true
+    - text: Tutorial
       link: /tutorial/
-    - theme: alt
-      text: Play the demo
+    - text: Play the demo
       link: https://deeptelar.github.io/telar-demo/
-    - theme: alt
-      text: GitHub
+    - text: GitHub
       link: https://github.com/deeptelar/telar
 
 features:
