@@ -303,6 +303,12 @@ final class dev.deeptelar.telar.agent/AgentState { // dev.deeptelar.telar.agent/
     }
 }
 
+final class dev.deeptelar.telar.agent/ChatDecisionModel : dev.deeptelar.telar.agent/DecisionModel { // dev.deeptelar.telar.agent/ChatDecisionModel|null[0]
+    constructor <init>(dev.deeptelar.telar.agent/ChatModel) // dev.deeptelar.telar.agent/ChatDecisionModel.<init>|<init>(dev.deeptelar.telar.agent.ChatModel){}[0]
+
+    final suspend fun decide(dev.deeptelar.telar.agent/DecisionRequest): dev.deeptelar.telar.agent/DecisionResponse // dev.deeptelar.telar.agent/ChatDecisionModel.decide|decide(dev.deeptelar.telar.agent.DecisionRequest){}[0]
+}
+
 final class dev.deeptelar.telar.agent/ChatModelException : dev.deeptelar.telar/TelarException { // dev.deeptelar.telar.agent/ChatModelException|null[0]
     constructor <init>(kotlin/String, kotlin/Throwable? = ...) // dev.deeptelar.telar.agent/ChatModelException.<init>|<init>(kotlin.String;kotlin.Throwable?){}[0]
 }

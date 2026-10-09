@@ -49,7 +49,8 @@ made under that name keep it. The repository is `deeptelar/telar` and the demo i
 - **`telar-agent`** (KMP): `ChatModel` (the provider-neutral model interface), `ChatMessage`,
   `Tool` (JSON Schema built from a `@Serializable` input class in `ToolSchema.kt`), and the
   tool-calling loop: `toolLoop` adds a model node and a tools node to any graph, `toolAgent` is that
-  loop as a graph over `AgentState`
+  loop as a graph over `AgentState`. Also `DecisionModel` (see `telar-typesafe`) and
+  `ChatDecisionModel`, which decides with any `ChatModel`
 - **`telar-anthropic`** (KMP): `AnthropicChatModel`, the Claude Messages API on Ktor client
   core. The app supplies the `HttpClient` and its engine
 - **`telar-openai`** (KMP): `OpenAiChatModel`, the Chat Completions API on Ktor client core. One

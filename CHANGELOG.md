@@ -9,6 +9,11 @@ breaking changes.
 
 ### Added
 
+- `ChatDecisionModel` in `telar-agent`: a `DecisionModel` that asks any `ChatModel`, so `choose`,
+  `isYes`, `score` and `decisionEdge` work with Claude, OpenAI, Gemini, Ollama or any other chat
+  model. One call answers every question of a request. The model estimates how likely each option
+  is, and `confidence` is computed from those as Jev computes it: how far the most likely option is
+  above an even split.
 - `AnthropicChatModel`, `OpenAiChatModel` and `TypeSafeDecisionModel` have a `timeout`: how long one
   call may take, from the request to the end of the answer. The default is five minutes for the two
   chat models and one minute for Jev.

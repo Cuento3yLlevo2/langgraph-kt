@@ -79,6 +79,11 @@ public final class dev/deeptelar/telar/agent/Answer$YesNo : dev/deeptelar/telar/
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class dev/deeptelar/telar/agent/ChatDecisionModel : dev/deeptelar/telar/agent/DecisionModel {
+	public fun <init> (Ldev/deeptelar/telar/agent/ChatModel;)V
+	public fun decide (Ldev/deeptelar/telar/agent/DecisionRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
 public abstract interface class dev/deeptelar/telar/agent/ChatEvent {
 }
 

@@ -4,12 +4,14 @@ import dev.deeptelar.telar.CompiledGraph
 import dev.deeptelar.telar.START
 import dev.deeptelar.telar.StateGraph
 import dev.deeptelar.telar.agent.Answer
+import dev.deeptelar.telar.agent.ChatDecisionModel
 import dev.deeptelar.telar.agent.DecisionModel
 import dev.deeptelar.telar.agent.DecisionResponse
 import dev.deeptelar.telar.agent.decisionEdge
 import dev.deeptelar.telar.typesafe.TypeSafeDecisionModel
 import io.ktor.client.HttpClient
 import kotlinx.serialization.json.jsonPrimitive
+import java.util.Locale
 
 /** Below this confidence a person reads the email. */
 const val SURE_ENOUGH = 0.6
@@ -20,7 +22,8 @@ const val SURE_ENOUGH = 0.6
  * for a complaint and for everything else that is neither a refund nor a defect. An email the
  * model is not sure about goes to the person as well.
  *
- * Pass any [DecisionModel]: `TypeSafeDecisionModel` for Jev, or one of your own.
+ * Pass any [DecisionModel]: `TypeSafeDecisionModel` for Jev, `ChatDecisionModel` for a chat model
+ * you already use, or one of your own.
  */
 fun routedSupport(model: DecisionModel): CompiledGraph<SupportEmail> =
     StateGraph<SupportEmail> {
@@ -88,12 +91,45 @@ private fun choice(vararg probabilities: Pair<String, Double>): Answer.Choice {
     return Answer.Choice(option, probabilities.toMap(), confidence = (highest - even) / (1 - even))
 }
 
-/** Set TYPESAFE_API_KEY to let Jev decide. Without it, the scripted model does. */
+/**
+ * The decision model that the environment asks for: Jev with TYPESAFE_API_KEY, or else the chat
+ * model that [modelFor] finds a key for, deciding through [ChatDecisionModel]. Without any key, the
+ * scripted model decides.
+ */
+fun decisionModelFor(client: HttpClient, environment: Map<String, String> = System.getenv()): DecisionModel {
+    val jevKey = environment["TYPESAFE_API_KEY"]?.takeIf { it.isNotBlank() }
+    val chatModel = modelFor(client, environment)
+    return when {
+        jevKey != null -> TypeSafeDecisionModel(client, apiKey = jevKey)
+        chatModel !== scriptedModel -> ChatDecisionModel(chatModel)
+        else -> scriptedDecisions
+    }
+}
+
+/**
+ * This model, printing each option it picks and how sure it is. A [DecisionModel] is one function,
+ * so a model that wraps another takes a few lines.
+ */
+fun DecisionModel.printingDecisions(): DecisionModel =
+    DecisionModel { request ->
+        decide(request).also { response ->
+            response.answers.values.filterIsInstance<Answer.Choice>().forEach { answer ->
+                println("  picked ${answer.option}, confidence ${"%.2f".format(Locale.ROOT, answer.confidence)}")
+            }
+        }
+    }
+
 suspend fun main() {
-    val key = System.getenv("TYPESAFE_API_KEY")
     val client = HttpClient()
-    val model = if (key.isNullOrBlank()) scriptedDecisions else TypeSafeDecisionModel(client, apiKey = key)
-    val graph = routedSupport(model)
+    val model = decisionModelFor(client)
+    println(
+        when (model) {
+            is TypeSafeDecisionModel -> "Jev decides."
+            is ChatDecisionModel -> "A chat model decides, through ChatDecisionModel."
+            else -> "No API key is set, so the scripted model decides."
+        },
+    )
+    val graph = routedSupport(model.printingDecisions())
 
     val emails =
         listOf(
