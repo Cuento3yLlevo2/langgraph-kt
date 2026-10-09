@@ -1,5 +1,6 @@
 package dev.deeptelar.telar.anthropic
 
+import dev.deeptelar.telar.GraphValidationException
 import dev.deeptelar.telar.agent.ChatEvent
 import dev.deeptelar.telar.agent.ChatMessage
 import dev.deeptelar.telar.agent.ChatModel
@@ -9,6 +10,10 @@ import dev.deeptelar.telar.agent.ChatResponse
 import dev.deeptelar.telar.agent.TokenUsage
 import dev.deeptelar.telar.agent.ToolCall
 import io.ktor.client.HttpClient
+import io.ktor.client.network.sockets.SocketTimeoutException
+import io.ktor.client.plugins.HttpRequestTimeoutException
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -41,6 +46,8 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.minutes
 
 /**
  * A [ChatModel] that calls Claude through the Messages API of Anthropic. It is built on Ktor, so it
@@ -56,9 +63,8 @@ import kotlinx.serialization.json.putJsonArray
  * Android, `ktor-client-darwin` on iOS or `ktor-client-js` in a browser. The client is yours: share
  * one between models, and close it when your app is done with it.
  *
- * Give the client time: the CIO engine of Ktor ends a request after 15 seconds, also when the answer
- * is still arriving. `HttpClient { install(HttpTimeout) { requestTimeoutMillis = 5 * 60 * 1000 } }`
- * gives a model five minutes.
+ * A call may take five minutes, whatever limits the client and its engine have: the CIO engine, for
+ * one, ends a request after 15 seconds. Change the limit with `timeout`.
  *
  * [chat] returns when Claude has finished, and [stream] delivers the text while Claude writes it. A
  * `toolAgent` uses [stream] when its run is collected with `stream`. Claude's thinking and other
@@ -77,16 +83,29 @@ import kotlinx.serialization.json.putJsonArray
  * or `tool_choice`. A field given here replaces the one this class would send.
  * @param headers more headers for every request, such as `anthropic-beta`.
  * @param baseUrl where the API lives. Change it to go through a proxy or a gateway.
+ * @param timeout how long one call may take, from the request to the end of the answer, and how
+ * long it may wait for the next piece of the answer. It replaces the limits of [client] and of its
+ * engine for the requests of this model. `null` leaves those limits in place.
+ * @throws GraphValidationException if [timeout] is not positive.
  */
 public class AnthropicChatModel(
-    private val client: HttpClient,
+    client: HttpClient,
     private val apiKey: String,
     private val model: String,
     private val maxTokens: Int = DEFAULT_MAX_TOKENS,
     private val parameters: JsonObject = JsonObject(emptyMap()),
     private val headers: Map<String, String> = emptyMap(),
     private val baseUrl: String = "https://api.anthropic.com",
+    private val timeout: Duration? = 5.minutes,
 ) : ChatModel {
+    init {
+        if (timeout != null && !timeout.isPositive()) throw GraphValidationException("timeout must be positive, was $timeout.")
+    }
+
+    // Ktor applies the limit of a request only in a client that has the HttpTimeout plugin. This
+    // client has it, with everything else of the client it was made from, and shares its engine.
+    private val client: HttpClient = if (timeout == null) client else client.config { install(HttpTimeout) }
+
     /**
      * Sends [request] to the Messages API and returns Claude's answer.
      *
@@ -103,7 +122,7 @@ public class AnthropicChatModel(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            throw unreachable(e)
+            throw failed(e)
         }
 
         if (status !in 200..299) throw apiError(status, text)
@@ -146,7 +165,7 @@ public class AnthropicChatModel(
                     } catch (e: ChatModelException) {
                         failure = e
                     } catch (e: Exception) {
-                        failure = unreachable(e)
+                        failure = failed(e)
                     }
                     pieces.close()
                 }
@@ -164,10 +183,22 @@ public class AnthropicChatModel(
         this@AnthropicChatModel.headers.forEach { (name, value) -> header(name, value) }
         contentType(ContentType.Application.Json)
         setBody(body.toString())
+        this@AnthropicChatModel.timeout?.let { limit ->
+            timeout {
+                requestTimeoutMillis = limit.inWholeMilliseconds
+                socketTimeoutMillis = limit.inWholeMilliseconds
+            }
+        }
     }
 
-    private fun unreachable(cause: Exception): ChatModelException =
-        ChatModelException("Could not reach the Claude API: ${cause.message ?: cause::class.simpleName}", cause)
+    /** The exception for a request that ended without a response, or in the middle of one. */
+    private fun failed(cause: Exception): ChatModelException =
+        when {
+            cause !is HttpRequestTimeoutException && cause !is SocketTimeoutException ->
+                ChatModelException("Could not reach the Claude API: ${cause.message ?: cause::class.simpleName}", cause)
+            timeout != null -> ChatModelException("The Claude API did not finish its answer within $timeout.", cause)
+            else -> ChatModelException("The Claude API did not finish its answer in the time the client allows: ${cause.message}", cause)
+        }
 
     private fun apiError(status: Int, text: String): ChatModelException {
         val error = parse(text)?.get("error") as? JsonObject
