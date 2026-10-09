@@ -132,18 +132,16 @@ public class ChatDecisionModel(
             is Question.YesNo -> mapOf(YES to yes, NO to no)
             is Question.Score -> levels.withIndex().associate { (level, description) -> level.toString() to description }
         }
-
-    private companion object {
-        const val YES = "yes"
-        const val NO = "no"
-        const val REPLY_EXCERPT = 200
-        const val SYSTEM =
-            "You make decisions about a state. For each question, judge the state as the instructions say, and estimate " +
-                "how likely each of its options is to be the right one, from what the state says. An option may come with " +
-                "a description of when it applies.\n\n" +
-                "Reply with one JSON object and nothing else. It has the name of each question as a key, and as its value " +
-                "an object with each option of that question as a key and its probability, a number from 0 to 1, as the " +
-                "value. The probabilities of one question add up to 1. For example: " +
-                "{\"team\": {\"refund\": 0.85, \"technical\": 0.15}, \"urgent\": {\"yes\": 0.2, \"no\": 0.8}}"
-    }
 }
+
+private const val YES = "yes"
+private const val NO = "no"
+private const val REPLY_EXCERPT = 200
+private const val SYSTEM =
+    "You make decisions about a state. For each question, judge the state as the instructions say, and estimate " +
+        "how likely each of its options is to be the right one, from what the state says. An option may come with " +
+        "a description of when it applies.\n\n" +
+        "Reply with one JSON object and nothing else. It has the name of each question as a key, and as its value " +
+        "an object with each option of that question as a key and its probability, a number from 0 to 1, as the " +
+        "value. The probabilities of one question add up to 1. For example: " +
+        "{\"team\": {\"refund\": 0.85, \"technical\": 0.15}, \"urgent\": {\"yes\": 0.2, \"no\": 0.8}}"

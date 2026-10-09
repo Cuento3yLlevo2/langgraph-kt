@@ -21,7 +21,12 @@ class ChatDecisionModelTest {
 
     /** The questions of the prompt that [model] received, as the JSON object they were sent as. */
     private fun questionsSent(model: ScriptedModel): JsonObject {
-        val prompt = model.requests.single().messages.single().text
+        val prompt =
+            model.requests
+                .single()
+                .messages
+                .single()
+                .text
         return Json.parseToJsonElement(prompt.substringAfter("Questions:\n")) as JsonObject
     }
 
@@ -138,7 +143,14 @@ class ChatDecisionModelTest {
 
             ChatDecisionModel(chat).decide(DecisionRequest(state, mapOf("decision" to Question.YesNo("Large?"))))
 
-            assertContains(chat.requests.single().messages.single().text, "State:\n{\"total\":120}")
+            assertContains(
+                chat.requests
+                    .single()
+                    .messages
+                    .single()
+                    .text,
+                "State:\n{\"total\":120}",
+            )
         }
 
     @Test
