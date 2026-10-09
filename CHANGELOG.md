@@ -7,6 +7,16 @@ breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+
+- `OpenAiChatModel` reports an error of Gemini with its status and its message, such as
+  `API error 404 (NOT_FOUND): This model is no longer available.` Gemini sends the error inside a
+  list, and the message of the exception was the whole body of the response.
+- A `toolAgent` works with Gemini through `OpenAiChatModel`. Gemini sends a thought signature with a
+  tool call and rejects the next request when the signature is not in it. `OpenAiChatModel` now
+  keeps the `extra_content` of an answer and of its tool calls in
+  `ChatMessage.Assistant.providerContent` and sends it back.
+
 ## [0.1.0-alpha07] - 2026-10-09
 
 ### Added

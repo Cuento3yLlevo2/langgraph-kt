@@ -165,6 +165,39 @@ class OpenAiStreamTest {
         }
 
     @Test
+    fun `the extra content of a streamed answer is kept with its call`() =
+        runTest {
+            val signature = """{"google": {"thought_signature": "sig-a"}}"""
+            val model =
+                model(
+                    chunks(
+                        delta("""{"role": "assistant", "extra_content": {"google": {"note": "n"}}}"""),
+                        delta(
+                            """{"tool_calls": [{"index": 0, "id": "call_a", "type": "function", "extra_content": $signature, "function": {"name": "menu_price", "arguments": "{\"item\":"}}]}""",
+                        ),
+                        callDelta(0, " \"cola\"}"),
+                        callDelta(1, "{\"item\": \"tea\"}", id = "call_b", name = "menu_price"),
+                        finish("tool_calls"),
+                        done,
+                    ),
+                )
+
+            val message = assertIs<ChatEvent.Completed>(model.stream(hello).toList().single()).response.message
+
+            assertEquals(
+                listOf(
+                    ToolCall("call_a", "menu_price", buildJsonObject { put("item", "cola") }),
+                    ToolCall("call_b", "menu_price", buildJsonObject { put("item", "tea") }),
+                ),
+                message.toolCalls,
+            )
+            assertEquals(
+                json("""{"extra_content": {"google": {"note": "n"}}, "tool_calls": {"call_a": $signature}}"""),
+                message.providerContent,
+            )
+        }
+
+    @Test
     fun `calls that a server sends whole and with the same index are told apart by their ids`() =
         runTest {
             val whole = { id: String, item: String ->
