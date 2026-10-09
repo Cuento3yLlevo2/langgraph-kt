@@ -25,7 +25,7 @@ flowchart LR
     model -.has its answer.-> send --> E
 ```
 
-[`level8/Level8.kt`](../../samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level8/Level8.kt)
+[`level8/Level8.kt`](https://github.com/deeptelar/telar/blob/main/samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level8/Level8.kt)
 has the whole program. This is the part that draws the map:
 
 ```kotlin
@@ -166,12 +166,12 @@ fun `rewrites the reply until it passes the check`() =
 ```
 
 All the levels are tested this way in
-[`TutorialTest.kt`](../../samples/src/test/kotlin/dev/deeptelar/telar/samples/tutorial/TutorialTest.kt).
+[`TutorialTest.kt`](https://github.com/deeptelar/telar/blob/main/samples/src/test/kotlin/dev/deeptelar/telar/samples/tutorial/TutorialTest.kt).
 For tests that pause and resume, use `MemoryCheckpointer`.
 
 ## Using the library in your own project
 
-So far you worked inside this repository. In your own Gradle project, add the library as a
+So far you worked inside the Telar repository. In your own Gradle project, add the library as a
 dependency:
 
 ```kotlin
@@ -191,10 +191,10 @@ dependencies {
 ```
 
 Until `0.1.0-alpha05` the project was called langgraph-kt. If you used it under that name, the
-[changelog](../../CHANGELOG.md) says how to update.
+[changelog](https://github.com/deeptelar/telar/blob/main/CHANGELOG.md) says how to update.
 
 The artifacts are on Maven Central, so your project needs the `mavenCentral()` repository. The
-[README](../../README.md#installation) lists the targets of each module.
+[installation page](../installation.md) lists the targets of each module.
 
 ## Your turn: the final quest
 
@@ -215,11 +215,11 @@ You can build a workflow with choices, loops, parallel work, live progress, paus
 know where an AI model goes, and how to let it call your functions. From here:
 
 - The [cheat sheet](cheat-sheet.md) has every word and every move on one page.
-- The [README](../../README.md#guides) has shorter, denser guides, including a reviewer who can send
+- The [guides](../guides/index.md) are shorter and denser, and include a reviewer who can send
   work back and a chat that continues over several turns.
-- The other [samples](../../samples/src/main/kotlin/dev/deeptelar/telar/samples) are complete programs.
+- The other [samples](https://github.com/deeptelar/telar/tree/main/samples/src/main/kotlin/dev/deeptelar/telar/samples) are complete programs.
 - The [demo app](https://github.com/deeptelar/telar-demo) shows graphs running behind a
   user interface, in the browser and on the desktop.
-- The [API reference](https://deeptelar.github.io/telar/) describes every function.
+- The [API reference](https://deeptelar.github.io/telar/api/) describes every function.
 
-[Back to level 7](07-game-over-screens.md) · [All levels](README.md)
+[Back to level 7](07-game-over-screens.md) · [All levels](./)

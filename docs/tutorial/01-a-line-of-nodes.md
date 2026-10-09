@@ -14,7 +14,7 @@ flowchart LR
     S([START]) --> greet --> E([END])
 ```
 
-[`level1/Level1.kt`](../../samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level1/Level1.kt)
+[`level1/Level1.kt`](https://github.com/deeptelar/telar/blob/main/samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level1/Level1.kt)
 
 ```kotlin
 import dev.deeptelar.telar.CompiledGraph
@@ -187,4 +187,4 @@ You can now:
 - let a later node use what an earlier node found out,
 - explain why nodes return a copy instead of changing the state.
 
-[Back to the idea](00-the-idea.md) · [All levels](README.md) · Next: [Level 2, choices](02-choices.md)
+[Back to the idea](00-the-idea.md) · [All levels](./) · Next: [Level 2, choices](02-choices.md)

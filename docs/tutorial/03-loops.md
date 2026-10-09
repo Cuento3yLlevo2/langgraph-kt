@@ -18,7 +18,7 @@ flowchart LR
 
 ## The code
 
-[`level3/Level3.kt`](../../samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level3/Level3.kt)
+[`level3/Level3.kt`](https://github.com/deeptelar/telar/blob/main/samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level3/Level3.kt)
 
 ```kotlin
 data class Ticket(
@@ -128,4 +128,4 @@ You can now:
 - keep the loop's memory in the state,
 - protect a loop with your own limit and know about the library's.
 
-[Back to level 2](02-choices.md) · [All levels](README.md) · Next: [Level 4, two things at once](04-two-things-at-once.md)
+[Back to level 2](02-choices.md) · [All levels](./) · Next: [Level 4, two things at once](04-two-things-at-once.md)

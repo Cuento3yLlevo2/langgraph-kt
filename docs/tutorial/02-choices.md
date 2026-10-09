@@ -22,7 +22,7 @@ After `read` the path splits. Only one of the three dotted arrows is taken in a 
 
 ## The code
 
-[`level2/Level2.kt`](../../samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level2/Level2.kt)
+[`level2/Level2.kt`](https://github.com/deeptelar/telar/blob/main/samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level2/Level2.kt)
 (`Ticket` and `topicOf` are the same as in level 1)
 
 ```kotlin
@@ -109,4 +109,4 @@ You can now:
 - say what a router is and why it returns a name,
 - explain what `targets` protects you from.
 
-[Back to level 1](01-a-line-of-nodes.md) · [All levels](README.md) · Next: [Level 3, loops](03-loops.md)
+[Back to level 1](01-a-line-of-nodes.md) · [All levels](./) · Next: [Level 3, loops](03-loops.md)

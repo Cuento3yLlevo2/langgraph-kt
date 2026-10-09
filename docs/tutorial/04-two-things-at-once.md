@@ -19,7 +19,7 @@ Two arrows leave `START`. Both are ordinary arrows, so both are followed.
 
 ## The code
 
-[`level4/Level4.kt`](../../samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level4/Level4.kt)
+[`level4/Level4.kt`](https://github.com/deeptelar/telar/blob/main/samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level4/Level4.kt)
 
 ```kotlin
 data class Ticket(
@@ -218,4 +218,4 @@ You can now:
 - say in which order the results of parallel nodes are written into the state,
 - follow a run live with `stream` and name the six events.
 
-[Back to level 3](03-loops.md) · [All levels](README.md) · Next: [Level 5, save points](05-save-points.md)
+[Back to level 3](03-loops.md) · [All levels](./) · Next: [Level 5, save points](05-save-points.md)
