@@ -29,7 +29,7 @@ fun topicOf(message: String): String =
         else -> "other"
     }
 
-/** Level 1 of the tutorial in `docs/`: two nodes in a row, each adding to the state. */
+/** Level 1 of the tutorial in `docs/tutorial/`: two nodes in a row, each adding to the state. */
 fun helpDesk(): CompiledGraph<Ticket> =
     StateGraph<Ticket> {
         val read = node("read") { ticket -> ticket.copy(topic = topicOf(ticket.message)) }

@@ -269,12 +269,12 @@ before `1.0`; the [changelog](CHANGELOG.md) lists what changes in each version, 
 
 ## Tutorial
 
-New to agent workflows, or to graphs? The [tutorial](docs/README.md) starts from zero and has eight
+New to agent workflows, or to graphs? The [tutorial](docs/tutorial/README.md) starts from zero and has eight
 levels, like a game: a line of nodes, a choice, a loop, parallel work, pausing for a human, an agent
 with tools, errors, and a complete workflow. Every level is a small program you can run, for example
 `./gradlew :samples:runLevel1`, and matches a stage of the
 [Pixel Pizza game](https://deeptelar.github.io/telar-demo/). The
-[cheat sheet](docs/cheat-sheet.md) has every term and every call on one page.
+[cheat sheet](docs/tutorial/cheat-sheet.md) has every term and every call on one page.
 
 ## Guides
 
@@ -1102,7 +1102,7 @@ runs without an API key, with Claude when `ANTHROPIC_API_KEY` is set, with OpenA
 `OPENAI_API_KEY` is set, and with a model of Ollama when `OLLAMA_MODEL` names one. `OPENAI_MODEL`
 names another model than `gpt-5`, and `OPENAI_BASE_URL` another server with the API of OpenAI, such
 as Gemini or Groq.
-[Level 6 of the tutorial](docs/06-the-agent.md) explains the same agent step by step.
+[Level 6 of the tutorial](docs/tutorial/06-the-agent.md) explains the same agent step by step.
 
 ### Inspecting a graph
 

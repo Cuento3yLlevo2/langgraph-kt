@@ -66,7 +66,7 @@ val menuPrice: Tool =
 
 const val HELP_DESK = "You work at the help desk of Pixel Pizza. Never guess where an order is or what something costs."
 
-/** Level 6 of the tutorial in `docs/`: a model that decides by itself which tools to call. */
+/** Level 6 of the tutorial in `docs/tutorial/`: a model that decides by itself which tools to call. */
 fun helpDesk(model: ChatModel): CompiledGraph<AgentState> = toolAgent(model, tools = listOf(orderStatus, menuPrice), system = HELP_DESK)
 
 /** The same agent as one part of a graph of your own, with the conversation in your own state. */

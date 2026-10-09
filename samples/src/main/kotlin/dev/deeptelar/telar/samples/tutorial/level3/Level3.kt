@@ -31,7 +31,7 @@ fun problemWith(ticket: Ticket): String =
         else -> ""
     }
 
-/** Level 3 of the tutorial in `docs/`: an edge that goes back, so the reply is rewritten until it passes. */
+/** Level 3 of the tutorial in `docs/tutorial/`: an edge that goes back, so the reply is rewritten until it passes. */
 fun helpDesk(): CompiledGraph<Ticket> =
     StateGraph<Ticket> {
         val write = node("write") { ticket -> ticket.copy(reply = writeReply(ticket), attempts = ticket.attempts + 1) }

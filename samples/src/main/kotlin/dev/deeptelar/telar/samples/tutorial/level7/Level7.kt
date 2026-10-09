@@ -61,7 +61,7 @@ fun helpDesk(callKitchen: suspend () -> String): CompiledGraph<Ticket> =
         START then greet then kitchen then END
     }.compile()
 
-/** Level 7 of the tutorial in `docs/`: what the library says when something is wrong. */
+/** Level 7 of the tutorial in `docs/tutorial/`: what the library says when something is wrong. */
 suspend fun main() {
     val ticket = Ticket(customer = "Ana", message = "Where is my pizza?")
 

@@ -59,7 +59,7 @@ suspend fun askDriver(millis: Long): String {
     return "the driver is 5 minutes away"
 }
 
-/** Level 8 of the tutorial in `docs/`: every move of the earlier levels in one graph. */
+/** Level 8 of the tutorial in `docs/tutorial/`: every move of the earlier levels in one graph. */
 fun helpDesk(model: ChatModel, lookupMillis: Long = 1_000): CompiledGraph<Ticket> =
     StateGraph<Ticket> {
         val read = node("read") { ticket -> ticket.copy(topic = topicOf(ticket.message)) }

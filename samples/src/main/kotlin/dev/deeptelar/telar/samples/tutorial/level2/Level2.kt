@@ -19,7 +19,7 @@ fun topicOf(message: String): String =
         else -> "other"
     }
 
-/** Level 2 of the tutorial in `docs/`: a conditional edge picks one of three paths. */
+/** Level 2 of the tutorial in `docs/tutorial/`: a conditional edge picks one of three paths. */
 fun helpDesk(): CompiledGraph<Ticket> =
     StateGraph<Ticket> {
         val read = node("read") { ticket -> ticket.copy(topic = topicOf(ticket.message)) }

@@ -18,7 +18,7 @@ data class Ticket(
 
 const val PAY = "pay"
 
-/** Level 5 of the tutorial in `docs/`: the run stops before money moves and waits for a human. */
+/** Level 5 of the tutorial in `docs/tutorial/`: the run stops before money moves and waits for a human. */
 fun helpDesk(): CompiledGraph<Ticket> =
     StateGraph<Ticket> {
         val prepare = node("prepare") { ticket -> ticket.copy(refund = 12) }

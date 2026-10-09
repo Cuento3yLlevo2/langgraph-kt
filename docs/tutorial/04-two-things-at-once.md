@@ -19,7 +19,7 @@ Two arrows leave `START`. Both are ordinary arrows, so both are followed.
 
 ## The code
 
-[`level4/Level4.kt`](../samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level4/Level4.kt)
+[`level4/Level4.kt`](../../samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level4/Level4.kt)
 
 ```kotlin
 data class Ticket(

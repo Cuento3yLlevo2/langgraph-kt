@@ -49,7 +49,7 @@ import dev.deeptelar.telar.samples.tutorial.level8.PAY as PAY8
 import dev.deeptelar.telar.samples.tutorial.level8.Ticket as Ticket8
 import dev.deeptelar.telar.samples.tutorial.level8.helpDesk as helpDesk8
 
-/** Keeps the code and the output shown in the tutorial in `docs/` true. */
+/** Keeps the code and the output shown in the tutorial in `docs/tutorial/` true. */
 class TutorialTest {
     @Test
     fun `level 1 greets the customer`() =

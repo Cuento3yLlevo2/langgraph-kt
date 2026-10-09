@@ -22,7 +22,7 @@ flowchart LR
 
 The model is not on the map. It is outside, and the `answer` node talks to it.
 
-[`level6/Level6.kt`](../samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level6/Level6.kt)
+[`level6/Level6.kt`](../../samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level6/Level6.kt)
 
 ```kotlin
 fun replyDesk(model: ChatModel): CompiledGraph<Ticket> =
@@ -289,9 +289,9 @@ pass a `timeout` to change that.
 This snippet is not part of the runnable level, because it needs an account and a key, or a model
 on your machine. Keep the key out of your source code; read it from an environment variable as
 shown. The
-[ToolAgent sample](../samples/src/main/kotlin/dev/deeptelar/telar/samples/ToolAgent.kt) is this help
+[ToolAgent sample](../../samples/src/main/kotlin/dev/deeptelar/telar/samples/ToolAgent.kt) is this help
 desk with a real model: Claude when `ANTHROPIC_API_KEY` is set, OpenAI when `OPENAI_API_KEY` is set,
-a model of Ollama when `OLLAMA_MODEL` names one, and a pretend one otherwise. The README has more under [AI models](../README.md#ai-models).
+a model of Ollama when `OLLAMA_MODEL` names one, and a pretend one otherwise. The README has more under [AI models](../../README.md#ai-models).
 
 ### What changes when the model is real
 
@@ -304,7 +304,7 @@ a model of Ollama when `OLLAMA_MODEL` names one, and a pretend one otherwise. Th
 - **Its tools act for you.** Ask a person before a tool does something that cannot be undone. The
   node that runs the tools is named `tools`, so `interruptBefore = setOf("tools")` from level 5
   pauses the run before any tool runs. The README shows how to read the calls that wait and how to
-  say no, under [Agents with tools](../README.md#agents-with-tools).
+  say no, under [Agents with tools](../../README.md#agents-with-tools).
 
 ## Your turn
 

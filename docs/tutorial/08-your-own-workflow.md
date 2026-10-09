@@ -25,7 +25,7 @@ flowchart LR
     model -.has its answer.-> send --> E
 ```
 
-[`level8/Level8.kt`](../samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level8/Level8.kt)
+[`level8/Level8.kt`](../../samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level8/Level8.kt)
 has the whole program. This is the part that draws the map:
 
 ```kotlin
@@ -166,7 +166,7 @@ fun `rewrites the reply until it passes the check`() =
 ```
 
 All the levels are tested this way in
-[`TutorialTest.kt`](../samples/src/test/kotlin/dev/deeptelar/telar/samples/tutorial/TutorialTest.kt).
+[`TutorialTest.kt`](../../samples/src/test/kotlin/dev/deeptelar/telar/samples/tutorial/TutorialTest.kt).
 For tests that pause and resume, use `MemoryCheckpointer`.
 
 ## Using the library in your own project
@@ -191,10 +191,10 @@ dependencies {
 ```
 
 Until `0.1.0-alpha05` the project was called langgraph-kt. If you used it under that name, the
-[changelog](../CHANGELOG.md) says how to update.
+[changelog](../../CHANGELOG.md) says how to update.
 
 The artifacts are on Maven Central, so your project needs the `mavenCentral()` repository. The
-[README](../README.md#installation) lists the targets of each module.
+[README](../../README.md#installation) lists the targets of each module.
 
 ## Your turn: the final quest
 
@@ -215,9 +215,9 @@ You can build a workflow with choices, loops, parallel work, live progress, paus
 know where an AI model goes, and how to let it call your functions. From here:
 
 - The [cheat sheet](cheat-sheet.md) has every word and every move on one page.
-- The [README](../README.md#guides) has shorter, denser guides, including a reviewer who can send
+- The [README](../../README.md#guides) has shorter, denser guides, including a reviewer who can send
   work back and a chat that continues over several turns.
-- The other [samples](../samples/src/main/kotlin/dev/deeptelar/telar/samples) are complete programs.
+- The other [samples](../../samples/src/main/kotlin/dev/deeptelar/telar/samples) are complete programs.
 - The [demo app](https://github.com/deeptelar/telar-demo) shows graphs running behind a
   user interface, in the browser and on the desktop.
 - The [API reference](https://deeptelar.github.io/telar/) describes every function.

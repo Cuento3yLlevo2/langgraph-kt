@@ -14,7 +14,7 @@ flowchart LR
     S([START]) --> greet --> E([END])
 ```
 
-[`level1/Level1.kt`](../samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level1/Level1.kt)
+[`level1/Level1.kt`](../../samples/src/main/kotlin/dev/deeptelar/telar/samples/tutorial/level1/Level1.kt)
 
 ```kotlin
 import dev.deeptelar.telar.CompiledGraph
