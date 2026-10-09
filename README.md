@@ -842,8 +842,10 @@ val graph = StateGraph<SupportEmail> {
         routes = mapOf(
             refund to "Money back for an order or a charge",
             technical to "Help with something that does not work",
+            // An option for the rest: a model picks one of its options, also when none fits.
+            escalate to "A complaint, or anything else that a person should read",
         ),
-        // An email the model is not sure about goes to a person.
+        // An email the model is not sure about goes to a person too.
         minConfidence = 0.6,
         fallback = escalate,
     ) { email -> email.body } // what the model judges
@@ -868,6 +870,9 @@ val anger = jev.score(email.body, "How angry is the customer?", listOf("Calm", "
 
 - **`confidence` says how clearly one option won**, from 0 to 1. It does not say that the answer is
   right. Try your limits on your own data before you rely on them.
+- **Give the model an option for the rest.** It picks one of the options it has, also when none
+  fits, and it can be sure of that pick. Asked to choose between `refund` and `technical` only, Jev
+  gave "This is unacceptable, third time I write to you!!" to `technical` with a confidence of 0.9.
 - `decisionEdge` does not write the decision into the state. When the state should keep it, ask in a
   node as above, and route with `conditionalEdge` on what the node stored.
 - Several questions about the same text cost one call: `jev.decide(DecisionRequest(text, questions))`.

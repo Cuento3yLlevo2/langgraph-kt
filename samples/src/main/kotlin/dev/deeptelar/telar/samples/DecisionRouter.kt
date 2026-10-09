@@ -16,8 +16,9 @@ const val SURE_ENOUGH = 0.6
 
 /**
  * The email support of the quick start, with a decision model in the place of `categoryOf`: the
- * model reads the email and picks the node that replies. An email it is not sure about goes to a
- * person.
+ * model reads the email and picks the node that replies. A person is one of the nodes it can pick,
+ * for a complaint and for everything else that is neither a refund nor a defect. An email the
+ * model is not sure about goes to the person as well.
  *
  * Pass any [DecisionModel]: `TypeSafeDecisionModel` for Jev, or one of your own.
  */
@@ -51,7 +52,11 @@ fun routedSupport(model: DecisionModel): CompiledGraph<SupportEmail> =
                 mapOf(
                     refund to "Money back for an order or a charge",
                     technical to "Help with something that does not work",
+                    // A model picks one of its options, also when none fits. Without this one, Jev
+                    // sends an angry email that asks for nothing to `technical`, and is sure of it.
+                    escalate to "A complaint, or anything else that a person should read",
                 ),
+            // A person also reads what the model cannot place, such as two requests in one email.
             minConfidence = SURE_ENOUGH,
             fallback = escalate,
         ) { email -> email.body }
@@ -61,15 +66,27 @@ fun routedSupport(model: DecisionModel): CompiledGraph<SupportEmail> =
 /** Offline stand-in for a real decision model, so the sample runs without an API key. */
 val scriptedDecisions: DecisionModel =
     DecisionModel { request ->
+        val body = request.state.jsonPrimitive.content
         val answer =
-            when (categoryOf(request.state.jsonPrimitive.content)) {
-                Category.REFUND -> Answer.Choice("refund", mapOf("refund" to 0.95, "technical" to 0.05), confidence = 0.9)
-                Category.TECHNICAL -> Answer.Choice("technical", mapOf("refund" to 0.05, "technical" to 0.95), confidence = 0.9)
-                // Neither fits: the two options are as likely as each other, which is a confidence of 0.
-                Category.ESCALATION -> Answer.Choice("refund", mapOf("refund" to 0.5, "technical" to 0.5), confidence = 0.0)
+            when {
+                // Two requests in one email: the model cannot say which of them it is.
+                listOf("refund", "error").all { it in body.lowercase() } -> choice("refund" to 0.5, "technical" to 0.45, "escalate" to 0.05)
+                categoryOf(body) == Category.REFUND -> choice("refund" to 0.9, "technical" to 0.05, "escalate" to 0.05)
+                categoryOf(body) == Category.TECHNICAL -> choice("refund" to 0.05, "technical" to 0.9, "escalate" to 0.05)
+                else -> choice("refund" to 0.05, "technical" to 0.05, "escalate" to 0.9)
             }
         DecisionResponse(request.questions.mapValues { answer })
     }
+
+/**
+ * The answer of a model that gives its options these [probabilities]. The confidence is the one of
+ * Jev: how far the most likely option is above an even split, from 0 to 1.
+ */
+private fun choice(vararg probabilities: Pair<String, Double>): Answer.Choice {
+    val (option, highest) = probabilities.maxBy { it.second }
+    val even = 1.0 / probabilities.size
+    return Answer.Choice(option, probabilities.toMap(), confidence = (highest - even) / (1 - even))
+}
 
 /** Set TYPESAFE_API_KEY to let Jev decide. Without it, the scripted model does. */
 suspend fun main() {
@@ -83,6 +100,7 @@ suspend fun main() {
             SupportEmail(sender = "Ana", body = "I was charged twice, I would like a refund."),
             SupportEmail(sender = "Ben", body = "The app shows an error when I log in."),
             SupportEmail(sender = "Cleo", body = "This is unacceptable, third time I write to you!!"),
+            SupportEmail(sender = "Dan", body = "I get an error when I pay, and I want a refund for last month."),
         )
     for (email in emails) {
         val result = graph.invoke(email)
