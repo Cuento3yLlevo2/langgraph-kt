@@ -11,8 +11,8 @@ import kotlinx.serialization.json.JsonPrimitive
  * its answer has a fixed type, which makes it a good fit for the places where a graph has to
  * decide: which node comes next, whether an answer is good enough, whether a person has to look.
  *
- * Use an implementation from an integration module (`telar-typesafe` for Jev), or write one. In a
- * test, a lambda is enough:
+ * Use [ChatDecisionModel] to decide with a chat model you already have, an implementation from an
+ * integration module (`telar-typesafe` for Jev), or write one. In a test, a lambda is enough:
  *
  * ```kotlin
  * val model = DecisionModel { request ->

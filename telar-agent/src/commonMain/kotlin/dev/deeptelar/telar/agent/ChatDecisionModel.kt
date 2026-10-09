@@ -27,8 +27,9 @@ import kotlinx.serialization.json.putJsonObject
  *   so they are rougher than those of a decision model such as Jev (`telar-typesafe`), and a
  *   `confidence` of 0.9 is a guess, not a measurement. Try limits such as `minConfidence` on your
  *   own data before you rely on them.
- * - **`confidence` is the lead of the winner**: the probability of the most likely option minus that
- *   of the next one. It is 0 when two options are equally likely, and 1 when the model is sure.
+ * - **`confidence` is computed as Jev computes it**: how far the probability of the most likely
+ *   option is above an even split, `(highest - 1/n) / (1 - 1/n)` for `n` options. It is 0 when every
+ *   option is as likely and 1 when the model is sure, so a limit means the same with both models.
  * - **A small, fast model is usually enough.** Picking an option is easier than writing an answer.
  *
  * A failed call to the chat model, an answer cut off at its output limit, and an answer that is not
@@ -84,7 +85,7 @@ public class ChatDecisionModel(
             if (start in 0..<end) {
                 try {
                     Json.parseToJsonElement(text.substring(start, end + 1))
-                } catch (e: SerializationException) {
+                } catch (_: SerializationException) {
                     null
                 }
             } else {
@@ -115,15 +116,22 @@ public class ChatDecisionModel(
 
     private fun answer(question: Question, probabilities: List<Double>): Answer {
         val best = probabilities.indices.maxBy { probabilities[it] }
-        val lead = probabilities[best] - (probabilities.filterIndexed { index, _ -> index != best }.maxOrNull() ?: 0.0)
+        val confidence = confidence(probabilities[best], probabilities.size)
         return when (question) {
             is Question.Choice -> {
                 val options = question.options.keys.toList()
-                Answer.Choice(options[best], options.zip(probabilities).toMap(), lead)
+                Answer.Choice(options[best], options.zip(probabilities).toMap(), confidence)
             }
             is Question.YesNo -> Answer.YesNo(probabilities[0])
-            is Question.Score -> Answer.Score(probabilities.withIndex().sumOf { (level, p) -> level * p }, probabilities, lead)
+            is Question.Score -> Answer.Score(probabilities.withIndex().sumOf { (level, p) -> level * p }, probabilities, confidence)
         }
+    }
+
+    /** How far [highest], the probability of the most likely of [count] options, is above an even split, from 0 to 1. */
+    private fun confidence(highest: Double, count: Int): Double {
+        if (count == 1) return 1.0
+        val even = 1.0 / count
+        return ((highest - even) / (1 - even)).coerceIn(0.0, 1.0)
     }
 
     private fun Question.labels(): Map<String, String?> =

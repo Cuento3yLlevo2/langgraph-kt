@@ -44,6 +44,21 @@ class ChatDecisionModelTest {
         }
 
     @Test
+    fun `confidence is how far the most likely option is above an even split`() =
+        runTest {
+            suspend fun confidenceOf(reply: String, options: List<String>): Double =
+                ChatDecisionModel(ScriptedModel(says(reply))).choose("Hello", "Which team?", options.associateWith { null }).confidence
+
+            // The numbers of an answer of Jev: it reported 0.9 for these two probabilities.
+            near(0.9, confidenceOf("""{"decision": {"refund": 0.05, "technical": 0.95}}""", listOf("refund", "technical")))
+            // With three options an even split is a third each, so 0.5 is a quarter of the way to sure.
+            val three = listOf("refund", "technical", "person")
+            near(0.25, confidenceOf("""{"decision": {"refund": 0.5, "technical": 0.45, "person": 0.05}}""", three))
+            near(0.0, confidenceOf("""{"decision": {"refund": 1, "technical": 1, "person": 1}}""", three))
+            near(1.0, confidenceOf("""{"decision": {"refund": 0.3}}""", listOf("refund")))
+        }
+
+    @Test
     fun `the prompt holds the state and the instructions and every option with its description`() =
         runTest {
             val chat = ScriptedModel(says("""{"decision": {"refund": 1}}"""))
@@ -104,7 +119,7 @@ class ChatDecisionModelTest {
 
             near(1.5, answer.score)
             assertEquals(3, answer.probabilities.size)
-            near(0.3, answer.confidence)
+            near(0.4, answer.confidence)
             assertEquals(
                 buildJsonObject {
                     put("0", "Calm")
