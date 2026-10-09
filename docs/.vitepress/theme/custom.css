@@ -1,36 +1,700 @@
-/* The colors of docs/brand/README.md: navy, ochre, red, cream and ink. */
+/*
+ * The look of the Telar brand on the default theme of VitePress. docs/brand/README.md has the
+ * colors: a cream cloth, a navy wordmark, ochre thread and red nodes, all drawn on a pixel grid.
+ * So the page is cream, the edges are square, a shadow is a solid block, and a rule is a thread.
+ */
+
+/* ---------- Colors ---------- */
+
 :root {
-  --vp-c-brand-1: #23336b;
-  --vp-c-brand-2: #33489a;
-  --vp-c-brand-3: #23336b;
+  --telar-navy: #23336b;
+  --telar-blue: #3e6fb0;
+  --telar-ochre: #d19a32;
+  --telar-red: #a8322d;
+  --telar-green: #4e7a4a;
+  --telar-cream: #efe6d2;
+  --telar-shadow: #1e1b2e;
+  --telar-ink: #15131f;
+
+  /* What the rules below use. The dark colors are further down. */
+  --telar-line: var(--telar-navy);
+  --telar-panel: var(--telar-cream);
+  --telar-accent: var(--telar-red);
+  --telar-thread: var(--telar-ochre);
+  --telar-block-shadow: var(--telar-navy);
+
+  --vp-c-bg: #fbf6e9;
+  --vp-c-bg-alt: #f5eedc;
+  --vp-c-bg-elv: #fffcf3;
+  --vp-c-bg-soft: var(--telar-cream);
+
+  --vp-c-text-1: #1e1b2e;
+  --vp-c-text-2: rgba(30, 27, 46, 0.76);
+  --vp-c-text-3: rgba(30, 27, 46, 0.52);
+
+  --vp-c-divider: rgba(35, 51, 107, 0.22);
+  --vp-c-gutter: rgba(35, 51, 107, 0.22);
+  --vp-c-border: rgba(35, 51, 107, 0.4);
+
+  --vp-c-default-soft: rgba(35, 51, 107, 0.1);
+
+  --vp-c-brand-1: var(--telar-navy);
+  --vp-c-brand-2: var(--telar-blue);
+  --vp-c-brand-3: var(--telar-navy);
   --vp-c-brand-soft: rgba(35, 51, 107, 0.12);
 
-  --vp-home-hero-name-color: transparent;
-  --vp-home-hero-name-background: linear-gradient(120deg, #23336b 35%, #a8322d);
-  --vp-home-hero-image-background-image: linear-gradient(135deg, #efe6d2 40%, #d19a32);
-  --vp-home-hero-image-filter: blur(56px);
+  --vp-c-tip-1: var(--telar-green);
+  --vp-c-tip-soft: rgba(78, 122, 74, 0.14);
+  --vp-c-warning-1: #8a5f0c;
+  --vp-c-warning-soft: rgba(209, 154, 50, 0.2);
+  --vp-c-danger-1: var(--telar-red);
+  --vp-c-danger-soft: rgba(168, 50, 45, 0.12);
+
+  --vp-code-block-bg: #f3ebd8;
+  --vp-code-bg: rgba(35, 51, 107, 0.1);
+  --vp-code-color: var(--telar-navy);
+  --vp-code-copy-code-bg: var(--vp-c-bg);
+  --vp-code-copy-code-hover-bg: var(--vp-c-bg-elv);
+  --vp-code-block-divider-color: rgba(35, 51, 107, 0.22);
+  --vp-code-lang-color: rgba(30, 27, 46, 0.52);
+
+  --vp-nav-bg-color: var(--vp-c-bg);
+  --vp-sidebar-bg-color: var(--vp-c-bg-alt);
+  --vp-local-search-bg: var(--vp-c-bg);
+
+  /* The woven band is above everything, and the rest of the layout starts below it. */
+  --vp-layout-top-height: 20px;
+
+  --vp-font-family-base: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --vp-font-family-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --telar-font-pixel: 'Geist Pixel', 'Geist Mono', ui-monospace, monospace;
 }
 
 .dark {
+  --telar-line: var(--telar-cream);
+  --telar-panel: var(--telar-shadow);
+  --telar-accent: #d9534c;
+  --telar-thread: var(--telar-ochre);
+  --telar-block-shadow: var(--telar-ochre);
+
+  --vp-c-bg: var(--telar-ink);
+  --vp-c-bg-alt: #100e18;
+  --vp-c-bg-elv: #262238;
+  --vp-c-bg-soft: var(--telar-shadow);
+
+  --vp-c-text-1: var(--telar-cream);
+  --vp-c-text-2: rgba(239, 230, 210, 0.74);
+  --vp-c-text-3: rgba(239, 230, 210, 0.5);
+
+  --vp-c-divider: rgba(239, 230, 210, 0.18);
+  --vp-c-gutter: rgba(239, 230, 210, 0.18);
+  --vp-c-border: rgba(239, 230, 210, 0.36);
+
+  --vp-c-default-soft: rgba(239, 230, 210, 0.1);
+
   --vp-c-brand-1: #e3b862;
-  --vp-c-brand-2: #d19a32;
-  --vp-c-brand-3: #d19a32;
+  --vp-c-brand-2: var(--telar-ochre);
+  --vp-c-brand-3: var(--telar-ochre);
   --vp-c-brand-soft: rgba(209, 154, 50, 0.16);
 
-  --vp-c-bg: #15131f;
-  --vp-c-bg-alt: #100e18;
-  --vp-c-bg-elv: #1e1b2e;
-  --vp-c-bg-soft: #1e1b2e;
+  --vp-c-tip-1: #8fbf8a;
+  --vp-c-warning-1: #e3b862;
+  --vp-c-danger-1: #e2716b;
 
-  --vp-button-brand-text: #15131f;
-  --vp-button-brand-hover-text: #15131f;
-  --vp-button-brand-active-text: #15131f;
-
-  --vp-home-hero-name-background: linear-gradient(120deg, #efe6d2 35%, #d19a32);
-  --vp-home-hero-image-background-image: linear-gradient(135deg, #23336b 40%, #a8322d);
+  --vp-code-block-bg: var(--telar-shadow);
+  --vp-code-bg: rgba(239, 230, 210, 0.1);
+  --vp-code-color: #e3b862;
+  --vp-code-block-divider-color: rgba(239, 230, 210, 0.18);
+  --vp-code-lang-color: rgba(239, 230, 210, 0.5);
 }
 
-/* The logo is pixel art: keep its edges sharp at every size. */
-.VPImage {
+/* ---------- The pixel grid: no round corners, and the art stays sharp ---------- */
+
+.VPImage,
+.telar-banner__art img,
+.telar-ribbon,
+.telar-banner__art {
   image-rendering: pixelated;
+}
+
+.vp-doc div[class*='language-'],
+.vp-doc :not(pre) > code,
+.vp-doc .custom-block,
+.vp-doc table,
+.VPFeature,
+.VPButton,
+.VPBadge,
+.VPLocalSearchBox .shell,
+.VPLocalSearchBox .result,
+.DocSearch-Button,
+.VPMenu,
+.VPFlyout .menu,
+.pager-link,
+.vp-code-group .tabs,
+.vp-doc [class*='language-'] > button.copy,
+.VPSwitch,
+.VPSwitch .check {
+  border-radius: 0 !important;
+}
+
+/* ---------- The woven band ---------- */
+
+.telar-ribbon {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--vp-z-index-layout-top);
+  height: 20px;
+  background-repeat: repeat-x;
+  background-size: 72px 20px;
+  border-bottom: 2px solid var(--telar-navy);
+}
+
+/* ---------- Type ---------- */
+
+.vp-doc h1,
+.vp-doc h2,
+.VPFeature .title,
+.telar-banner__title,
+.NotFound .code,
+.NotFound .title {
+  font-family: var(--telar-font-pixel);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.vp-doc h1 {
+  font-size: 34px;
+  line-height: 1.15;
+  color: var(--vp-c-brand-1);
+}
+
+@media (min-width: 768px) {
+  .vp-doc h1 {
+    font-size: 42px;
+  }
+}
+
+/* A heading starts with a node, and the rule above it is a thread. */
+.vp-doc h2 {
+  margin-top: 56px;
+  padding-top: 28px;
+  border-top: 2px dashed var(--telar-thread);
+  font-size: 27px;
+  line-height: 1.25;
+}
+
+.vp-doc h2::before {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 12px;
+  background: var(--telar-accent);
+}
+
+.vp-doc h3 {
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+/* Small upper-case labels in the mono face, as in the demo. */
+.telar-label,
+.VPNavBarMenuLink,
+.VPNavBarMenuGroup .text,
+.VPNavScreenMenuLink,
+.VPNavScreenMenuGroup .button,
+.VPSidebarItem.level-0 > .item .text,
+.VPDocAsideOutline .outline-title,
+.VPLocalNav .menu-text,
+.VPLocalNavOutlineDropdown button,
+.pager-link .desc,
+.edit-link-button,
+.VPFeature .link-text,
+.vp-doc th,
+.vp-doc [class*='language-'] > span.lang,
+.DocSearch-Button-Placeholder,
+.VPFooter .message {
+  font-family: var(--vp-font-family-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.telar-label {
+  margin: 0;
+  color: var(--telar-accent);
+}
+
+/* ---------- Navigation ---------- */
+
+.VPNav {
+  border-bottom: 2px solid var(--telar-line);
+}
+
+.VPNavBar,
+.VPNavBar:not(.home.top) .content-body,
+.VPNavBar:not(.has-sidebar):not(.home.top),
+.VPNavBar.has-sidebar .title {
+  background-color: var(--vp-nav-bg-color) !important;
+}
+
+.VPNavBar .divider,
+.VPNavBar .divider-line {
+  display: none;
+}
+
+/* The lockup, loom and wordmark, at twice its grid: 170 by 42 pixels. */
+:root {
+  --vp-nav-logo-height: 42px;
+}
+
+.VPNavBarTitle .logo {
+  margin-right: 0;
+}
+
+.VPNavBarMenuLink.active,
+.VPNavBarMenuLink:hover {
+  color: var(--telar-accent) !important;
+}
+
+.VPSidebar {
+  border-right: 2px solid var(--telar-line);
+}
+
+/* On a wide screen the sidebar starts below the navigation, so the line under it runs across. */
+@media (min-width: 960px) {
+  .VPSidebar {
+    top: calc(var(--vp-layout-top-height) + var(--vp-nav-height)) !important;
+    padding-top: 0 !important;
+  }
+
+  .VPSidebar .curtain {
+    display: none;
+  }
+
+  .VPNavBarTitle.has-sidebar .title {
+    border-bottom-color: transparent !important;
+  }
+}
+
+.VPSidebarItem.level-0 > .item .text {
+  color: var(--vp-c-text-3);
+}
+
+.VPSidebarItem.is-active > .item .link > .text {
+  color: var(--vp-c-text-1) !important;
+  font-weight: 600;
+}
+
+/* The page you are on is the lit node. */
+.VPSidebarItem.level-1.is-active > .item > .indicator,
+.VPSidebarItem.level-1.is-active > .item::before {
+  content: '';
+  position: absolute;
+  top: 11px;
+  left: -16px;
+  width: 8px;
+  height: 8px;
+  border-radius: 0;
+  background: var(--telar-accent);
+}
+
+.VPSidebarItem.level-1 > .item {
+  position: relative;
+}
+
+.VPDocAsideOutline .content {
+  border-left: 2px dashed var(--telar-thread);
+}
+
+.VPDocAsideOutline .outline-marker {
+  width: 8px;
+  height: 8px;
+  left: -5px;
+  margin-top: 5px;
+  border-radius: 0;
+  background: var(--telar-accent);
+}
+
+.DocSearch-Button {
+  border: 2px solid var(--vp-c-border) !important;
+  background: transparent !important;
+}
+
+.DocSearch-Button:hover {
+  border-color: var(--telar-line) !important;
+}
+
+/* On a narrow screen the search is only an icon, and an icon has no box. */
+@media (max-width: 767px) {
+  .DocSearch-Button {
+    border: 0 !important;
+  }
+}
+
+/* ---------- Panels: a line around, and a block for a shadow ---------- */
+
+.vp-doc div[class*='language-'] {
+  border: 2px solid var(--telar-line);
+  box-shadow: 6px 6px 0 var(--vp-c-default-soft);
+}
+
+@media (max-width: 639px) {
+  .vp-doc div[class*='language-'] {
+    border-left: 0;
+    border-right: 0;
+    box-shadow: none;
+  }
+}
+
+.vp-doc :not(pre) > code {
+  padding: 2px 6px;
+}
+
+.vp-doc a {
+  text-decoration-color: var(--telar-thread);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.vp-doc a:hover {
+  color: var(--telar-accent);
+}
+
+.vp-doc table {
+  display: table;
+  width: 100%;
+  border: 2px solid var(--telar-line);
+  border-collapse: collapse;
+}
+
+.vp-doc tr,
+.vp-doc tr:nth-child(2n) {
+  background-color: transparent;
+  border-top: 1px solid var(--vp-c-divider);
+}
+
+.vp-doc th {
+  background: var(--telar-panel);
+  border: 0;
+  border-bottom: 2px solid var(--telar-line);
+  text-align: left;
+}
+
+.vp-doc td {
+  border: 0;
+  border-left: 1px solid var(--vp-c-divider);
+}
+
+.vp-doc td:first-child {
+  border-left: 0;
+}
+
+/* A wide table scrolls inside the page in place of pushing it wider. */
+@media (max-width: 767px) {
+  .vp-doc table {
+    display: block;
+    overflow-x: auto;
+  }
+}
+
+.vp-doc blockquote {
+  border-left: 4px solid var(--telar-thread);
+  background: var(--telar-panel);
+  padding: 12px 16px;
+}
+
+.vp-doc blockquote > p {
+  color: var(--vp-c-text-2);
+  font-size: 15px;
+}
+
+.vp-doc .custom-block {
+  border: 2px solid currentColor;
+}
+
+.vp-doc hr {
+  border-top: 2px dashed var(--telar-thread);
+}
+
+.pager-link {
+  border: 2px solid var(--vp-c-border);
+}
+
+.pager-link:hover {
+  border-color: var(--telar-line);
+  box-shadow: 4px 4px 0 var(--telar-block-shadow);
+}
+
+/* ---------- Buttons ---------- */
+
+.telar-button {
+  display: inline-block;
+  padding: 10px 18px;
+  border: 2px solid var(--telar-line);
+  background: var(--vp-c-bg);
+  box-shadow: 4px 4px 0 var(--telar-block-shadow);
+  color: var(--vp-c-text-1);
+  font-family: var(--vp-font-family-mono);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: transform 0.08s steps(2), box-shadow 0.08s steps(2);
+}
+
+.telar-button:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--telar-block-shadow);
+}
+
+.telar-button:active {
+  transform: translate(4px, 4px);
+  box-shadow: none;
+}
+
+.telar-button--primary {
+  background: var(--telar-navy);
+  box-shadow: 4px 4px 0 var(--telar-ochre);
+  color: var(--telar-cream);
+}
+
+.telar-button--primary:hover {
+  box-shadow: 2px 2px 0 var(--telar-ochre);
+}
+
+.dark .telar-button--primary {
+  background: var(--telar-ochre);
+  border-color: var(--telar-ochre);
+  box-shadow: 4px 4px 0 var(--telar-cream);
+  color: var(--telar-ink);
+}
+
+.dark .telar-button--primary:hover {
+  box-shadow: 2px 2px 0 var(--telar-cream);
+}
+
+/* The page for an address that does not exist. */
+.NotFound .code {
+  color: var(--vp-c-brand-1);
+}
+
+.NotFound .divider {
+  width: 96px;
+  height: 0;
+  border-top: 2px dashed var(--telar-thread);
+  background: none;
+}
+
+.NotFound .link {
+  padding: 8px 18px;
+  border: 2px solid var(--telar-line);
+  border-radius: 0;
+  box-shadow: 4px 4px 0 var(--telar-block-shadow);
+  color: var(--vp-c-text-1);
+  font-family: var(--vp-font-family-mono);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ---------- The home page ---------- */
+
+.telar-banner {
+  padding: 56px 24px 40px;
+}
+
+.telar-banner__inner {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 40px;
+  max-width: 1152px;
+  margin: 0 auto;
+}
+
+.telar-banner__title {
+  margin: 14px 0 0;
+  max-width: 640px;
+  color: var(--vp-c-brand-1);
+  font-size: 34px;
+  line-height: 1.12;
+}
+
+.telar-banner__tagline {
+  margin: 20px 0 0;
+  max-width: 560px;
+  color: var(--vp-c-text-2);
+  font-size: 18px;
+  line-height: 1.55;
+}
+
+.telar-banner__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+/* The loom on its cloth: the pattern around, as on the banners of the brand. */
+.telar-banner__art {
+  align-self: center;
+  flex: none;
+  padding: 30px 36px;
+  border: 2px solid var(--telar-navy);
+  background-size: 108px 30px;
+  box-shadow: 8px 8px 0 var(--telar-block-shadow);
+}
+
+.telar-banner__loom {
+  padding: 24px;
+  border: 2px solid var(--telar-navy);
+  background: var(--telar-cream);
+  line-height: 0;
+}
+
+.telar-banner__loom img {
+  width: 168px;
+  height: 168px;
+}
+
+@media (min-width: 960px) {
+  .telar-banner {
+    padding: 88px 64px 64px;
+  }
+
+  .telar-banner__inner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 64px;
+  }
+
+  .telar-banner__title {
+    font-size: 50px;
+  }
+
+  .telar-banner__art {
+    padding: 60px 72px;
+  }
+
+  .telar-banner__loom img {
+    width: 252px;
+    height: 252px;
+  }
+}
+
+.VPHome {
+  margin-bottom: 64px !important;
+}
+
+.VPFeatures .items {
+  counter-reset: feature;
+}
+
+.VPFeature {
+  border: 2px solid var(--telar-line) !important;
+  background: var(--telar-panel) !important;
+  counter-increment: feature;
+  transition: transform 0.08s steps(2), box-shadow 0.08s steps(2);
+}
+
+.VPFeature.link:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--telar-block-shadow);
+}
+
+.VPFeature .box::before {
+  content: counter(feature, decimal-leading-zero);
+  margin-bottom: 10px;
+  color: var(--telar-accent);
+  font-family: var(--vp-font-family-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+
+.VPFeature .title {
+  font-size: 19px;
+  line-height: 1.25;
+}
+
+.VPFeature .details {
+  font-size: 14.5px;
+}
+
+.VPFeature .link-text {
+  color: var(--vp-c-brand-1);
+}
+
+.VPHome .vp-doc h2 {
+  margin-top: 48px;
+}
+
+.VPFooter {
+  border-top: 2px solid var(--telar-line) !important;
+  background: var(--vp-c-bg-alt) !important;
+}
+
+/* ---------- Diagrams ---------- */
+
+/* Mermaid colors a diagram itself, with rules that name its id. These win over them, so a
+   diagram has the colors of the page in both modes. */
+.mermaid {
+  margin: 24px 0;
+  padding: 20px 16px;
+  border: 2px solid var(--telar-line);
+  background-color: var(--vp-c-bg-elv);
+  background-image: radial-gradient(var(--vp-c-divider) 1px, transparent 1px);
+  background-size: 16px 16px;
+  text-align: center;
+  overflow-x: auto;
+}
+
+.mermaid .node rect,
+.mermaid .node polygon,
+.mermaid .node path,
+.mermaid .node circle {
+  fill: var(--telar-panel) !important;
+  stroke: var(--telar-line) !important;
+  stroke-width: 2px !important;
+}
+
+.mermaid .node .label,
+.mermaid .nodeLabel,
+.mermaid .edgeLabel,
+.mermaid .edgeLabel p,
+.mermaid .label text,
+.mermaid span {
+  color: var(--vp-c-text-1) !important;
+  fill: var(--vp-c-text-1) !important;
+  font-family: var(--vp-font-family-mono) !important;
+}
+
+.mermaid .edgeLabel,
+.mermaid .edgeLabel p,
+.mermaid .labelBkg {
+  background-color: var(--vp-c-bg-elv) !important;
+}
+
+.mermaid .edgeLabel rect {
+  fill: var(--vp-c-bg-elv) !important;
+  opacity: 1 !important;
+}
+
+.mermaid .flowchart-link,
+.mermaid .edgePath .path {
+  stroke: var(--vp-c-text-1) !important;
+  stroke-width: 2px !important;
+}
+
+.mermaid marker path,
+.mermaid .arrowheadPath,
+.mermaid .marker {
+  fill: var(--vp-c-text-1) !important;
+  stroke: var(--vp-c-text-1) !important;
 }
