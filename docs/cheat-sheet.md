@@ -146,7 +146,7 @@ val jev: DecisionModel = TypeSafeDecisionModel(HttpClient(), apiKey = key)
 
 // The model picks the next node. Below minConfidence the run goes to the fallback.
 decisionEdge(classify, jev, "What does the customer want?",
-    routes = mapOf(refund to "Money back", technical to "Something does not work"),
+    routes = mapOf(refund to "Money back", technical to "Something does not work", escalate to "Anything else"),
     minConfidence = 0.6, fallback = escalate,
 ) { ticket -> ticket.message }
 
