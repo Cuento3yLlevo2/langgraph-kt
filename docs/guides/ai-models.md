@@ -16,6 +16,9 @@ val model: ChatModel = AnthropicChatModel(HttpClient(), apiKey = key, model = "c
 // OpenAI, on every platform (telar-openai).
 val model: ChatModel = OpenAiChatModel(HttpClient(), apiKey = key, model = "gpt-5")
 
+// Gemini, on every platform (telar-openai): Google has an address with the API of OpenAI.
+val model: ChatModel = OpenAiChatModel(HttpClient(), apiKey = key, model = "gemini-3.8-flash", baseUrl = "https://generativelanguage.googleapis.com/v1beta/openai")
+
 // A model that Ollama runs on your machine, without a key (telar-openai).
 val model: ChatModel = OpenAiChatModel.ollama(HttpClient(), model = "llama3.2")
 
@@ -80,7 +83,10 @@ val careful = OpenAiChatModel(client, apiKey = key, model = "gpt-5", parameters 
 ```
 
 An agent with tools needs a model that can call tools. With Ollama, pick one that lists "tools"
-among what it can do.
+among what it can do. Gemini calls tools and streams through its address at the top of this page.
+It sends a thought signature with each tool call and wants it back with the result:
+`OpenAiChatModel` keeps it in `ChatMessage.Assistant.providerContent` and returns it, so a
+`toolAgent` needs nothing more.
 
 On the JVM, `telar-langchain4j` also builds a node straight from a
 [LangChain4j](https://docs.langchain4j.dev) model with `chatNode` (one text in, one text out) and
