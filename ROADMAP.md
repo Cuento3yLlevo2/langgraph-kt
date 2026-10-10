@@ -12,16 +12,17 @@ what is already released.
 To ask for a feature or to move one up, add a 👍 to its issue or
 [start a discussion](https://github.com/deeptelar/telar/discussions).
 
-Last updated: 2026-10-08.
+Last updated: 2026-10-10.
 
 ## Where the project is
 
-`0.1.0-alpha07` is on Maven Central. It has the graph builder and the engine: loops, parallel
+`0.1.0-alpha08` is on Maven Central. It has the graph builder and the engine: loops, parallel
 branches, subgraphs, streaming, checkpoints with the history of a run, and pausing for a person,
 before a node or in the middle of its work. Around the engine it has checkpointers for memory, files
 and the browser, a tool-calling agent for every platform, and model modules for Claude, for OpenAI,
 Ollama and the other servers with the Chat Completions API, for LangChain4j, and for Jev, a decision
-model. The API can still change in any release.
+model. Any of the chat models can take the decisions of a workflow too. The API can still change in
+any release.
 
 ## The way to 1.0
 
@@ -74,8 +75,6 @@ New modules and additions to `telar-agent`. They do not change the core.
 - **Documentation.** A guide for every feature on this page, a tutorial level where one fits, and a
   page for people who know LangGraph for Python: what has the same name and what is different
   ([#80]).
-- **The project's own name everywhere.** The topic `langgraph` is taken off the repository, which
-  keeps the sentence that says what Telar is inspired by.
 - **Written rules.** Which Kotlin versions are supported, and how long a deprecated declaration
   stays before it is removed.
 

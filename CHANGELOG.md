@@ -7,6 +7,8 @@ breaking changes.
 
 ## [Unreleased]
 
+## [0.1.0-alpha08] - 2026-10-10
+
 ### Added
 
 - `ChatDecisionModel` in `telar-agent`: a `DecisionModel` that asks any `ChatModel`, so `choose`,
@@ -281,7 +283,8 @@ First public release. Everything below is new compared with the unpublished beta
 - `START` counted toward `maxIterations`.
 - `FileCheckpointer` did not write the format version into its files.
 
-[Unreleased]: https://github.com/deeptelar/telar/compare/v0.1.0-alpha07...HEAD
+[Unreleased]: https://github.com/deeptelar/telar/compare/v0.1.0-alpha08...HEAD
+[0.1.0-alpha08]: https://github.com/deeptelar/telar/compare/v0.1.0-alpha07...v0.1.0-alpha08
 [0.1.0-alpha07]: https://github.com/deeptelar/telar/compare/v0.1.0-alpha06...v0.1.0-alpha07
 [0.1.0-alpha06]: https://github.com/deeptelar/telar/compare/v0.1.0-alpha05...v0.1.0-alpha06
 [0.1.0-alpha05]: https://github.com/deeptelar/telar/compare/v0.1.0-alpha04...v0.1.0-alpha05
