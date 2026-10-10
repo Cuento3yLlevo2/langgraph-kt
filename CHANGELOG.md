@@ -7,6 +7,15 @@ breaking changes.
 
 ## [Unreleased]
 
+## [0.1.0-alpha09] - 2026-10-10
+
+### Changed
+
+- A node, a condition, a reducer or a tool that throws something that is neither an `Exception` nor
+  an `Error`, a `Throwable` of your own, now fails with a `NodeExecutionException`, an
+  `EdgeConditionException`, a `ReducerException` or an error result. It passed through the library
+  before. The same holds for one that throws `Error` itself and not a subclass of it.
+
 ### Fixed
 
 - In a browser, `AnthropicChatModel`, `OpenAiChatModel` and `TypeSafeDecisionModel` report a request
@@ -23,13 +32,6 @@ breaking changes.
   What is still not treated as a failure is an error of the program or of its machine: a subclass
   of `Error`, such as `OutOfMemoryError`, `AssertionError` or the `NotImplementedError` of `TODO()`.
   The guide [Errors](https://deeptelar.github.io/telar/guides/errors) says what counts as a failure.
-
-### Changed
-
-- A node, a condition, a reducer or a tool that throws something that is neither an `Exception` nor
-  an `Error`, a `Throwable` of your own, now fails with a `NodeExecutionException`, an
-  `EdgeConditionException`, a `ReducerException` or an error result. It passed through the library
-  before. So does one that throws `Error` itself and not a subclass of it.
 
 ## [0.1.0-alpha08] - 2026-10-10
 
@@ -307,7 +309,8 @@ First public release. Everything below is new compared with the unpublished beta
 - `START` counted toward `maxIterations`.
 - `FileCheckpointer` did not write the format version into its files.
 
-[Unreleased]: https://github.com/deeptelar/telar/compare/v0.1.0-alpha08...HEAD
+[Unreleased]: https://github.com/deeptelar/telar/compare/v0.1.0-alpha09...HEAD
+[0.1.0-alpha09]: https://github.com/deeptelar/telar/compare/v0.1.0-alpha08...v0.1.0-alpha09
 [0.1.0-alpha08]: https://github.com/deeptelar/telar/compare/v0.1.0-alpha07...v0.1.0-alpha08
 [0.1.0-alpha07]: https://github.com/deeptelar/telar/compare/v0.1.0-alpha06...v0.1.0-alpha07
 [0.1.0-alpha06]: https://github.com/deeptelar/telar/compare/v0.1.0-alpha05...v0.1.0-alpha06
