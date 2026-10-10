@@ -7,6 +7,15 @@ breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+
+- In a browser, `AnthropicChatModel`, `OpenAiChatModel` and `TypeSafeDecisionModel` report a request
+  that got no response as a `ChatModelException` or a `DecisionModelException`, as on every other
+  platform: `Could not reach the API at http://localhost:11434/v1: Fail to fetch`. Ktor's engine for
+  JS and Wasm reports such a request as an `Error`, which the three classes let pass, so a run
+  ended with that `Error` and not with a `NodeExecutionException`. It happens when the server is
+  not running, the device is offline, or the server does not take requests from the page.
+
 ## [0.1.0-alpha08] - 2026-10-10
 
 ### Added
