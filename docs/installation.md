@@ -3,17 +3,17 @@
 ```kotlin
 dependencies {
     // The graph builder and the engine. This is all the quick start needs.
-    implementation("dev.deeptelar:telar-core:0.1.0-alpha07")
+    implementation("dev.deeptelar:telar-core:0.1.0-alpha08")
 
     // Optional modules. Add only the ones you use.
-    implementation("dev.deeptelar:telar-serialization:0.1.0-alpha07")      // save @Serializable states
-    implementation("dev.deeptelar:telar-checkpoint-file:0.1.0-alpha07")    // save runs as JSON files
-    implementation("dev.deeptelar:telar-checkpoint-browser:0.1.0-alpha07") // save runs in a browser's localStorage (JS and Wasm)
-    implementation("dev.deeptelar:telar-agent:0.1.0-alpha07")              // chat models, tools and the tool-calling agent
-    implementation("dev.deeptelar:telar-anthropic:0.1.0-alpha07")          // call Claude, on every platform
-    implementation("dev.deeptelar:telar-openai:0.1.0-alpha07")             // call OpenAI, Ollama and compatible servers, on every platform
-    implementation("dev.deeptelar:telar-langchain4j:0.1.0-alpha07")        // call AI models through LangChain4j (JVM)
-    implementation("dev.deeptelar:telar-typesafe:0.1.0-alpha07")           // ask Jev, a decision model, on every platform
+    implementation("dev.deeptelar:telar-serialization:0.1.0-alpha08")      // save @Serializable states
+    implementation("dev.deeptelar:telar-checkpoint-file:0.1.0-alpha08")    // save runs as JSON files
+    implementation("dev.deeptelar:telar-checkpoint-browser:0.1.0-alpha08") // save runs in a browser's localStorage (JS and Wasm)
+    implementation("dev.deeptelar:telar-agent:0.1.0-alpha08")              // chat models, tools and the tool-calling agent
+    implementation("dev.deeptelar:telar-anthropic:0.1.0-alpha08")          // call Claude, on every platform
+    implementation("dev.deeptelar:telar-openai:0.1.0-alpha08")             // call OpenAI, Ollama and compatible servers, on every platform
+    implementation("dev.deeptelar:telar-langchain4j:0.1.0-alpha08")        // call AI models through LangChain4j (JVM)
+    implementation("dev.deeptelar:telar-typesafe:0.1.0-alpha08")           // ask Jev, a decision model, on every platform
 }
 ```
 
@@ -37,6 +37,6 @@ Java 17 because LangChain4j does.
 
 ## Status
 
-Alpha. `0.1.0-alpha07` is the latest release, and it is on Maven Central. The API may still change
+Alpha. `0.1.0-alpha08` is the latest release, and it is on Maven Central. The API may still change
 before `1.0`; the [changelog](https://github.com/deeptelar/telar/blob/main/CHANGELOG.md) lists what changes in each version, and the
 [roadmap](https://github.com/deeptelar/telar/blob/main/ROADMAP.md) lists what is planned.
