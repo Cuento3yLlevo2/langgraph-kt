@@ -373,6 +373,28 @@ class AnthropicChatModelTest {
         }
 
     @Test
+    fun `a request that fails in a browser is an error of the model too`() =
+        runTest {
+            // Ktor's engine for the browser throws this, an Error and not an exception, when a
+            // request gets no response.
+            val offline = HttpClient(MockEngine { throw Error("Fail to fetch") })
+
+            val failure = assertFailsWith<ChatModelException> { AnthropicChatModel(offline, "test-key", "claude-opus-5-5").chat(hello) }
+
+            assertEquals("Could not reach the Claude API: Fail to fetch", failure.message)
+        }
+
+    @Test
+    fun `an error that is not a failed request stays what it is`() =
+        runTest {
+            val broken = HttpClient(MockEngine { throw AssertionError("Out of memory") })
+
+            val failure = runCatching { AnthropicChatModel(broken, "test-key", "claude-opus-5-5").chat(hello) }.exceptionOrNull()
+
+            assertIs<AssertionError>(failure)
+        }
+
+    @Test
     fun `a cancellation is not turned into an error of the model`() =
         runTest {
             val cancelling = HttpClient(MockEngine { throw CancellationException("Stopped") })

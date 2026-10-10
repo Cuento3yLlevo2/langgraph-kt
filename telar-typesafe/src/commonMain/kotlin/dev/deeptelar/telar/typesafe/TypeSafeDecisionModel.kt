@@ -113,6 +113,8 @@ public class TypeSafeDecisionModel(
             throw e
         } catch (e: Exception) {
             throw failed(e)
+        } catch (e: Error) {
+            throw if (e.isFailedFetch()) failed(e) else e
         }
 
         if (status !in 200..299) throw DecisionModelException("TypeSafe API error $status: ${text.trim().ifEmpty { "no details" }}")
@@ -160,7 +162,7 @@ public class TypeSafeDecisionModel(
         }
 
     /** The exception for a request that ended without a response. */
-    private fun failed(cause: Exception): DecisionModelException =
+    private fun failed(cause: Throwable): DecisionModelException =
         when {
             cause !is HttpRequestTimeoutException && cause !is SocketTimeoutException ->
                 DecisionModelException("Could not reach the TypeSafe API: ${cause.message ?: cause::class.simpleName}", cause)
@@ -216,3 +218,11 @@ private fun JsonObject.string(key: String): String? = (this[key] as? JsonPrimiti
 private fun JsonObject.double(key: String): Double? = (this[key] as? JsonPrimitive)?.doubleOrNull
 
 private fun JsonObject.int(key: String): Int = (this[key] as? JsonPrimitive)?.intOrNull ?: 0
+
+/**
+ * Whether this is a request that failed in a browser. Ktor's engine for JS and Wasm reports a
+ * request without a response as a plain `Error`, not as an exception: the server is not running,
+ * the device is offline, or the server does not take requests from the page. Every other error,
+ * such as one of the virtual machine, is of a subclass and is not a failure of the request.
+ */
+private fun Error.isFailedFetch(): Boolean = this::class == Error::class

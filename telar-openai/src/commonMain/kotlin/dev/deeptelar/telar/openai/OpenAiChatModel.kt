@@ -135,6 +135,8 @@ public class OpenAiChatModel(
             throw e
         } catch (e: Exception) {
             throw failed(e)
+        } catch (e: Error) {
+            throw if (e.isFailedFetch()) failed(e) else e
         }
 
         if (status !in 200..299) throw apiError(status, text)
@@ -180,6 +182,9 @@ public class OpenAiChatModel(
                         failure = e
                     } catch (e: Exception) {
                         failure = failed(e)
+                    } catch (e: Error) {
+                        if (!e.isFailedFetch()) throw e
+                        failure = failed(e)
                     }
                     pieces.close()
                 }
@@ -205,7 +210,7 @@ public class OpenAiChatModel(
     }
 
     /** The exception for a request that ended without a response, or in the middle of one. */
-    private fun failed(cause: Exception): ChatModelException =
+    private fun failed(cause: Throwable): ChatModelException =
         when {
             cause !is HttpRequestTimeoutException && cause !is SocketTimeoutException ->
                 ChatModelException("Could not reach the API at $baseUrl: ${cause.message ?: cause::class.simpleName}", cause)
@@ -563,3 +568,11 @@ private fun JsonObject?.string(key: String): String? = (this?.get(key) as? JsonP
 private fun JsonObject.int(key: String): Int = (this[key] as? JsonPrimitive)?.intOrNull ?: 0
 
 private fun JsonArray?.orEmpty(): List<JsonElement> = this ?: emptyList()
+
+/**
+ * Whether this is a request that failed in a browser. Ktor's engine for JS and Wasm reports a
+ * request without a response as a plain `Error`, not as an exception: the server is not running,
+ * the device is offline, or the server does not take requests from the page. Every other error,
+ * such as one of the virtual machine, is of a subclass and is not a failure of the request.
+ */
+private fun Error.isFailedFetch(): Boolean = this::class == Error::class

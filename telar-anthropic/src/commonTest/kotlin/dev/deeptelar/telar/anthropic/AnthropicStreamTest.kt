@@ -330,6 +330,30 @@ class AnthropicStreamTest {
         }
 
     @Test
+    fun `a request that fails in a browser fails the stream with an error of the model`() =
+        runTest {
+            // Ktor's engine for the browser throws this, an Error and not an exception, when a
+            // request gets no response.
+            val offline = HttpClient(MockEngine { throw Error("Fail to fetch") })
+            val model = AnthropicChatModel(offline, "test-key", "claude-opus-5-5")
+
+            val failure = assertFailsWith<ChatModelException> { model.stream(hello).toList() }
+
+            assertEquals("Could not reach the Claude API: Fail to fetch", failure.message)
+        }
+
+    @Test
+    fun `an error that is not a failed request stays what it is in a stream`() =
+        runTest {
+            val broken = HttpClient(MockEngine { throw AssertionError("Out of memory") })
+            val model = AnthropicChatModel(broken, "test-key", "claude-opus-5-5")
+
+            val failure = runCatching { model.stream(hello).toList() }.exceptionOrNull()
+
+            assertIs<AssertionError>(failure)
+        }
+
+    @Test
     fun `a failure of the collector is not turned into an error of the model`() =
         runTest {
             val failure =
