@@ -16,7 +16,7 @@ Last updated: 2026-10-10.
 
 ## Where the project is
 
-`0.1.0-alpha08` is on Maven Central. It has the graph builder and the engine: loops, parallel
+`0.1.0-alpha09` is on Maven Central. It has the graph builder and the engine: loops, parallel
 branches, subgraphs, streaming, checkpoints with the history of a run, and pausing for a person,
 before a node or in the middle of its work. Around the engine it has checkpointers for memory, files
 and the browser, a tool-calling agent for every platform, and model modules for Claude, for OpenAI,
