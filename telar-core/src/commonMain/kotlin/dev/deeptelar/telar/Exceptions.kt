@@ -38,10 +38,28 @@ public class InvalidRouteException(
 ) : TelarException("Conditional edge from '$from' routed to '$target', which is not a valid target.")
 
 /**
+ * Whether this is a failure of the code that threw it, which the engine reports with the part of
+ * the graph that failed.
+ *
+ * An error of the program or of its machine is not: a subclass of `Error`, such as
+ * `OutOfMemoryError`, `AssertionError` or the `NotImplementedError` of `TODO()`. A retry would not
+ * help, and a test that asserts inside a node should fail with its own error. The pause of
+ * [interrupt] travels as such a subclass too.
+ *
+ * Everything else is a failure. That is every `Exception`, and what a browser throws in their
+ * place: Ktor reports a request that got no response as a plain `Error`, and Kotlin/Wasm reports an
+ * error of JavaScript as a `JsException`, which is a `Throwable` and nothing more.
+ */
+internal fun Throwable.isFailure(): Boolean = this !is Error || this::class == Error::class
+
+/**
  * A node's action threw an exception. The original exception is available as [cause].
  *
  * Every exception is wrapped, also a [TelarException]: when a node runs another graph or calls a
- * model of an integration module, [cause] is the exception of that graph or model.
+ * model of an integration module, [cause] is the exception of that graph or model. So is what a
+ * browser throws in place of an exception, such as the `Error` of a request that got no response.
+ * An error of the program or of its machine is not wrapped: a subclass of `Error`, such as
+ * `OutOfMemoryError`, `AssertionError` or the `NotImplementedError` of `TODO()`.
  *
  * Cancellation of the run itself is never wrapped: it propagates as a `CancellationException`. A
  * `CancellationException` that a node raises while the run is still active, such as an expired

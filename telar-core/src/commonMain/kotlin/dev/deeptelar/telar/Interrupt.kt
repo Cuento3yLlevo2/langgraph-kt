@@ -67,7 +67,8 @@ internal class RunningNode(
 
 /**
  * Carries an [interrupt] from the node that called it to the engine. It is not an `Exception`, so
- * that a `catch (e: Exception)` in the node does not stop it on the way.
+ * that a `catch (e: Exception)` in the node does not stop it on the way. It is an `Error` of its
+ * own class, which nothing between the node and the engine takes for a failure: see [isFailure].
  *
  * @property position where the run stands inside the subgraph of [node], when the pause comes from
  * there. `null` when the node called [interrupt] itself.
@@ -76,4 +77,4 @@ internal class NodeInterrupt(
     val node: String,
     val state: Any?,
     val position: SubgraphPosition?,
-) : Throwable("Node '$node' called interrupt(). The engine pauses the run with this; do not catch it.")
+) : Error("Node '$node' called interrupt(). The engine pauses the run with this; do not catch it.")

@@ -19,6 +19,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 enum class Size { SMALL, LARGE }
@@ -228,6 +229,28 @@ class ToolTest {
             val result = listOf(broken).execute(listOf(ToolCall("a", "broken", noInput))).single()
 
             assertEquals(ChatMessage.ToolResult("a", "broken", "The tool failed.", isError = true), result)
+        }
+
+    @Test
+    fun `a tool that fails with a plain error gives an error result`() =
+        runTest {
+            // Ktor's engine for the browser throws this, an Error and not an exception, when a
+            // request gets no response.
+            val offline = Tool(ToolSpec("order_status", "Looks up an order.", noInput)) { throw Error("Fail to fetch") }
+
+            val result = listOf(offline).execute(listOf(ToolCall("a", "order_status", noInput))).single()
+
+            assertEquals(ChatMessage.ToolResult("a", "order_status", "Fail to fetch", isError = true), result)
+        }
+
+    @Test
+    fun `an error of the program in a tool is not turned into a result`() =
+        runTest {
+            val broken = Tool(ToolSpec("broken", "Fails.", noInput)) { throw AssertionError("Expected 2, was 3") }
+
+            val failure = runCatching { listOf(broken).execute(listOf(ToolCall("a", "broken", noInput))) }.exceptionOrNull()
+
+            assertEquals("Expected 2, was 3", assertIs<AssertionError>(failure).message)
         }
 
     @Test

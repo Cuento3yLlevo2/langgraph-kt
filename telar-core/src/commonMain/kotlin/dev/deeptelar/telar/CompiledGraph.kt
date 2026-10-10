@@ -501,8 +501,11 @@ public class CompiledGraph<State> internal constructor(
      * reducer), and rethrows what it throws as the exception that [failure] builds. That includes a
      * [TelarException], such as the failure of a graph that a node runs, so the caller always
      * learns which part of this graph failed.
+     *
+     * Not everything a browser throws is an `Exception`, so every `Throwable` is looked at. What is
+     * no failure of the code passes as it is: see [isFailure].
      */
-    private suspend inline fun <T> wrapFailure(failure: (Exception) -> TelarException, block: () -> T): T =
+    private suspend inline fun <T> wrapFailure(failure: (Throwable) -> TelarException, block: () -> T): T =
         try {
             block()
         } catch (e: CancellationException) {
@@ -510,8 +513,8 @@ public class CompiledGraph<State> internal constructor(
             // only itself (for example its own withTimeout expired), which is a failure of that code.
             currentCoroutineContext().ensureActive()
             throw failure(e)
-        } catch (e: Exception) {
-            throw failure(e)
+        } catch (e: Throwable) {
+            throw if (e.isFailure()) failure(e) else e
         }
 
     /** Returns the nodes to run after [currentNodes], without [END]. */
