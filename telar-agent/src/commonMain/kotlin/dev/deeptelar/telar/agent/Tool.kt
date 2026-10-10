@@ -110,8 +110,11 @@ public annotation class Description(
  *
  * A call never fails the caller. When the tool throws, when the input does not match the tool's
  * schema, or when no tool has the call's name, the result has [ChatMessage.ToolResult.isError] set
- * and the message of the error as its text, so the model can correct itself. Only a cancellation of
- * the caller is propagated.
+ * and the message of the error as its text, so the model can correct itself. That includes what a
+ * browser throws in place of an exception, such as the `Error` of a request that got no response.
+ *
+ * Only two things are propagated: a cancellation of the caller, and an error of the program or of
+ * its machine, which is a subclass of `Error` such as `OutOfMemoryError` or `AssertionError`.
  */
 public suspend fun List<Tool>.execute(calls: List<ToolCall>): List<ChatMessage.ToolResult> =
     coroutineScope {
@@ -127,7 +130,9 @@ private suspend fun List<Tool>.execute(call: ToolCall): ChatMessage.ToolResult {
         // only itself (for example its own withTimeout expired), which is a failure of the tool.
         currentCoroutineContext().ensureActive()
         call.failed(e.message)
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
+        // A subclass of Error is no failure of the tool. The pause of interrupt() is one as well.
+        if (e is Error && e::class != Error::class) throw e
         call.failed(e.message)
     }
 }

@@ -15,6 +15,21 @@ breaking changes.
   JS and Wasm reports such a request as an `Error`, which the three classes let pass, so a run
   ended with that `Error` and not with a `NodeExecutionException`. It happens when the server is
   not running, the device is offline, or the server does not take requests from the page.
+- In a browser, a node, a conditional edge, a reducer or a tool that makes a request of its own
+  fails like on every other platform when the request gets no response. The same holds for an error
+  that JavaScript throws, such as one of an API of the browser. Neither is an `Exception` in
+  Kotlin, so the engine let both pass: a run ended with the raw error and not with a
+  `NodeExecutionException`, and a tool failed the whole run and gave the model no error result.
+  What is still not treated as a failure is an error of the program or of its machine: a subclass
+  of `Error`, such as `OutOfMemoryError`, `AssertionError` or the `NotImplementedError` of `TODO()`.
+  The guide [Errors](https://deeptelar.github.io/telar/guides/errors) says what counts as a failure.
+
+### Changed
+
+- A node, a condition, a reducer or a tool that throws something that is neither an `Exception` nor
+  an `Error`, a `Throwable` of your own, now fails with a `NodeExecutionException`, an
+  `EdgeConditionException`, a `ReducerException` or an error result. It passed through the library
+  before. So does one that throws `Error` itself and not a subclass of it.
 
 ## [0.1.0-alpha08] - 2026-10-10
 
