@@ -128,5 +128,11 @@ Runnable version: [`ToolAgent`](https://github.com/deeptelar/telar/blob/main/sam
 runs without an API key, with Claude when `ANTHROPIC_API_KEY` is set, with OpenAI when
 `OPENAI_API_KEY` is set, and with a model of Ollama when `OLLAMA_MODEL` names one. `OPENAI_MODEL`
 names another model than `gpt-5`, and `OPENAI_BASE_URL` another server with the API of OpenAI, such
-as Gemini or Groq.
+as Gemini or Groq. With Gemini:
+
+```bash
+OPENAI_API_KEY=your-gemini-key OPENAI_MODEL=gemini-3.8-flash \
+  OPENAI_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai ./gradlew :samples:runToolAgent
+```
+
 [Level 6 of the tutorial](../tutorial/06-the-agent.md) explains the same agent step by step.
